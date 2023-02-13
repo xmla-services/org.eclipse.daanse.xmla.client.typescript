@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "typeRoots": ["src/@types", "node_modules/@types"],
+    "moduleResolution": "classic",
+    "outDir": "lib",
+    "sourceMap": true,
+    "declaration": true,
+    "stripInternal": true,
+    "target": "esnext",
+    //"target": "node",
+    "module": "esnext",
+    "strict": false,
+  },
+  "references": [
+    {
+      "path": "./tsconfig.config.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+  ]
+}
