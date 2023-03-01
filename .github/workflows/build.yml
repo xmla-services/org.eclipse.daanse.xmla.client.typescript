@@ -1,6 +1,8 @@
 name: build artifact
 
-on: workflow_dispatch
+on:
+  push:
+      branches: ["feature-buildsteps"]
 
 jobs:
   build_and_test:
