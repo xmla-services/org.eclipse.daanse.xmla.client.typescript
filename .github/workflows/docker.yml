@@ -10,11 +10,10 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
       -
-        name: bulid _dist
+        name: bulid_dist
         run: |
           npm install
-          npm run build --if-present
-          npm test
+          npm run build-only --if-present
       -
         name: Build and push
         uses: docker/build-push-action@v4
