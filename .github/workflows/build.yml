@@ -19,16 +19,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: type=raw,value={{date 'YYYYMMDD'}},prefix=SNAPSHOT-
-      - name: remove ':'
-        uses: mad9000/actions-find-and-replace-string@2
-        with:
-          source: ${{ steps.meta.outputs.tags }} # this translates to ref/heads/main on the main branch, but can be any arbitrary string
-          find: ':'        # we want to remove ref/heads/ from source
-          replace: ''
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.meta.outputs.tags}}
+          name: ${{ steps.meta.outputs.version}}
           path: |
             dist
     
