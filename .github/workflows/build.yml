@@ -13,7 +13,7 @@ jobs:
           npm install
           npm run build-only --if-present
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -23,7 +23,7 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.meta.outputs.tags }}
+          name: ${{ steps.meta.outputs.tags//:/ s}}
           path: |
             dist
     
