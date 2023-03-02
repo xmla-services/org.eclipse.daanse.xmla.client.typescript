@@ -12,15 +12,18 @@ jobs:
         run: |
           npm install
           npm run build-only --if-present
+
+      - name: Extract metadata (tags, labels) for Docker
+          id: meta
+          uses: docker/metadata-action@v4
+          with:
+            images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            tags: type=raw,value={{date 'YYYYMMDD'}},prefix=SNAPSHOT-
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist
+          name: ${{ steps.meta.outputs.tags }}
           path: |
             dist
-            !dist/**/*.md
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-report
-          path: output/test/code-coverage.html
+    
