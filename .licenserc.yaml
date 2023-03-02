@@ -61,5 +61,6 @@ header:
     - '.eslintrc.cjs'
     - 'vite.config.ts'
     - 'yarn.lock'
+    - 'Docker/Dockerfile'
 
   comment: always
