@@ -15,8 +15,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Download and run license-check
-
-        #run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES -P eclipse-licenses-check --file package-lock.json
         run: |
               curl -L 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST' --output licence_tool.jar
               java -jar licence_tool.jar package-lock.json
