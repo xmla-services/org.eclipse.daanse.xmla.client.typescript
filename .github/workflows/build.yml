@@ -23,7 +23,7 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.meta.outputs.tags//:/ s}}
+          name: ${{ steps.meta.outputs.tags //:/ }}
           path: |
             dist
     
