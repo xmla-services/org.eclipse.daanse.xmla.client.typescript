@@ -14,4 +14,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Build with Maven
+        run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES -DexcludeArtifactIds=$EXCLUDED_ARTIFACTS -P eclipse-licenses-check --file package-lock.json
 
