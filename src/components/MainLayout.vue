@@ -13,7 +13,7 @@ const appSettings = useAppSettingsStore();
         class="split"
         :model-value="30"
         :limits="[
-          ['500px', 'any'],
+          ['600px', 'any'],
           ['500px', 'any'],
         ]"
       >

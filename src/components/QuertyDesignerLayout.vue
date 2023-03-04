@@ -5,7 +5,7 @@
       :model-value="30"
       :limits="[
         ['300px', 'any'],
-        ['200px', 'any'],
+        ['300px', 'any'],
       ]"
     >
       <template #start>

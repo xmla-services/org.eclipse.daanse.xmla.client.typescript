@@ -3,6 +3,7 @@ import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { TreeItemTypesEnum } from "../../stores/TreeViewItems";
 import { ref } from "vue";
+import draggable from "vuedraggable";
 
 export default {
   setup() {
@@ -12,6 +13,7 @@ export default {
     const triggerExpanded = (nodes: string[]) => {
       store.callExpandedMethods(nodes);
     };
+    const dragging = ref("");
 
     return {
       store,
@@ -19,7 +21,11 @@ export default {
       filter,
       triggerExpanded,
       TreeItemTypesEnum,
+      dragging,
     };
+  },
+  components: {
+    draggable,
   },
 };
 </script>
@@ -42,13 +48,43 @@ export default {
         @update:expanded="triggerExpanded"
       >
         <template #content="node">
+          <draggable
+            v-if="node.type === TreeItemTypesEnum.Hierarchy"
+            :modelValue="[node]"
+            :group="{ name: 'hierarchies', pull: 'clone', put: false }"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <div>
+                {{ element.caption }}
+              </div>
+            </template>
+          </draggable>
+          <draggable
+            v-else-if="node.type === TreeItemTypesEnum.Measure"
+            :modelValue="[node]"
+            :group="{ name: 'measures', pull: 'clone', put: false }"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <div>
+                {{ element.caption }}
+              </div>
+            </template>
+          </draggable>
           <div
-            v-if="node.type === TreeItemTypesEnum.Loading"
+            v-else-if="node.type === TreeItemTypesEnum.Loading"
             class="d-flex align-center"
           >
             <va-progress-circle indeterminate size="small" />
           </div>
-          <div class="d-flex align-center" draggable="true">
+          <div
+            v-else-if="node.type === TreeItemTypesEnum.LoadMore"
+            class="d-flex align-center"
+          >
+            <va-button @click="node.onClick()">Load more</va-button>
+          </div>
+          <div v-else class="d-flex align-center">
             {{ node.caption }}
           </div>
         </template>
