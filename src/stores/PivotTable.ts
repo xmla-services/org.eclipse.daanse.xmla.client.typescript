@@ -19,13 +19,14 @@ export const usePivotTableStore = defineStore("PivotTable", {
       const rows = queryDesignerStore.rows;
       const columns = queryDesignerStore.columns;
 
+      appSettings.loading = true;
       const [tableData] = await Promise.all([
         await api.getPivotTableData(appSettings.selectedCube, rows, columns),
       ]);
-
       this.rows = tableData.axis0;
       this.columns = tableData.axis1;
       this.cells = tableData.cells;
+      appSettings.loading = false;
       console.log(tableData);
       // this.tableData = tableData;
     },
