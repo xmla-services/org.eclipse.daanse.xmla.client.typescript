@@ -4,6 +4,9 @@ import { useAppSettingsStore } from "./AppSettings";
 import type { DimensionTreeItem, TreeItem } from "./TreeViewItems";
 import * as TreeViewItems from "./TreeViewItems";
 
+const MDDISPINFO_CHILD_COUNT = 65535;
+const membersStorage = new Map();
+
 // Done
 function getLevelProperties(
   level: MDSchemaLevel,
@@ -32,9 +35,128 @@ function getLevelProperties(
   }
 }
 
-function getMembers() {}
+function getMembers(level: MDSchemaLevel, state: any, levelTreeItemId: string) {
+  const result = {
+    loaded: false,
+    members: [] as any[],
+  };
 
-function loadMoreMembers() {}
+  const parsedMembersDesc = state.members.get(levelTreeItemId);
+  const currentlyLoadedMembers = membersStorage.get(levelTreeItemId);
+
+  if (!parsedMembersDesc) return result;
+
+  const extendedMembers = currentlyLoadedMembers.members.map(
+    (e: TreeViewItems.MemberTreeItem) => {
+      e.children = [];
+      const childs = getChildMembers(state, e.id);
+
+      const childMembers = childs.members;
+      const childMembersLoaded = childs.loaded;
+      let memberState = state.membersState.get(e.id);
+      if (!memberState) {
+        state.membersState.set(e.id, {
+          inited: false,
+          loaded: false,
+          opened: false,
+          onOpen: function () {
+            if (!this.inited) {
+              this.inited = true;
+              state.getChildMembers(e.__MDSchemaMember, e.id);
+            }
+          },
+        });
+        memberState = state.membersState.get(e.id);
+      }
+
+      if (e.hasChildren) {
+        if (childMembersLoaded && memberState.opened) {
+          e.children.push(...childMembers);
+        } else {
+          const loadingPlaceHolder = TreeViewItems.getLoadingItemDesc(e.id);
+          e.children.push(loadingPlaceHolder);
+        }
+      }
+
+      return e;
+    }
+  );
+
+  result.loaded = true;
+  result.members = [...extendedMembers];
+  if (parsedMembersDesc.hasMore) {
+    const loadMoreButton = TreeViewItems.getLoadMoreItemDesc(
+      levelTreeItemId,
+      () => {
+        state.getLevelMembers(level, levelTreeItemId);
+      }
+    );
+    result.members.push(loadMoreButton);
+  }
+  return result;
+}
+
+function getChildMembers(state: any, memberTreeItemId: string) {
+  const result = {
+    loaded: false,
+    members: [] as any[],
+  };
+
+  const parsedMembersDesc = state.members.get(memberTreeItemId);
+  const currentlyLoadedMembers = membersStorage.get(memberTreeItemId);
+
+  if (!parsedMembersDesc) return result;
+
+  const extendedMembers = currentlyLoadedMembers.members.map(
+    (e: TreeViewItems.MemberTreeItem) => {
+      e.children = [];
+      const childs = getChildMembers(state, e.id);
+
+      const childMembers = childs.members;
+      const childMembersLoaded = childs.loaded;
+      let memberState = state.membersState.get(e.id);
+      if (!memberState) {
+        state.membersState.set(e.id, {
+          inited: false,
+          loaded: false,
+          opened: false,
+          onOpen: function () {
+            if (!this.inited) {
+              this.inited = true;
+              state.getChildMembers(e.__MDSchemaMember, e.id);
+            }
+          },
+        });
+        memberState = state.membersState.get(e.id);
+      }
+
+      if (e.hasChildren) {
+        if (childMembersLoaded && memberState.opened) {
+          e.children.push(...childMembers);
+        } else {
+          const loadingPlaceHolder = TreeViewItems.getLoadingItemDesc(e.id);
+          e.children.push(loadingPlaceHolder);
+        }
+      }
+
+      return e;
+    }
+  );
+
+  result.loaded = true;
+  result.members = [...extendedMembers];
+
+  if (parsedMembersDesc.hasMore) {
+    const loadMoreButton = TreeViewItems.getLoadMoreItemDesc(
+      memberTreeItemId,
+      () => {
+        state.getChildMembers(memberTreeItemId);
+      }
+    );
+    result.members.push(loadMoreButton);
+  }
+  return result;
+}
 
 function getChildLevels(
   hierarchy: MDSchemaHierarchy,
@@ -48,22 +170,31 @@ function getChildLevels(
       const parsedLevel = TreeViewItems.getLevelDesc(level);
       const levelProperties = getLevelProperties(level, state);
       parsedLevel.children = [...levelProperties];
-      const membersLoaded = state.members.has(parsedLevel.id);
 
-      state.levelsState.set(parsedLevel.id, {
-        inited: membersLoaded,
-        hasMoreMembers: true,
-        loading: true,
-        onOpen: function () {
-          if (!this.inited) {
-            state.loadMembers(level, parsedLevel.id);
-          }
-        },
-      });
+      let levelState = state.levelsState.get(parsedLevel.id);
+      if (!levelState) {
+        state.levelsState.set(parsedLevel.id, {
+          inited: false,
+          loaded: true,
+          opened: false,
+          onOpen: function () {
+            if (!this.inited) {
+              this.inited = true;
+              state.getLevelMembers(level, parsedLevel.id);
+            }
+          },
+        });
+        levelState = state.levelsState.get(parsedLevel.id);
+      }
 
-      if (membersLoaded) {
-        const parsedMembers = state.members.get(parsedLevel.id);
-        parsedLevel.children.push(...parsedMembers);
+      const { loaded: membersLoaded, members } = getMembers(
+        level,
+        state,
+        parsedLevel.id
+      );
+
+      if (membersLoaded && levelState.opened) {
+        parsedLevel.children.push(...members);
       } else {
         const loadingPlaceHolder = TreeViewItems.getLoadingItemDesc(
           parsedLevel.id
@@ -302,8 +433,9 @@ export const useTreeViewDataStore = defineStore("TreeViewData", {
       sets: [] as MDSchemaSet[],
       properties: [] as MDSchemaProperty[],
       levelsState: new Map<string, any>(),
+      membersState: new Map<string, any>(),
       api: null as unknown as XMLAApi,
-      members: new Map<string, any[]>(),
+      members: new Map<string, { loaded: boolean; hasMore: boolean }>(),
     };
   },
   actions: {
@@ -340,20 +472,132 @@ export const useTreeViewDataStore = defineStore("TreeViewData", {
       this.api = api;
     },
     callExpandedMethods(expandedNodes: string[]) {
-      expandedNodes.forEach(async (nodeId) => {
-        if (this.levelsState.has(nodeId)) {
-          const levelState = this.levelsState.get(nodeId);
-          await levelState.onOpen();
+      this.levelsState.forEach((e, key) => {
+        if (expandedNodes.find((nodeName) => nodeName === key)) {
+          e.onOpen();
+          e.opened = true;
+        } else {
+          e.opened = false;
         }
       });
+      this.membersState.forEach((e, key) => {
+        if (expandedNodes.find((nodeName) => nodeName === key)) {
+          e.onOpen();
+          e.opened = true;
+        } else {
+          e.opened = false;
+        }
+      });
+      // expandedNodes.forEach(async (nodeId) => {
+
+      //   if (this.levelsState.has(nodeId)) {
+      //     const levelState = this.levelsState.get(nodeId);
+      //     await levelState.onOpen();
+      //   }
+      // });
     },
-    async loadMembers(level: MDSchemaLevel, id: string) {
-      const childMembers = await this.api.getMembers(level);
-      const parsedMembers = childMembers.map((member: MDSchemaMember) => {
-        return TreeViewItems.getMemberDesc(member);
+    // async loadMembers(level: MDSchemaLevel, id: string) {
+    //   const childMembers = await this.api.getMembers(level);
+    //   const treeViewMembers = childMembers.map((member: MDSchemaMember) => {
+    //     return TreeViewItems.getMemberDesc(member);
+    //   });
+
+    //   // this.members.set(id, treeViewMembers);
+    // },
+    async getLevelMembers(level: MDSchemaLevel, id: string) {
+      const count = 1000;
+      let start = 0;
+
+      const currentlyLoadedMembersState = this.members.get(id);
+      const currentlyLoadedMembers = membersStorage.get(id);
+
+      if (currentlyLoadedMembersState) {
+        if (!currentlyLoadedMembersState.hasMore) return;
+        start = currentlyLoadedMembers.members.length;
+      }
+
+      const members = await this.api.getLevelMembers(level, count, start);
+      const parsedMembers = members.map((e): MDSchemaMember => {
+        const displayInfo = e.Member.DisplayInfo;
+        const childCount = displayInfo & MDDISPINFO_CHILD_COUNT;
+
+        return {
+          CATALOG_NAME: level.CATALOG_NAME,
+          CUBE_NAME: level.CUBE_NAME,
+          DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
+          HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
+          LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
+          LEVEL_NAME: level.LEVEL_NAME,
+          LEVEL_NUMBER: level.LEVEL_NUMBER,
+          LEVEL_CAPTION: level.LEVEL_CAPTION,
+          MEMBER_CAPTION: e.Member.Caption,
+          MEMBER_NAME: e.Member.UName,
+          MEMBER_UNIQUE_NAME: e.Member.UName,
+          HAS_CHILDREN: childCount > 0,
+        };
+      });
+      const treeViewMembers = parsedMembers.map((member: MDSchemaMember) => {
+        const desc = TreeViewItems.getMemberDesc(member);
+        return desc;
+      });
+      const currentMembers = currentlyLoadedMembers?.members || [];
+
+      membersStorage.set(id, {
+        members: [...currentMembers, ...treeViewMembers],
       });
 
-      this.members.set(id, parsedMembers);
+      this.members.set(id, {
+        loaded: true,
+        hasMore: treeViewMembers.length === count + 1,
+      });
+    },
+    async getChildMembers(member: MDSchemaMember, id: string) {
+      const count = 1000;
+      let start = 0;
+
+      const currentlyLoadedMembersState = this.members.get(id);
+      const currentlyLoadedMembers = membersStorage.get(id);
+
+      if (currentlyLoadedMembersState) {
+        if (!currentlyLoadedMembersState.hasMore) return;
+        start = currentlyLoadedMembers.members.length;
+      }
+
+      const members = await this.api.getChildMembers(member, count, start);
+
+      const parsedMembers = members.map((e): MDSchemaMember => {
+        const displayInfo = e.Member.DisplayInfo;
+        const childCount = displayInfo & MDDISPINFO_CHILD_COUNT;
+
+        return {
+          CATALOG_NAME: member.CATALOG_NAME,
+          CUBE_NAME: member.CUBE_NAME,
+          DIMENSION_UNIQUE_NAME: member.DIMENSION_UNIQUE_NAME,
+          HIERARCHY_UNIQUE_NAME: member.HIERARCHY_UNIQUE_NAME,
+          LEVEL_UNIQUE_NAME: member.LEVEL_UNIQUE_NAME,
+          LEVEL_NAME: member.LEVEL_NAME,
+          LEVEL_NUMBER: member.LEVEL_NUMBER,
+          LEVEL_CAPTION: member.LEVEL_CAPTION,
+          MEMBER_CAPTION: e.Member.Caption,
+          MEMBER_NAME: e.Member.UName,
+          MEMBER_UNIQUE_NAME: e.Member.UName,
+          HAS_CHILDREN: childCount > 0,
+        };
+      });
+      const treeViewMembers = parsedMembers.map((member: MDSchemaMember) => {
+        const desc = TreeViewItems.getMemberDesc(member);
+        return desc;
+      });
+      const currentMembers = currentlyLoadedMembers?.members || [];
+
+      membersStorage.set(id, {
+        members: [...currentMembers, ...treeViewMembers],
+      });
+
+      this.members.set(id, {
+        loaded: true,
+        hasMore: treeViewMembers.length === count + 1,
+      });
     },
   },
   getters: {

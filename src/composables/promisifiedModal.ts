@@ -3,22 +3,26 @@ import { ref } from "vue";
 
 export function usePromisifiedModal(
   resetFn: () => void,
-  opened: () => void = () => {}
+  opened: (data: any) => void = () => {}
 ) {
   const isOpened = ref(false);
   let resolveFunction = (_val: any) => {};
-  const runPromise: Promise<string> = new Promise((res) => {
+  let runPromise: Promise<string> = new Promise((res) => {
     resolveFunction = res;
   });
 
-  const run = () => {
+  const run = (data: any) => {
     isOpened.value = true;
-    opened();
+    opened(data);
     return runPromise;
   };
 
   const close = (data: any) => {
     resolveFunction(data);
+    runPromise = new Promise<string>((res) => {
+      resolveFunction = res;
+    });
+
     isOpened.value = false;
     resetFn();
   };

@@ -1,8 +1,8 @@
-import type { Client } from "@/utils/browser-soap/client";
 import "pinia";
+import type XmlaClient from "@/XMLAClient";
 
 declare module "pinia" {
   export interface PiniaCustomStateProperties {
-    $soapClient: Client;
+    $soapClient: XmlaClient;
   }
 }

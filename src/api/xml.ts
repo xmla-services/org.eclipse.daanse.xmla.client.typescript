@@ -12,7 +12,10 @@ class XMLAApi {
 
   private rowToArray(row: any): any[] {
     if (Array.isArray(row)) return row;
-    return [row];
+    if (row) {
+      return [row];
+    }
+    return [];
   }
 
   public async startSession(): Promise<void> {
@@ -333,6 +336,109 @@ class XMLAApi {
     return this.rowToArray(
       propertiesResponce.Body.DiscoverResponse.return[0].root.row
     ) as MDSchemaMember[];
+  }
+
+  public async getLevelMembers(
+    level: MDSchemaLevel,
+    amount: number,
+    start: number
+  ): Promise<any[]> {
+    const levelMembersRequestMDX = `
+      select Subset(${level.LEVEL_UNIQUE_NAME}.AllMembers, ${start}, ${
+      amount + 1
+    }) 
+      DIMENSION PROPERTIES MEMBER_TYPE on 0, 
+      {} on 1 
+      from ${level.CUBE_NAME}
+    `;
+
+    const levelMembersResponce = await this.getMDX(levelMembersRequestMDX);
+    return this.rowToArray(
+      levelMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
+        .Tuple
+    );
+  }
+
+  public async getChildMembers(
+    member: MDSchemaMember,
+    amount: number,
+    start: number
+  ): Promise<any[]> {
+    const childMembersRequestMDX = `
+      select Subset({AddCalculatedMembers(${
+        member.MEMBER_UNIQUE_NAME
+      }.Children)}, ${start}, ${amount + 1}) 
+      DIMENSION PROPERTIES MEMBER_TYPE on 0, 
+      {} on 1 
+      from ${member.CUBE_NAME}
+    `;
+
+    const childMembersResponce = await this.getMDX(childMembersRequestMDX);
+    return this.rowToArray(
+      childMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
+        .Tuple
+    );
+  }
+
+  public async getMDX(mdx: string): Promise<any> {
+    const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
+      Headers: {
+        Session: {
+          __attrs: {
+            xmlns: "urn:schemas-microsoft-com:xml-analysis",
+            SessionId: this.sessionId,
+          },
+        },
+      },
+      Command: {
+        Statement: mdx,
+      },
+      Properties: {},
+    });
+
+    return propertiesResponce;
+  }
+
+  public async getPivotTableData(
+    cubename: string,
+    rows: any,
+    columns: any
+  ): Promise<any> {
+    console.log(rows);
+    console.log(columns);
+    let mdxRequest;
+    if (rows.length && columns.length) {
+      mdxRequest = `
+          SELECT
+          { ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members } ON 0,
+          { ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members } ON 1
+          FROM ${cubename}
+      `;
+    } else {
+      mdxRequest = `
+          SELECT
+          FROM ${cubename}
+      `;
+    }
+
+    const mdxResponce = await this.getMDX(mdxRequest);
+    const axis0 = this.rowToArray(
+      mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
+        ?.Tuple
+    );
+    const axis1 = this.rowToArray(
+      mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
+        ?.Tuple
+    );
+    const cells = this.rowToArray(
+      mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
+    );
+
+    return {
+      axis0,
+      axis1,
+      cells,
+    };
   }
 
   public async endSession(): Promise<void> {

@@ -87,4 +87,5 @@ declare interface MDSchemaMember {
   MEMBER_NAME: string;
   MEMBER_UNIQUE_NAME: string;
   MEMBER_CAPTION: string;
+  HAS_CHILDREN: boolean;
 }

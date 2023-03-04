@@ -12,6 +12,7 @@ export enum TreeItemTypesEnum {
   SetsFolder,
   Member,
   Loading,
+  LoadMore,
 }
 
 export interface TreeItem {
@@ -29,6 +30,10 @@ export interface DimensionTreeItem extends TreeItem {
 export interface HierarchyTreeItem extends TreeItem {
   type: TreeItemTypesEnum.Hierarchy;
   children: TreeItem[];
+  originalItem: MDSchemaHierarchy;
+  filters: {
+    enabled: boolean;
+  };
 }
 
 export interface FolderTreeItem extends TreeItem {
@@ -58,6 +63,7 @@ export interface MeasureGroupTreeItem extends TreeItem {
 
 export interface MeasureTreeItem extends TreeItem {
   type: TreeItemTypesEnum.Measure;
+  originalItem: MDSchemaMeasure;
 }
 
 export interface PropertyTreeItem extends TreeItem {
@@ -69,8 +75,17 @@ export interface LoadingTreeItem extends TreeItem {
   caption: "";
 }
 
+export interface LoadMoreTreeItem extends TreeItem {
+  type: TreeItemTypesEnum.LoadMore;
+  caption: "";
+  onClick: Function;
+}
+
 export interface MemberTreeItem extends TreeItem {
   type: TreeItemTypesEnum.Member;
+  children: any[];
+  hasChildren: boolean;
+  __MDSchemaMember: MDSchemaMember;
 }
 
 export function getDimensionDesc(
@@ -94,6 +109,10 @@ export function getHierarchyDesc(
     children: [],
     id: `Dimension(${hierarchy.DIMENSION_UNIQUE_NAME})_Hierarchy(${hierarchy.HIERARCHY_UNIQUE_NAME})`,
     caption: hierarchy.HIERARCHY_CAPTION,
+    originalItem: hierarchy,
+    filters: {
+      enabled: false,
+    },
   };
 }
 
@@ -136,12 +155,14 @@ export function getMeasureDesc(
       type: TreeItemTypesEnum.Measure,
       caption: measure.MEASURE_CAPTION,
       id: `MeasureGroup(${mg.MEASUREGROUP_NAME})_Measure(${measure.MEASURE_UNIQUE_NAME})`,
+      originalItem: measure,
     };
   } else {
     return {
       type: TreeItemTypesEnum.Measure,
       caption: measure.MEASURE_CAPTION,
       id: `Measure(${measure.MEASURE_UNIQUE_NAME}_${measure.MEASURE_DISPLAY_FOLDER})`,
+      originalItem: measure,
     };
   }
 }
@@ -200,11 +221,25 @@ export function getLoadingItemDesc(parentId: string): LoadingTreeItem {
     id: `${parentId}_Loading`,
   };
 }
+export function getLoadMoreItemDesc(
+  parentId: string,
+  onClick: Function
+): LoadMoreTreeItem {
+  return {
+    type: TreeItemTypesEnum.LoadMore,
+    caption: "",
+    id: `${parentId}_LoadMore`,
+    onClick,
+  };
+}
 
 export function getMemberDesc(member: MDSchemaMember): MemberTreeItem {
   return {
     type: TreeItemTypesEnum.Member,
     caption: member.MEMBER_CAPTION,
     id: `Dimemsion(${member.DIMENSION_UNIQUE_NAME})_Hierarchy(${member.HIERARCHY_UNIQUE_NAME})_Level(${member.LEVEL_UNIQUE_NAME})_Member(${member.MEMBER_UNIQUE_NAME})`,
+    children: [],
+    hasChildren: member.HAS_CHILDREN,
+    __MDSchemaMember: member,
   };
 }
