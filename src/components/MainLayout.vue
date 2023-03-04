@@ -32,6 +32,14 @@ const appSettings = useAppSettingsStore();
     <div v-else class="helper">
       <h2>Connect to the cube</h2>
     </div>
+    <va-modal v-model="appSettings.loading" no-dismiss>
+      <template #content>
+        <div class="my-2 mx-4">
+          <div class="mb-4">Loading</div>
+          <va-progress-circle indeterminate />
+        </div>
+      </template>
+    </va-modal>
   </div>
 </template>
 

@@ -11,6 +11,7 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
       selectedCatalog: "",
       selectedCube: "",
       cubeOpened: false,
+      loading: false,
     };
   },
   actions: {
@@ -32,11 +33,13 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
       this.selectedCatalog = catalogName;
       this.selectedCube = cube;
       this.cubeOpened = true;
+      this.loading = true;
 
       const treeViewDataStore = useTreeViewDataStore();
       await treeViewDataStore.fetchCubeData(catalogName, cube);
       const pivotTableStore = usePivotTableStore();
       pivotTableStore.fetchPivotTableData();
+      this.loading = false;
     },
   },
 });
