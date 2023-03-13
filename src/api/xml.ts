@@ -188,6 +188,38 @@ class XMLAApi {
     ) as MDSchemaLevel[];
   }
 
+  public async getHierarchyLevels(
+    catalogName: string,
+    cubeName: string,
+    hierarchyUniqueName: string
+  ): Promise<MDSchemaLevel[]> {
+    const levelsResponce = await this.SOAPClient?.DiscoverAsync({
+      Headers: {
+        Session: {
+          __attrs: {
+            xmlns: "urn:schemas-microsoft-com:xml-analysis",
+            SessionId: this.sessionId,
+          },
+        },
+      },
+      RequestType: "MDSCHEMA_LEVELS",
+      Restrictions: {
+        RestrictionList: {
+          CATALOG_NAME: catalogName,
+          CUBE_NAME: cubeName,
+          HIERARCHY_UNIQUE_NAME: hierarchyUniqueName,
+        },
+      },
+      Properties: {
+        PropertyList: {},
+      },
+    });
+
+    return this.rowToArray(
+      levelsResponce.Body.DiscoverResponse.return[0].root.row
+    ) as MDSchemaLevel[];
+  }
+
   public async getMeasureGroups(
     catalogName: string,
     cubeName: string

@@ -12,7 +12,7 @@ console.log("https://ssemenkoff.dev/emondrian/xmla");
   <test></test>
   <MainLayout>
     <template #left_container>
-      <QuertyDesignerLayout>
+      <QuertyDesignerLayout layout="vertical">
         <template #left_container>
           <TreeView />
         </template>

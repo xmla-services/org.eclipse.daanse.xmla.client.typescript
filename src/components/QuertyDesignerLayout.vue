@@ -1,24 +1,43 @@
+<script setup lang="ts">
+const props = defineProps(["layout"]);
+</script>
 <template>
   <div class="split-container">
-    <va-split
-      class="split"
-      :model-value="30"
-      :limits="[
-        ['300px', 'any'],
-        ['300px', 'any'],
-      ]"
-    >
-      <template #start>
-        <div class="section-block">
-          <slot name="left_container" />
-        </div>
-      </template>
-      <template #end>
-        <div class="section-block">
-          <slot name="right_container" />
-        </div>
-      </template>
-    </va-split>
+    <template v-if="props.layout === 'default'">
+      <va-split
+        class="split"
+        :model-value="30"
+        :limits="[
+          ['300px', 'any'],
+          ['300px', 'any'],
+        ]"
+      >
+        <template #start>
+          <div class="section-block">
+            <slot name="left_container" />
+          </div>
+        </template>
+        <template #end>
+          <div class="section-block">
+            <slot name="right_container" />
+          </div>
+        </template>
+      </va-split>
+    </template>
+    <template v-if="props.layout === 'vertical'">
+      <va-split class="split vertical" vertical>
+        <template #start>
+          <div class="section-block">
+            <slot name="left_container" />
+          </div>
+        </template>
+        <template #end>
+          <div class="section-block">
+            <slot name="right_container" />
+          </div>
+        </template>
+      </va-split>
+    </template>
   </div>
 </template>
 
