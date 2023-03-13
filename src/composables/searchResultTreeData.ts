@@ -1,16 +1,9 @@
 import { ref, watch } from "vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { debounce } from "lodash";
+import { optionalArrayToArray } from "@/utils/helpers";
 
 const MDDISPINFO_CHILD_COUNT = 65535;
-
-function optionalArrayToArray(el: any): any[] {
-  if (Array.isArray(el)) return el;
-  if (el) {
-    return [el];
-  }
-  return [];
-}
 
 function fillTree(treeNode: any, childMembers: any[]) {
   const children = childMembers.filter(

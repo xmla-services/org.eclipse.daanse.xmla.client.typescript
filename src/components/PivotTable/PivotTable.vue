@@ -1,6 +1,7 @@
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
+import { optionalArrayToArray } from "@/utils/helpers";
 
 export default {
   setup() {
@@ -21,10 +22,19 @@ export default {
   },
   computed: {
     columns() {
-      return this.pivotTableStore.columns;
+      const cols = this.pivotTableStore.columns.map((e: { Member: any }) => {
+        return optionalArrayToArray(e.Member);
+      });
+
+      return cols;
     },
     rows() {
-      return this.pivotTableStore.rows;
+      const rows = this.pivotTableStore.rows.map((e: { Member: any }) => {
+        return optionalArrayToArray(e.Member);
+      });
+
+      return rows;
+      // return this.pivotTableStore.rows;
     },
     cellsParsed() {
       if (!this.pivotTableStore.cells.length) return;
@@ -63,42 +73,57 @@ export default {
     },
   },
   methods: {
-    getStylesForColumn(index: number) {
-      return {
-        width: "150px",
-        height: "30px",
-        "line-height": "30px",
-        "padding-left": "3px",
-        "border-left": index > 0 ? "none" : "",
-      };
+    getColumnMemberStyle(i: number, j: number) {
+      const currentMember = this.columns?.[i]?.[j];
+      const nextMember = this.columns?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return;
+
+      if (currentMember.UName === nextMember.UName) {
+        return {
+          "border-left": "none",
+        };
+      }
+      return {};
+    },
+    getColumnMemberCaption(i: number, j: number) {
+      const currentMember = this.columns?.[i]?.[j];
+      const nextMember = this.columns?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return currentMember.Caption;
+
+      if (currentMember.UName === nextMember.UName) {
+        return "";
+      }
+      return currentMember.Caption;
+    },
+    getRowMemberStyle(i: number, j: number) {
+      const currentMember = this.rows?.[i]?.[j];
+      const nextMember = this.rows?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return;
+
+      if (currentMember.UName === nextMember.UName) {
+        return {
+          "border-top": "none",
+        };
+      }
+      return {};
+    },
+    getRowMemberCaption(i: number, j: number) {
+      const currentMember = this.rows?.[i]?.[j];
+      const nextMember = this.rows?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return currentMember.Caption;
+
+      if (currentMember.UName === nextMember.UName) {
+        return "";
+      }
+      return currentMember.Caption;
     },
     getColumnHeaderOffsetStyle() {
       return {
-        "margin-left": `${150 - 1}px`,
-        height: "30px",
-      };
-    },
-    getStylesForRow(index: number) {
-      return {
-        width: "150px",
-        height: "30px",
-        "line-height": "30px",
-        "padding-left": "3px",
-        "border-top": index > 0 ? "none" : "",
-      };
-    },
-    getStylesForCell() {
-      const isOnlyCell =
-        this.pivotTableStore.rows.length === 0 &&
-        this.pivotTableStore.columns.length === 0;
-
-      return {
-        width: "150px",
-        height: "30px",
-        "line-height": "30px",
-        "padding-left": "3px",
-        "border-left": isOnlyCell ? "" : "none",
-        "border-top": isOnlyCell ? "" : "none",
+        "margin-left": `${this.rows?.[0]?.length * 150}px`,
       };
     },
     getCellValue(cell: any) {
@@ -123,35 +148,34 @@ export default {
     <div class="pivotTable">
       <div class="columnHeader_container" :style="getColumnHeaderOffsetStyle()">
         <div ref="columnsContainer" class="columnScroller">
-          <div
-            class="columnHeader"
-            v-for="(column, i) in columns"
-            :key="(column as any).Member.UNAME"
-            :style="getStylesForColumn(i)"
-          >
-            {{ (column as any).Member.Caption }}
+          <div class="columnHeader" v-for="(column, i) in columns" :key="i">
+            <div
+              v-for="(member, j) in column"
+              :key="member.UNAME"
+              class="columnMember"
+              :style="getColumnMemberStyle(i, j)"
+            >
+              {{ getColumnMemberCaption(i, j) }}
+            </div>
           </div>
         </div>
       </div>
       <div class="d-flex flex-row overflow-hidden">
         <div class="rowsHeader_container" ref="rowsContainer">
-          <div
-            class="rowsHeader"
-            v-for="(row, i) in rows"
-            :key="(row as any).Member.UNAME"
-            :style="getStylesForRow(i)"
-          >
-            {{ (row as any).Member.Caption }}
+          <div class="rowsHeader" v-for="(row, i) in rows" :key="i">
+            <div
+              v-for="(member, j) in row"
+              :key="member.UNAME"
+              class="rowMember"
+              :style="getRowMemberStyle(i, j)"
+            >
+              {{ getRowMemberCaption(i, j) }}
+            </div>
           </div>
         </div>
         <div class="cells_container" @scroll="handleScroll">
           <div class="cell_row" v-for="(cellRow, i) in cellsParsed" :key="i">
-            <div
-              class="cell"
-              v-for="(cell, j) in cellRow"
-              :key="`${i}_${j}`"
-              :style="getStylesForCell()"
-            >
+            <div class="cell" v-for="(cell, j) in cellRow" :key="`${i}_${j}`">
               {{ getCellValue(cell) }}
             </div>
           </div>
@@ -174,7 +198,6 @@ export default {
 }
 
 .columnHeader_container {
-  margin-bottom: -1px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -185,35 +208,74 @@ export default {
 
 .columnHeader {
   display: inline-block;
-  border: 1px silver solid;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   flex-shrink: 0;
+  width: 150px;
+  line-height: 30px;
 }
+
+.columnHeader:last-child {
+  border-right: 1px silver solid;
+}
+
+.columnMember {
+  border-top: 1px silver solid;
+  padding-left: 3px;
+  font-weight: 600;
+  height: 30px;
+  border-left: 1px silver solid;
+}
+
 .rowsHeader_container {
-  margin-right: -1px;
+  border-bottom: 1px silver solid;
 }
 .rowsHeader {
-  border: 1px silver solid;
+  display: flex;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  border-right: 0;
+  border-left: 0;
+  height: 30px;
+  line-height: 30px;
+}
+
+.rowMember {
+  width: 150px;
+  border-left: 1px silver solid;
+  border-top: 1px silver solid;
+  padding-left: 3px;
+  font-weight: 600;
 }
 
 .cells_container {
   display: flex;
   flex-direction: column;
   overflow: auto;
+  border-bottom: 1px silver solid;
 }
+
 .cell_row {
   display: flex;
 }
+
 .cell {
   border: 1px silver solid;
+  border-right: 0;
+  border-bottom: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   flex-shrink: 0;
+  width: 150px;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 3px;
+}
+
+.cell:last-child {
+  border-right: 1px silver solid;
 }
 </style>

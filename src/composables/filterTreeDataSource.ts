@@ -1,19 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ref, watch } from "vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
+import { optionalArrayToArray } from "@/utils/helpers";
 
 interface SelectionItem {
   timestamp: number;
   UName: string;
 }
 
-function optionalArrayToArray(el: any): any[] {
-  if (Array.isArray(el)) return el;
-  if (el) {
-    return [el];
-  }
-  return [];
-}
 const MDDISPINFO_CHILD_COUNT = 65535;
 
 function getTreeItem(e: any, parentSelected: boolean = false) {
