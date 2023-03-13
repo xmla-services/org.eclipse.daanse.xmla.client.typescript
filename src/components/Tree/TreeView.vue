@@ -31,18 +31,20 @@ export default {
 </script>
 
 <template>
-  <div v-if="store.metadataLoaded">
-    <h3 class="ma-2">Cube: {{ appSettings.selectedCube }}</h3>
+  <div v-if="store.metadataLoaded" style="height: 100%">
     <div class="tree-container">
-      <va-input
-        v-model="filter"
-        placeholder="Filter..."
-        clearable
-        class="filter-input"
-      />
+      <div class="tree-header mb-2">
+        <h3 class="ma-2">Cube: {{ appSettings.selectedCube }}</h3>
+        <va-input
+          v-model="filter"
+          placeholder="Filter..."
+          clearable
+          class="filter-input"
+        />
+      </div>
       <va-tree-view
         :nodes="store.treeViewNodes"
-        class="customizable-content"
+        class="tree-view"
         :filter="filter"
         :text-by="'caption'"
         @update:expanded="triggerExpanded"
@@ -97,6 +99,17 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.tree-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  .tree-view {
+    overflow: auto;
+  }
+}
+
 .progress-circle {
   width: 100%;
   height: 100%;
