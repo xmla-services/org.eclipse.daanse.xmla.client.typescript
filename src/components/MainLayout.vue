@@ -3,6 +3,11 @@ import Navbar from "./NavBar.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 
 const appSettings = useAppSettingsStore();
+const layout = "vertical";
+
+const getLeftWidth = () => {
+  return layout === "default" ? "600px" : "400px";
+};
 </script>
 
 <template>
@@ -13,7 +18,7 @@ const appSettings = useAppSettingsStore();
         class="split"
         :model-value="30"
         :limits="[
-          ['600px', 'any'],
+          [getLeftWidth(), 'any'],
           ['500px', 'any'],
         ]"
       >

@@ -433,17 +433,53 @@ class XMLAApi {
 
   public async getPivotTableData(
     cubename: string,
-    rows: any,
-    columns: any
+    rows: any[],
+    columns: any[]
   ): Promise<any> {
     console.log(rows);
     console.log(columns);
     let mdxRequest;
     if (rows.length && columns.length) {
+      let rowsRequest = "";
+      if (rows.length >= 1) {
+        rows.forEach((e: any, i: number) => {
+          if (i === 0) {
+            rowsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
+          } else {
+            rowsRequest = `
+              CrossJoin(
+                ${rowsRequest},
+                Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})
+              )
+            `;
+          }
+        });
+      } else {
+        rowsRequest = `{ ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
+      }
+
+      let columnsRequest = "";
+      if (columns.length >= 1) {
+        columns.forEach((e: any, i: number) => {
+          if (i === 0) {
+            columnsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
+          } else {
+            columnsRequest = `
+              CrossJoin(
+                ${columnsRequest},
+                Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})
+              )
+            `;
+          }
+        });
+      } else {
+        columnsRequest = `{ ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
+      }
+
       mdxRequest = `
           SELECT
-          { ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members } ON 0,
-          { ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members } ON 1
+          ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0,
+          ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1
           FROM ${cubename}
       `;
     } else {
