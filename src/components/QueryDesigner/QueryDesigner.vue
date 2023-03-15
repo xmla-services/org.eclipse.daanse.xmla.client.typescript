@@ -187,6 +187,7 @@ export default {
         element,
         filters: element.filters,
       });
+      if (!filters) return;
       if (originalItem) {
         originalItem.filters = filters;
       }

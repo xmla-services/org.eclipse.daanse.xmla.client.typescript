@@ -1,11 +1,27 @@
 <script lang="ts" setup>
 import { useFilterTreeDataSource } from "@/composables/filterTreeDataSource";
 import { useSearchResultTreeData } from "@/composables/searchResultTreeData";
+import { debounce } from "lodash";
+import { computed, defineComponent, ref, watch, type Ref } from "vue";
 
-import { ref, watch } from "vue";
+interface TreeData {
+  nodes: { value: any[] };
+  onExpanded: (event: any) => void;
+  setSelectAll: (event: any) => void;
+  changeSelection: (event: any) => void;
+  selectAll: { value: boolean };
+  key: string;
+  expanded: { value: string[] };
+}
 
 const props = defineProps(["rootHierarchy"]);
 const emit = defineEmits(["setSelection"]);
+
+const resetSelection = ref(() => {});
+
+defineExpose({
+  resetSelection,
+});
 
 const {
   tree,
@@ -16,15 +32,65 @@ const {
   changeSelection,
   setSelectAll,
 } = await useFilterTreeDataSource(props.rootHierarchy);
+
 const {
   filteredTree,
   levels,
   searchBy,
   searchValue,
   triggerExpandedWithSearch,
+  expanded,
+  search,
+  searchSelectAll,
+  searchSelectedItems,
+  searchDeselectedItems,
+  searchSetSelectAll,
+  searchChangeSelection,
 } = await useSearchResultTreeData(props.rootHierarchy);
 
-const selectedNodes = ref([]);
+const treeData = ref({} as TreeData);
+
+watch(
+  searchValue,
+  debounce(() => {
+    if (searchValue.value) {
+      treeData.value = {
+        nodes: filteredTree,
+        onExpanded: triggerExpandedWithSearch,
+        setSelectAll: searchSetSelectAll,
+        changeSelection: searchChangeSelection,
+        selectAll: searchSelectAll,
+        key: "SearchTree",
+        expanded: expanded,
+      };
+    } else {
+      treeData.value = {
+        nodes: tree,
+        onExpanded: triggerExpanded,
+        setSelectAll: setSelectAll,
+        changeSelection: changeSelection,
+        selectAll: selectAll,
+        key: "Tree",
+        expanded: ref([]),
+      };
+    }
+
+    if (searchValue.value.length > 1) {
+      search();
+    }
+  }, 500)
+);
+
+treeData.value = {
+  nodes: tree,
+  onExpanded: triggerExpanded,
+  setSelectAll: setSelectAll,
+  changeSelection: changeSelection,
+  selectAll: selectAll,
+  key: "Tree",
+  expanded: ref([]),
+};
+
 const multipleChoise = ref(
   props.rootHierarchy.filters
     ? props.rootHierarchy.filters.multipleChoise
@@ -33,23 +99,52 @@ const multipleChoise = ref(
 const singleSelection = ref({ id: null });
 
 const emitSelectFunc = () => {
-  emit("setSelection", {
-    enabled: true,
-    multipleChoise: multipleChoise.value,
-    selectedItem: singleSelection.value,
-    selectAll: selectAll.value,
-    deselectedItems: deselectedItems.value,
-    selectedItems: selectedItems.value,
-  });
+  if (searchValue.value) {
+    emit("setSelection", {
+      enabled: true,
+      multipleChoise: multipleChoise.value,
+      selectedItem: singleSelection.value,
+      selectAll: searchSelectAll.value,
+      deselectedItems: searchDeselectedItems.value,
+      selectedItems: searchSelectedItems.value,
+    });
+  } else {
+    emit("setSelection", {
+      enabled: true,
+      multipleChoise: multipleChoise.value,
+      selectedItem: singleSelection.value,
+      selectAll: selectAll.value,
+      deselectedItems: deselectedItems.value,
+      selectedItems: selectedItems.value,
+    });
+  }
 };
 
+watch(multipleChoise, emitSelectFunc);
 watch(selectAll, emitSelectFunc);
 watch(selectedItems, emitSelectFunc);
 watch(deselectedItems, emitSelectFunc);
 watch(singleSelection, emitSelectFunc);
+watch(searchSelectAll, emitSelectFunc);
+watch(searchDeselectedItems, emitSelectFunc);
+watch(searchSelectedItems, emitSelectFunc);
+
+const emptySelection = computed(() => {
+  if (searchValue.value) {
+    return (
+      !searchSelectedItems.value.length && !searchDeselectedItems.value.length
+    );
+  } else {
+    return !selectedItems.value.length && !deselectedItems.value.length;
+  }
+});
 
 const selectFilter = function (e: any) {
   singleSelection.value = e;
+};
+
+resetSelection.value = () => {
+  singleSelection.value = { id: null };
 };
 </script>
 <template>
@@ -58,6 +153,7 @@ const selectFilter = function (e: any) {
       <va-input
         v-model="searchValue"
         class="mr-3"
+        clearable
         placeholder="Search value"
         style="width: 100%"
       />
@@ -79,32 +175,29 @@ const selectFilter = function (e: any) {
     </div>
     <div class="mb-3" style="overflow: auto; height: 100%">
       <template v-if="multipleChoise">
-        <template v-if="!selectedItems.length && !deselectedItems.length">
+        <template v-if="emptySelection">
           <va-checkbox
-            class="mt-3 ml-2"
-            v-model="selectAll"
+            class="mt-3 ml-2 selectAll"
+            v-model="treeData.selectAll"
             label="Select all"
           />
         </template>
         <template v-else>
           <va-checkbox
-            class="mt-3 ml-2"
+            class="mt-3 ml-2 selectAll"
             :model-value="true"
             label="Select all"
             checked-icon="remove"
-            @click.prevent.stop="setSelectAll"
+            @click.prevent.stop="treeData.setSelectAll"
           />
         </template>
       </template>
       <va-tree-view
         class="filter-tree-view"
-        :nodes="searchValue ? filteredTree : tree"
-        @update:expanded="
-          searchValue
-            ? triggerExpandedWithSearch($event)
-            : triggerExpanded($event)
-        "
-        v-model:checked="selectedNodes"
+        :nodes="treeData.nodes"
+        @update:expanded="treeData.onExpanded"
+        :expanded="treeData.expanded"
+        :key="treeData.key"
       >
         <template #content="node">
           <div v-if="node.isLoading" class="d-flex align-center">
@@ -125,7 +218,7 @@ const selectFilter = function (e: any) {
               <va-checkbox
                 class="mr-2"
                 :model-value="node.selected"
-                @click.stop.prevent="changeSelection(node)"
+                @click.stop.prevent="treeData.changeSelection(node)"
               />
             </template>
             <template v-else-if="multipleChoise && node.partiallySelected">
@@ -133,7 +226,7 @@ const selectFilter = function (e: any) {
                 class="mr-2"
                 :model-value="true"
                 checked-icon="remove"
-                @click.stop.prevent="changeSelection(node)"
+                @click.stop.prevent="treeData.changeSelection(node)"
               />
             </template>
             <div style="width: 100%">{{ node.Caption }}</div>
@@ -161,5 +254,9 @@ const selectFilter = function (e: any) {
     padding-top: 8px;
     padding-bottom: 8px;
   }
+}
+
+.selectAll label {
+  font-weight: 600;
 }
 </style>

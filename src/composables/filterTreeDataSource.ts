@@ -136,9 +136,6 @@ export async function useFilterTreeDataSource(element: {
   }
 
   function computeSelection(treeNode: any, parentSelected: boolean) {
-    const hasSelection =
-      selectedItems.value.length || deselectedItems.value.length;
-
     treeNode.selected = parentSelected;
 
     if (parentSelected) {
@@ -163,7 +160,7 @@ export async function useFilterTreeDataSource(element: {
   }
 
   function computePartialSelection(treeNode: any) {
-    if (!treeNode.children.some((e: any) => !e.isLoading)) {
+    if (!treeNode.children?.some((e: any) => !e.isLoading)) {
       const currentSelectionDesc = treeSelection.find(
         (s) => s.UName === treeNode.UName
       );
@@ -195,7 +192,7 @@ export async function useFilterTreeDataSource(element: {
   }
 
   function optimizeSelection(treeNode: any) {
-    if (!treeNode.children.some((e: any) => !e.isLoading)) return;
+    if (!treeNode.children?.some((e: any) => !e.isLoading)) return;
     treeNode.children.forEach((childNode: any) => {
       optimizeSelection(childNode);
     });
@@ -272,9 +269,19 @@ export async function useFilterTreeDataSource(element: {
       }
     });
 
+    let hasSelection = false;
+    tree.value.forEach((treeNode: any) => {
+      if (treeNode.selected || treeNode.partiallySelected) hasSelection = true;
+    });
+
     if (rootNodeSelectedCount === tree.value.length) {
       selectedItems.value = [];
       selectAll.value = true;
+    }
+
+    if (!hasSelection) {
+      selectAll.value = false;
+      deselectedItems.value = [];
     }
   }
 
