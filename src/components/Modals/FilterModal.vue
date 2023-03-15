@@ -13,6 +13,8 @@ export default {
     const reset = () => {
       filterConfigured.value = {};
     };
+    const multipleChoise = ref(false);
+    const currentlySelected = ref(null as any);
     const opened = ({ element }: { element: any }) => {
       rootHierarchy.value = {
         item: element.originalItem,
@@ -20,6 +22,8 @@ export default {
       };
 
       const initialFilters = element.filters;
+      multipleChoise.value = initialFilters.multipleChoise;
+
       if (initialFilters.multipleChoise) {
         filterConfigured.value = {
           enabled: initialFilters.enabled,
@@ -34,6 +38,8 @@ export default {
           multipleChoise: initialFilters.multipleChoise,
           selectedItem: initialFilters.selectedItem,
         };
+
+        currentlySelected.value = initialFilters.selectedItem;
       }
     };
     const { isOpened, run, close } = usePromisifiedModal(reset, opened);
@@ -67,6 +73,8 @@ export default {
           multipleChoise,
           selectedItem,
         };
+
+        currentlySelected.value = selectedItem;
       }
     };
 
@@ -77,11 +85,19 @@ export default {
       close,
       rootHierarchy,
       setSelection,
+      multipleChoise,
+      currentlySelected,
     };
   },
   methods: {
     ok() {
       this.close({ filters: this.filterConfigured });
+    },
+    cancel() {
+      this.close({});
+    },
+    resetSelection() {
+      this.$refs.filterTreeView?.resetSelection();
     },
   },
   components: { FilterTreeView },
@@ -100,13 +116,25 @@ export default {
       <va-card-content>
         <Suspense>
           <FilterTreeView
+            ref="filterTreeView"
             :rootHierarchy="rootHierarchy"
             @set-selection="setSelection"
           ></FilterTreeView>
         </Suspense>
       </va-card-content>
-      <va-card-actions>
-        <va-button @click="ok" color="warning">Ok!</va-button>
+      <va-card-actions class="actions">
+        <div class="action-buttons">
+          <va-button @click="ok" color="primary">Confirm</va-button>
+          <va-button @click="cancel" color="secondary">Cancel</va-button>
+        </div>
+        <div
+          v-if="!multipleChoise && currentlySelected && currentlySelected.id"
+        >
+          <div>Currently selected: {{ currentlySelected.Caption }}</div>
+          <div class="reset-button" @click="resetSelection">
+            Reset selection
+          </div>
+        </div>
       </va-card-actions>
     </template>
   </va-modal>
@@ -143,6 +171,19 @@ export default {
     flex-direction: column;
     overflow: hidden;
     width: 100%;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between !important;
+  }
+
+  .reset-button {
+    margin-top: 0.25rem;
+    color: var(--va-primary);
+    text-decoration: underline;
+    user-select: none;
+    cursor: pointer;
   }
 }
 </style>
