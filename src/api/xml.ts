@@ -434,10 +434,9 @@ class XMLAApi {
   public async getPivotTableData(
     cubename: string,
     rows: any[],
-    columns: any[]
+    columns: any[],
+    pivotTableSettings: any,
   ): Promise<any> {
-    console.log(rows);
-    console.log(columns);
     let mdxRequest;
     if (rows.length && columns.length) {
       let rowsRequest = "";
@@ -476,12 +475,21 @@ class XMLAApi {
         columnsRequest = `{ ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
       }
 
-      mdxRequest = `
-          SELECT
-          ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0,
-          ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1
-          FROM ${cubename}
-      `;
+      if (pivotTableSettings.showEmpty) {
+        mdxRequest = `
+            SELECT
+            ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
+            ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
+            FROM ${cubename}
+        `;
+      } else {
+        mdxRequest = `
+            SELECT
+            NON EMPTY ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
+            NON EMPTY ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
+            FROM ${cubename}
+        `;
+      }
     } else {
       mdxRequest = `
           SELECT

@@ -2,6 +2,7 @@
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import ServerSelectionModal from "@/components/Modals/ServerSelectionModal.vue";
 import CatalogSelectionModal from "@/components/Modals/CatalogSelectionModal.vue";
+import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
 
 // const url = "https://ssemenkoff.dev/emondrian/xmla";
 
@@ -27,6 +28,7 @@ export default {
   components: {
     ServerSelectionModal,
     CatalogSelectionModal,
+    PivotTableSettingsButton,
   },
 };
 </script>
@@ -34,6 +36,9 @@ export default {
   <va-navbar color="primary">
     <template #left>
       <va-navbar-item class="logo">LOGO</va-navbar-item>
+      <va-navbar-item>
+        <PivotTableSettingsButton />
+      </va-navbar-item>
     </template>
     <template #right>
       <va-navbar-item v-if="!store.xmlaApiInited">

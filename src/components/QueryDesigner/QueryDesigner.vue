@@ -263,41 +263,6 @@ export default {
         </div>
       </div>
       <div class="queryDesignerArea">
-        <div class="va-title">Rows</div>
-        <div class="queryDesingnerArea_container">
-          <draggable
-            class="dragArea list-group"
-            :list="rows"
-            group="hierarchies"
-            @change="changeItems('rows', $event)"
-            item-key="id"
-          >
-            <template #item="{ element }">
-              <va-chip
-                :model-value="true"
-                closeable
-                @update:model-value="remove('rows', element, $event)"
-              >
-                <div class="d-flex chip_caption">
-                  <span class="chip_caption_text">
-                    {{ element.caption }}
-                  </span>
-                  <va-icon
-                    class="filter-icon ml-2"
-                    name="filter_list"
-                    size="small"
-                    :style="{
-                      color: element.filters.enabled ? 'lime' : '',
-                    }"
-                    @click="configureFilter('rows', element)"
-                  />
-                </div>
-              </va-chip>
-            </template>
-          </draggable>
-        </div>
-      </div>
-      <div class="queryDesignerArea">
         <div class="va-title">Columns</div>
         <div class="queryDesingnerArea_container">
           <draggable
@@ -325,6 +290,41 @@ export default {
                       color: element.filters.enabled ? 'lime' : '',
                     }"
                     @click="configureFilter('columns', element)"
+                  />
+                </div>
+              </va-chip>
+            </template>
+          </draggable>
+        </div>
+      </div>
+      <div class="queryDesignerArea">
+        <div class="va-title">Rows</div>
+        <div class="queryDesingnerArea_container">
+          <draggable
+            class="dragArea list-group"
+            :list="rows"
+            group="hierarchies"
+            @change="changeItems('rows', $event)"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <va-chip
+                :model-value="true"
+                closeable
+                @update:model-value="remove('rows', element, $event)"
+              >
+                <div class="d-flex chip_caption">
+                  <span class="chip_caption_text">
+                    {{ element.caption }}
+                  </span>
+                  <va-icon
+                    class="filter-icon ml-2"
+                    name="filter_list"
+                    size="small"
+                    :style="{
+                      color: element.filters.enabled ? 'lime' : '',
+                    }"
+                    @click="configureFilter('rows', element)"
                   />
                 </div>
               </va-chip>
