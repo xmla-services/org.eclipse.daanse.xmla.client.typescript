@@ -498,7 +498,6 @@ class XMLAApi {
         );
       });
 
-      console.log(columnsProperties, rowsProperties);
       let columnsPropertiesList = columnsProperties
         .flat(1)
         .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
@@ -519,8 +518,6 @@ class XMLAApi {
             ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${rowsPropertiesList}  ON 0
             FROM ${cubename}
         `;
-
-        console.log(mdxRequest);
       } else {
         mdxRequest = `
             SELECT
