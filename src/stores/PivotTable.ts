@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useAppSettingsStore } from "./AppSettings";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { ref, watch } from "vue";
+import { useTreeViewDataStore } from "./TreeView";
 
 export const usePivotTableStore = defineStore("PivotTable", () => {
   const state = ref({
@@ -19,6 +20,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
   const fetchPivotTableData = async () => {
     const appSettings = useAppSettingsStore();
     const queryDesignerStore = useQueryDesignerStore();
+    const treeViewStore = useTreeViewDataStore();
 
     const api = appSettings.getApi();
     const rows = queryDesignerStore.rows;
@@ -31,7 +33,8 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
         appSettings.selectedCube,
         rows,
         columns,
-        pivotTableSettings
+        pivotTableSettings,
+        treeViewStore.properties
       ),
     ]);
 
