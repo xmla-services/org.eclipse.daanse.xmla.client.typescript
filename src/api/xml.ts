@@ -436,9 +436,11 @@ class XMLAApi {
     rows: any[],
     columns: any[],
     pivotTableSettings: any,
+    properties: any[]
   ): Promise<any> {
     let mdxRequest;
     if (rows.length && columns.length) {
+      const rowsProperties = [] as any[];
       let rowsRequest = "";
       if (rows.length >= 1) {
         rows.forEach((e: any, i: number) => {
@@ -457,6 +459,17 @@ class XMLAApi {
         rowsRequest = `{ ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
       }
 
+      rows.forEach((e: any) => {
+        rowsProperties.push(
+          properties.filter(
+            (prop) =>
+              prop.HIERARCHY_UNIQUE_NAME ===
+              e.originalItem.HIERARCHY_UNIQUE_NAME
+          )
+        );
+      });
+
+      const columnsProperties = [] as any[];
       let columnsRequest = "";
       if (columns.length >= 1) {
         columns.forEach((e: any, i: number) => {
@@ -475,18 +488,44 @@ class XMLAApi {
         columnsRequest = `{ ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
       }
 
+      columns.forEach((e: any) => {
+        columnsProperties.push(
+          properties.filter(
+            (prop) =>
+              prop.HIERARCHY_UNIQUE_NAME ===
+              e.originalItem.HIERARCHY_UNIQUE_NAME
+          )
+        );
+      });
+
+      console.log(columnsProperties, rowsProperties);
+      let columnsPropertiesList = columnsProperties
+        .flat(1)
+        .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
+        .join(",");
+      let rowsPropertiesList = rowsProperties
+        .flat(1)
+        .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
+        .join(",");
+
+      if (columnsPropertiesList)
+        columnsPropertiesList = `,${columnsPropertiesList}`;
+      if (rowsPropertiesList) rowsPropertiesList = `,${rowsPropertiesList}`;
+
       if (pivotTableSettings.showEmpty) {
         mdxRequest = `
             SELECT
-            ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-            ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
+            ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${columnsPropertiesList} ON 1,
+            ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${rowsPropertiesList}  ON 0
             FROM ${cubename}
         `;
+
+        console.log(mdxRequest);
       } else {
         mdxRequest = `
             SELECT
-            NON EMPTY ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-            NON EMPTY ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
+            NON EMPTY ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${columnsPropertiesList} ON 1,
+            NON EMPTY ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${rowsPropertiesList} ON 0
             FROM ${cubename}
         `;
       }
