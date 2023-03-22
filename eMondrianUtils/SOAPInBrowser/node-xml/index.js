@@ -1,5 +1,5 @@
 var whitespace = "\n\r\t ";
-var iRet, theatts, splits, nameobject, that, theattsandnamespace;
+var iRet, theatts, splits, nameobject, that, theattsandnamespace, strEnt;
 
 //XMLP is a pull-based parser. The calling application passes in a XML string
 //to the constructor, then repeatedly calls .next() to parse the next segment.
