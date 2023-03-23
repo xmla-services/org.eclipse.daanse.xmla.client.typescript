@@ -1,7 +1,7 @@
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { optionalArrayToArray } from "@/utils/helpers";
-import { provide, ref, watch } from "vue";
+import { onMounted, provide, ref, watch } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -55,31 +55,31 @@ export default {
       const parentLevel = treeViewStore.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME &&
-          e.LEVEL_NUMBER === (member.LNum - 1).toString()
+          e.LEVEL_NUMBER === (Math.max(parseInt(member.LNum) - 1, 0)).toString()
         );
       });
 
       if (parentLevel) {
-        appSettings.loading = true;
+        const loadingId = appSettings.setLoadingState();
         const parentMember = await api.getMember(
           parentLevel,
           member.PARENT_UNIQUE_NAME
         );
-        appSettings.loading = false;
+        appSettings.removeLoadingState(loadingId);
 
         const requestParentLevel = treeViewStore.levels.find((e) => {
           return (
             e.HIERARCHY_UNIQUE_NAME === parentMember.HIERARCHY_UNIQUE_NAME &&
             e.LEVEL_NUMBER ===
-              (parseInt(parentMember.LEVEL_NUMBER) - 1).toString()
+              (Math.max(parseInt(parentMember.LEVEL_NUMBER) - 1, 0)).toString()
           );
         });
-
         if (requestParentLevel) {
           const createdMember = {
             UName: parentMember.PARENT_UNIQUE_NAME,
             LName: requestParentLevel.LEVEL_UNIQUE_NAME,
             HIERARCHY_UNIQUE_NAME: requestParentLevel.HIERARCHY_UNIQUE_NAME,
+            LNum: requestParentLevel.LEVEL_NUMBER,
           };
           if (area === "rows") {
             pivotTableStore.drilldownOnRows(createdMember);
@@ -91,8 +91,7 @@ export default {
     });
 
     const getPivotTableData = async () => {
-      appSettings.loading = true;
-
+      const loadingId = appSettings.setLoadingState();
       const mdx = pivotTableStore.mdx;
 
       const mdxResponce = await api.getMDX(mdx);
@@ -116,7 +115,7 @@ export default {
       });
       cells.value = parseCells(cellsArray, columns.value, rows.value);
 
-      appSettings.loading = false;
+      appSettings.removeLoadingState(loadingId);
     };
 
     function parseCells(cells: any[], columns: any[], rows: any[]) {
@@ -138,6 +137,10 @@ export default {
     }
 
     watch(mdx, async () => {
+      await getPivotTableData();
+    });
+
+    onMounted(async () => {
       await getPivotTableData();
     });
 
@@ -195,8 +198,6 @@ export default {
         },
         { items: [], totalWidth: 0 }
       );
-      console.log(this.columns, xAxisDesc);
-      console.log(this.rows, yAxisDesc);
       return 0;
     },
   },

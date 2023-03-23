@@ -3,6 +3,7 @@ import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 
 defineEmits(["drilldown", "drillup"]);
+defineProps(["drillupDisabled"]);
 
 const opened = ref(false);
 const eventBus = inject("eventBus") as TinyEmitter;
@@ -44,6 +45,7 @@ watch(opened, () => {
           Drilldown
         </va-button>
         <va-button
+          v-if="!drillupDisabled"
           preset="plain"
           class="dropdown_button"
           text-color="#000"
