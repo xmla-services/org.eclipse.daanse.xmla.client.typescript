@@ -114,10 +114,28 @@ export default {
       rows.value = axis1.map((e: { Member: any }) => {
         return optionalArrayToArray(e.Member);
       });
-      cells.value = [...cellsArray];
+      cells.value = parseCells(cellsArray, columns.value, rows.value);
 
       appSettings.loading = false;
     };
+
+    function parseCells(cells: any[], columns: any[], rows: any[]) {
+      if (!cells.length) return [];
+      if (!rows.length || !columns.length) {
+        if (rows.length === columns.length) {
+          return [cells];
+        }
+        return [];
+      }
+      const cp = [...cells] as any[];
+
+      const columnsArray = [] as any[];
+      const count = columns.length;
+      while (cp.length) {
+        columnsArray.push(cp.splice(0, count));
+      }
+      return columnsArray;
+    }
 
     watch(mdx, async () => {
       await getPivotTableData();
@@ -137,23 +155,6 @@ export default {
   computed: {
     columnsOffset() {
       return this.rows?.[0]?.length * DEFAULT_COLUMN_WIDTH;
-    },
-    cellsParsed() {
-      if (!this.cells.length) return;
-      if (!this.rows.length || !this.columns.length) {
-        if (this.rows.length === this.columns.length) {
-          return [this.cells];
-        }
-        return [];
-      }
-      const cp = [...this.cells];
-
-      const columnsArray = [];
-      const count = this.columns.length;
-      while (cp.length) {
-        columnsArray.push(cp.splice(0, count));
-      }
-      return columnsArray;
     },
     totalContentHeight() {
       const xAxisDesc = this.columns.reduce(
@@ -237,7 +238,7 @@ export default {
         <CellsArea
           :rowsStyles="rowsStyles"
           :colsStyles="colStyles"
-          :cells="cellsParsed"
+          :cells="cells"
         ></CellsArea>
       </div>
     </div>
