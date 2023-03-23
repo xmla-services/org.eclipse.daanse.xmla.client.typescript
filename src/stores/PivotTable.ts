@@ -53,22 +53,32 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
       }
     );
-    if (sameHierarchyIndex >= 0) {
-      state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
+    if (member.LNum === "0") {
+      state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1);
     } else {
-      state.value.rowsDrilldownMembers.push(member);
+      if (sameHierarchyIndex >= 0) {
+        state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
+      } else {
+        state.value.rowsDrilldownMembers.push(member);
+      }
     }
   };
   const drilldownOnColumns = (member: any) => {
+    console.log(member);
     const sameHierarchyIndex = state.value.columnsDrilldownMembers.findIndex(
       (e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
       }
     );
-    if (sameHierarchyIndex >= 0) {
-      state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
+    if (member.LNum === "0") {
+      console.log("flushed");
+      state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1);
     } else {
-      state.value.columnsDrilldownMembers.push(member);
+      if (sameHierarchyIndex >= 0) {
+        state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
+      } else {
+        state.value.columnsDrilldownMembers.push(member);
+      }
     }
   };
 

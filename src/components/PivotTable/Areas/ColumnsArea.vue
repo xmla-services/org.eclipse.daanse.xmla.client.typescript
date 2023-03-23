@@ -39,7 +39,6 @@ watch(
   () => {
     for (let i = 0; i < props.columns[0]?.length; i++) {
       for (let j = 0; j < props.columns.length; j++) {
-        console.log(props.columns[j][i]);
         const level = parseInt(props.columns[j][i].LNum);
         if (maxLevels[i] || 0 <= level) {
           maxLevels[i] = level;
@@ -55,7 +54,6 @@ const getColumnMemberStyle = (i: number, j: number) => {
 
   const styles = {} as { [key: string]: string };
   styles["padding-top"] = `${currentMember.LNum * 5 + 5}px`;
-  console.log(maxLevels);
   styles["height"] = `${30 + maxLevels[j] * 5}px`;
 
   if (!currentMember || !nextMember) return styles;
@@ -133,6 +131,7 @@ eventBus.on("scroll", ({ left }: { left: number }) => {
         <MemberDropdown
           v-for="(member, j) in column"
           :key="member.UNAME"
+          :drillupDisabled="member.LNum === '0'"
           @drilldown="drilldown(member)"
           @drillup="drillup(member)"
         >

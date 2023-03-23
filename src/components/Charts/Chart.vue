@@ -2,7 +2,7 @@
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { optionalArrayToArray } from "@/utils/helpers";
-import { defineComponent, watch, ref } from "vue";
+import { defineComponent, watch, ref, onMounted } from "vue";
 import { Bar } from 'vue-chartjs'
 //@ts-ignore
 import autocolors from 'chartjs-plugin-autocolors';
@@ -32,7 +32,7 @@ export default defineComponent({
     const plugins = [autocolors];
 
     const getData = async () => {
-      appSettings.loading = true;
+      const loadingId = appSettings.setLoadingState();
 
       const mdx = pivotTableStore.mdx;
       const mdxResponce = await api.getMDX(mdx);
@@ -65,8 +65,7 @@ export default defineComponent({
       });
       
       labels.value = columns.value.map(e=>e.map(f=>f.Caption).join('/'));
-
-      appSettings.loading = false;
+      appSettings.removeLoadingState(loadingId);
     };
 
     function parseCells(cells: any[], columns: any[], rows: any[]) {
@@ -88,6 +87,10 @@ export default defineComponent({
     }
 
     watch(mdx, async () => {
+      await getData();
+    });
+
+    onMounted(async () => {
       await getData();
     });
 
