@@ -35,6 +35,9 @@ import {
   VaChip,
   VaIcon,
   VaCheckbox,
+  VaDropdown,
+  VaDropdownContent,
+  VaButtonGroup,
 } from "vuestic-ui";
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";
@@ -68,6 +71,9 @@ app.use(
       VaChip,
       VaIcon,
       VaCheckbox,
+      VaDropdown,
+      VaDropdownContent,
+      VaButtonGroup,
     },
   })
 );
