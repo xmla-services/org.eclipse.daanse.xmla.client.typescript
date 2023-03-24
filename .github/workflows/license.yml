@@ -1,6 +1,10 @@
 name: license
 
-on: workflow_dispatch
+on:
+  pull_request:
+    branches:
+      [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
