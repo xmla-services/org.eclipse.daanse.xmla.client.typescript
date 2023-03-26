@@ -34,15 +34,13 @@ import {
   VaProgressCircle,
   VaChip,
   VaIcon,
-  VaCheckbox,
-  VaDropdown,
-  VaDropdownContent,
-  VaButtonGroup,
+  VaCheckbox
 } from "vuestic-ui";
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";
 import "vuestic-ui/styles/reset.css";
 import "vuestic-ui/styles/typography.css";
+import './scss/mainLayout.scss';
 
 const app = createApp(App);
 
@@ -52,30 +50,35 @@ app.use(pinia);
 // app.use(router)
 
 app.use(
-  createVuesticEssential({
-    components: {
-      VaButton,
-      VaSplit,
-      VaImage,
-      VaModal,
-      VaCardTitle,
-      VaCardContent,
-      VaCardActions,
-      VaInput,
-      VaNavbar,
-      VaNavbarItem,
-      VaOptionList,
-      VaSelect,
-      VaTreeView,
-      VaProgressCircle,
-      VaChip,
-      VaIcon,
-      VaCheckbox,
-      VaDropdown,
-      VaDropdownContent,
-      VaButtonGroup,
-    },
-  })
+    createVuesticEssential({
+        components: {
+            VaButton,
+            VaSplit,
+            VaImage,
+            VaModal,
+            VaCardTitle,
+            VaCardContent,
+            VaCardActions,
+            VaInput,
+            VaNavbar,
+            VaNavbarItem,
+            VaOptionList,
+            VaSelect,
+            VaTreeView,
+            VaProgressCircle,
+            VaChip,
+            VaIcon,
+            VaCheckbox
+        },
+        config: {
+            colors: {
+                variables: {
+                    primary: "#133370",
+                    warning: "#F49423"
+                },
+            },
+        },
+    })
 );
 
 app.mount("#app");

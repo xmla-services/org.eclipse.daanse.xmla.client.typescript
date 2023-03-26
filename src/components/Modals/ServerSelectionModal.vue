@@ -41,7 +41,7 @@ export default {
         />
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok" color="warning">Ok!</va-button>
+        <va-button @click="ok">Ok!</va-button>
       </va-card-actions>
     </template>
   </va-modal>

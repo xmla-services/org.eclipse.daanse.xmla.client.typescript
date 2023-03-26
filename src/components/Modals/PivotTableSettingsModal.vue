@@ -40,7 +40,7 @@ export default {
         />
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok" color="warning">Save</va-button>
+        <va-button @click="ok" >Save</va-button>
       </va-card-actions>
     </template>
   </va-modal>

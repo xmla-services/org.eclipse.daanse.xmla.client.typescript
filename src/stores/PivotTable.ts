@@ -3,130 +3,51 @@ import { useAppSettingsStore } from "./AppSettings";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { ref, watch } from "vue";
 import { useTreeViewDataStore } from "./TreeView";
-import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
 
 export const usePivotTableStore = defineStore("PivotTable", () => {
-  const queryDesignerStore = useQueryDesignerStore();
-  const appSettings = useAppSettingsStore();
-  const treeViewStore = useTreeViewDataStore();
-
   const state = ref({
+    rows: [],
+    columns: [],
+    cells: [],
+    rowsStyles: [],
+    columnStyles: [],
     settings: ref({
       showEmpty: true,
     }),
-    styles: {
-      rows: [] as number[],
-      columns: [],
-    },
-    rowsDrilldownMembers: [] as any,
-    columnsDrilldownMembers: [] as any,
     inited: false,
   });
 
-  const mdx = ref("");
+  const fetchPivotTableData = async () => {
+    const appSettings = useAppSettingsStore();
+    const queryDesignerStore = useQueryDesignerStore();
+    const treeViewStore = useTreeViewDataStore();
 
-  function getMDX() {
+    const api = appSettings.getApi();
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
     const pivotTableSettings = state.value.settings;
 
-    const mdxRequest = getMdxRequest(
-      appSettings.selectedCube,
-      state.value.rowsDrilldownMembers,
-      state.value.columnsDrilldownMembers,
-      rows,
-      columns,
-      pivotTableSettings,
-      treeViewStore.properties
-    );
+    appSettings.loading = true;
+    const [tableData] = await Promise.all([
+      await api.getPivotTableData(
+        appSettings.selectedCube,
+        rows,
+        columns,
+        pivotTableSettings,
+        treeViewStore.properties
+      ),
+    ]);
 
-    mdx.value = mdxRequest;
-  }
+    state.value.rows = tableData.axis0;
+    state.value.columns = tableData.axis1;
+    state.value.cells = tableData.cells;
 
-  const fetchPivotTableData = () => {
-    getMDX();
+    appSettings.loading = false;
   };
 
-  const drilldownOnRows = (member: any) => {
-    const sameHierarchyIndex = state.value.rowsDrilldownMembers.findIndex(
-      (e: any) => {
-        return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-      }
-    );
-    if (member.LNum === "0") {
-      state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1);
-    } else {
-      if (sameHierarchyIndex >= 0) {
-        state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
-      } else {
-        state.value.rowsDrilldownMembers.push(member);
-      }
-    }
-  };
-  const drilldownOnColumns = (member: any) => {
-    console.log(member);
-    const sameHierarchyIndex = state.value.columnsDrilldownMembers.findIndex(
-      (e: any) => {
-        return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-      }
-    );
-    if (member.LNum === "0") {
-      console.log("flushed");
-      state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1);
-    } else {
-      if (sameHierarchyIndex >= 0) {
-        state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1, member);
-      } else {
-        state.value.columnsDrilldownMembers.push(member);
-      }
-    }
-  };
-
-  const flushDrilldowns = () => {
-    const columns = queryDesignerStore.columns;
-    const notUsedHierarchiesInDrilldownCols =
-      state.value.columnsDrilldownMembers.filter((e: any) => {
-        return !columns.some((member) => {
-          return (
-            member.originalItem.HIERARCHY_UNIQUE_NAME ===
-            e.HIERARCHY_UNIQUE_NAME
-          );
-        });
-      });
-
-    notUsedHierarchiesInDrilldownCols.forEach((member: any) => {
-      const itemIndex = state.value.columnsDrilldownMembers.findIndex(
-        (e: any) => {
-          return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-        }
-      );
-
-      state.value.columnsDrilldownMembers.splice(itemIndex, 1);
-    });
-
-    const rows = queryDesignerStore.rows;
-    const notUsedHierarchiesInDrilldownRows =
-      state.value.rowsDrilldownMembers.filter((e: any) => {
-        return !rows.some((member) => {
-          return (
-            member.originalItem.HIERARCHY_UNIQUE_NAME ===
-            e.HIERARCHY_UNIQUE_NAME
-          );
-        });
-      });
-
-    notUsedHierarchiesInDrilldownRows.forEach((member: any) => {
-      const itemIndex = state.value.rowsDrilldownMembers.findIndex((e: any) => {
-        return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-      });
-
-      state.value.rowsDrilldownMembers.splice(itemIndex, 1);
-    });
-  };
-
+  const queryDesignerStore = useQueryDesignerStore();
   queryDesignerStore.$subscribe(
     () => {
-      flushDrilldowns();
       fetchPivotTableData();
     },
     { detached: true, immediate: false }
@@ -134,23 +55,8 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
 
   watch(
     state.value.settings,
-    () => {
-      fetchPivotTableData();
-    },
-    { deep: true }
-  );
-
-  watch(
-    state.value.rowsDrilldownMembers,
-    () => {
-      fetchPivotTableData();
-    },
-    { deep: true }
-  );
-  watch(
-    state.value.columnsDrilldownMembers,
-    () => {
-      fetchPivotTableData();
+    async () => {
+      await fetchPivotTableData();
     },
     { deep: true }
   );
@@ -158,8 +64,5 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
   return {
     state,
     fetchPivotTableData,
-    drilldownOnRows,
-    drilldownOnColumns,
-    mdx,
   };
 });

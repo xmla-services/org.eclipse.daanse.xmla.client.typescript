@@ -1,207 +1,195 @@
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
+import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { optionalArrayToArray } from "@/utils/helpers";
-import { onMounted, provide, ref, watch } from "vue";
-import { TinyEmitter } from "tiny-emitter";
-import RowsArea from "./Areas/RowsArea.vue";
-import ColumnsArea from "./Areas/ColumnsArea.vue";
-import CellsArea from "./Areas/CellsArea.vue";
-import { useAppSettingsStore } from "@/stores/AppSettings";
-import { storeToRefs } from "pinia";
-import { useTreeViewDataStore } from "@/stores/TreeView";
+import { ref } from "vue";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 
-const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
-
 export default {
   setup() {
+    const queryDesignerStore = useQueryDesignerStore();
     const pivotTableStore = usePivotTableStore();
-    const { mdx } = storeToRefs(pivotTableStore);
-    const appSettings = useAppSettingsStore();
-    const api = appSettings.getApi();
-    const treeViewStore = useTreeViewDataStore();
+    const resizeInProg = ref(false);
 
-    const colStyles = ref([...pivotTableStore.state.styles.columns] as any[]);
-    const rowsStyles = ref([...pivotTableStore.state.styles.rows] as any[]);
-
-    const eventBus = new TinyEmitter();
-    provide("eventBus", eventBus);
+    const colStyles = ref([] as any[]);
+    const rowStyles = ref([] as any[]);
+    const itemResized = ref(null as any);
 
     pivotTableStore.state.inited = true;
 
-    const setRowsStyles = (i: number, styles: number) => {
-      rowsStyles.value[i] = styles;
-    };
-    const setColumnsStyles = (i: number, styles: number) => {
-      colStyles.value[i] = styles;
-    };
-
-    const rows = ref([] as any[]);
-    const columns = ref([] as any[]);
-    const cells = ref([] as any[]);
-
-    provide("setRowsStyles", setRowsStyles);
-    provide("setColumnsStyles", setColumnsStyles);
-    provide("drilldown", (member: any, area: "columns" | "rows") => {
-      if (area === "rows") {
-        pivotTableStore.drilldownOnRows(member);
-      } else if (area === "columns") {
-        pivotTableStore.drilldownOnColumns(member);
-      }
-    });
-    provide("drillup", async (member: any, area: "columns" | "rows") => {
-      const parentLevel = treeViewStore.levels.find((e) => {
-        return (
-          e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME &&
-          e.LEVEL_NUMBER === (Math.max(parseInt(member.LNum) - 1, 0)).toString()
-        );
-      });
-
-      if (parentLevel) {
-        const loadingId = appSettings.setLoadingState();
-        const parentMember = await api.getMember(
-          parentLevel,
-          member.PARENT_UNIQUE_NAME
-        );
-        appSettings.removeLoadingState(loadingId);
-
-        const requestParentLevel = treeViewStore.levels.find((e) => {
-          return (
-            e.HIERARCHY_UNIQUE_NAME === parentMember.HIERARCHY_UNIQUE_NAME &&
-            e.LEVEL_NUMBER ===
-              (Math.max(parseInt(parentMember.LEVEL_NUMBER) - 1, 0)).toString()
-          );
-        });
-        if (requestParentLevel) {
-          const createdMember = {
-            UName: parentMember.PARENT_UNIQUE_NAME,
-            LName: requestParentLevel.LEVEL_UNIQUE_NAME,
-            HIERARCHY_UNIQUE_NAME: requestParentLevel.HIERARCHY_UNIQUE_NAME,
-            LNum: requestParentLevel.LEVEL_NUMBER,
-          };
-          if (area === "rows") {
-            pivotTableStore.drilldownOnRows(createdMember);
-          } else if (area === "columns") {
-            pivotTableStore.drilldownOnColumns(createdMember);
-          }
-        }
-      }
-    });
-
-    const getPivotTableData = async () => {
-      const loadingId = appSettings.setLoadingState();
-      const mdx = pivotTableStore.mdx;
-
-      const mdxResponce = await api.getMDX(mdx);
-      const axis0 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-          ?.Tuple
-      );
-      const axis1 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-          ?.Tuple
-      );
-      const cellsArray = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
-      );
-
-      columns.value = axis0.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      rows.value = axis1.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      cells.value = parseCells(cellsArray, columns.value, rows.value);
-
-      appSettings.removeLoadingState(loadingId);
-    };
-
-    function parseCells(cells: any[], columns: any[], rows: any[]) {
-      if (!cells.length) return [];
-      if (!rows.length || !columns.length) {
-        if (rows.length === columns.length) {
-          return [cells];
-        }
-        return [];
-      }
-      const cp = [...cells] as any[];
-
-      const columnsArray = [] as any[];
-      const count = columns.length;
-      while (cp.length) {
-        columnsArray.push(cp.splice(0, count));
-      }
-      return columnsArray;
-    }
-
-    watch(mdx, async () => {
-      await getPivotTableData();
-    });
-
-    onMounted(async () => {
-      await getPivotTableData();
-    });
-
     return {
       pivotTableStore,
+      queryDesignerStore,
+      resizeInProg,
       colStyles,
-      rowsStyles,
-      eventBus,
-      DEFAULT_ROW_HEIGHT_CSS,
-      cells,
-      rows,
-      columns,
+      rowStyles,
+      itemResized,
+      DEFAULT_ROW_HEIGHT: `${DEFAULT_ROW_HEIGHT}px`,
+      DEFAULT_COLUMN_WIDTH: `${DEFAULT_COLUMN_WIDTH}px`,
     };
   },
   computed: {
-    columnsOffset() {
-      return this.rows?.[0]?.length * DEFAULT_COLUMN_WIDTH;
+    columns() {
+      const cols = this.pivotTableStore.state.columns.map(
+        (e: { Member: any }) => {
+          return optionalArrayToArray(e.Member);
+        }
+      );
+
+      return cols;
+    },
+    rows() {
+      const rows = this.pivotTableStore.state.rows.map((e: { Member: any }) => {
+        return optionalArrayToArray(e.Member);
+      });
+
+      return rows;
+      // return this.pivotTableStore.rows;
+    },
+    cellsParsed() {
+      if (!this.pivotTableStore.state.cells.length) return;
+      if (
+        !this.pivotTableStore.state.rows.length ||
+        !this.pivotTableStore.state.columns.length
+      ) {
+        if (
+          this.pivotTableStore.state.rows.length ===
+          this.pivotTableStore.state.columns.length
+        ) {
+          return [this.pivotTableStore.state.cells];
+        }
+        return [];
+      }
+
+      const cp = [...this.pivotTableStore.state.cells];
+      const result = [] as any[][];
+      const colsArray = [];
+      const count = this.pivotTableStore.state.rows.length;
+
+      while (cp.length) {
+        colsArray.push(cp.splice(0, count));
+      }
+
+      for (let j = 0; j < colsArray[0].length; j++) {
+        const tmp = [] as any[];
+        for (let i = 0; i < colsArray.length; i++) {
+          tmp.push(colsArray[i][j]);
+        }
+
+        result.push(tmp);
+      }
+
+      return result;
     },
     totalContentHeight() {
       const xAxisDesc = this.columns.reduce(
-        (
-          acc: {
-            items: any[];
-            totalWidth: number;
-          },
-          _: any,
-          i: number
-        ) => {
+        (acc: { items: any[]; totalWidth: number }, _: any, i: number) => {
           acc.items[i] = {
             start: acc.totalWidth,
             width: this.colStyles[i] || DEFAULT_COLUMN_WIDTH,
           };
           acc.totalWidth =
             acc.totalWidth + (this.colStyles[i] || DEFAULT_COLUMN_WIDTH);
+
           return acc;
         },
         { items: [], totalWidth: 0 }
       );
       const yAxisDesc = this.rows.reduce(
-        (
-          acc: {
-            items: any[];
-            totalWidth: number;
-          },
-          _: any,
-          i: number
-        ) => {
+        (acc: { items: any[]; totalWidth: number }, _: any, i: number) => {
           acc.items[i] = {
             start: acc.totalWidth,
-            width: this.rowsStyles[i] || DEFAULT_ROW_HEIGHT,
+            width: this.rowStyles[i] || DEFAULT_ROW_HEIGHT,
           };
           acc.totalWidth =
-            acc.totalWidth + (this.rowsStyles[i] || DEFAULT_ROW_HEIGHT);
+            acc.totalWidth + (this.rowStyles[i] || DEFAULT_ROW_HEIGHT);
+
           return acc;
         },
         { items: [], totalWidth: 0 }
       );
+
+      console.log(this.columns, xAxisDesc);
+      console.log(this.rows, yAxisDesc);
       return 0;
     },
   },
   methods: {
+    getColumnMemberStyle(i: number, j: number) {
+      const currentMember = this.columns?.[i]?.[j];
+      const nextMember = this.columns?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return;
+
+      if (currentMember.UName === nextMember.UName) {
+        return {
+          "border-left": "none",
+        };
+      }
+      return {};
+    },
+    getColumnMemberCaption(i: number, j: number) {
+      const currentMember = this.columns?.[i]?.[j];
+      const nextMember = this.columns?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return currentMember.Caption;
+
+      if (currentMember.UName === nextMember.UName) {
+        return "";
+      }
+      return currentMember.Caption;
+    },
+    getRowMemberStyle(i: number, j: number) {
+      const currentMember = this.rows?.[i]?.[j];
+      const nextMember = this.rows?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return;
+
+      if (currentMember.UName === nextMember.UName) {
+        return {
+          "border-top": "none",
+        };
+      }
+      return {};
+    },
+    getRowMemberCaption(i: number, j: number) {
+      const currentMember = this.rows?.[i]?.[j];
+      const nextMember = this.rows?.[i - 1]?.[j];
+
+      if (!currentMember || !nextMember) return currentMember.Caption;
+
+      if (currentMember.UName === nextMember.UName) {
+        return "";
+      }
+      return currentMember.Caption;
+    },
+    getColumnHeaderOffsetStyle() {
+      return {
+        "margin-left": `${this.rows?.[0]?.length * DEFAULT_COLUMN_WIDTH}px`,
+      };
+    },
+    getColumnHeaderStyle(i: number) {
+      return {
+        width: `${this.colStyles[i] || DEFAULT_COLUMN_WIDTH}px`,
+      };
+    },
+    getRowHeaderStyle(i: number) {
+      return {
+        height: `${this.rowStyles[i] || DEFAULT_ROW_HEIGHT}px`,
+      };
+    },
+    getCellValue(cell: any) {
+      if (typeof cell.FmtValue === "string") return cell.FmtValue;
+      return "";
+    },
+    getCellStyle(i: number, j: number) {
+      return {
+        width: `${this.colStyles[i] || DEFAULT_COLUMN_WIDTH}px`,
+        height: `${this.rowStyles[j] || DEFAULT_ROW_HEIGHT}px`,
+      };
+    },
     handleScroll(e: any) {
       (
         this.$refs.rowsContainer as HTMLElement
@@ -211,13 +199,29 @@ export default {
       ).style.transform = `translateX(-${e.target.scrollLeft}px)`;
     },
     onResize(e: MouseEvent) {
-      this.eventBus.emit("onResize", e);
+      if (this.resizeInProg) {
+        const index = this.itemResized.index;
+        if (this.itemResized.area === "columns") {
+          this.colStyles[index] =
+            (this.colStyles[index] || DEFAULT_COLUMN_WIDTH) + e.movementX;
+        } else if (this.itemResized.area === "rows") {
+          this.rowStyles[index] =
+            (this.rowStyles[index] || DEFAULT_ROW_HEIGHT) + e.movementY;
+        }
+      }
+    },
+    onStartResize(e: any, i: number, area: "columns" | "rows") {
+      this.resizeInProg = true;
+      this.itemResized = {
+        area,
+        index: i,
+      };
     },
     onStopResize() {
-      this.eventBus.emit("onStopResize");
+      this.resizeInProg = false;
+      // Save changes to store
     },
   },
-  components: { RowsArea, ColumnsArea, CellsArea },
 };
 </script>
 
@@ -228,19 +232,79 @@ export default {
     @mouseup="onStopResize"
     @mouseleave="onStopResize"
   >
+    <!-- {{ queryDesignerStore.queryModel }} -->
     <div class="pivotTable">
-      <ColumnsArea
-        :columnsStyles="colStyles"
-        :columnsOffset="columnsOffset"
-        :columns="columns"
-      ></ColumnsArea>
+      <div class="columnHeader_container" :style="getColumnHeaderOffsetStyle()">
+        <div
+          ref="columnsContainer"
+          class="columnScroller"
+          :style="getColumnHeaderStyle"
+        >
+          <div
+            class="columnHeader"
+            v-for="(column, i) in columns"
+            :key="i"
+            :style="getColumnHeaderStyle(i)"
+          >
+            <div
+              v-if="i > 0"
+              class="col_dragAreaLeft"
+              @mousedown="onStartResize($event, i - 1, 'columns')"
+            ></div>
+            <div
+              v-for="(member, j) in column"
+              :key="member.UNAME"
+              class="columnMember"
+              :style="getColumnMemberStyle(i, j)"
+            >
+              {{ getColumnMemberCaption(i, j) }}
+            </div>
+            <div
+              class="col_dragAreaRight"
+              @mousedown="onStartResize($event, i, 'columns')"
+            ></div>
+          </div>
+        </div>
+      </div>
       <div class="d-flex flex-row overflow-hidden">
-        <RowsArea :rows="rows" :rowsStyles="rowsStyles"></RowsArea>
-        <CellsArea
-          :rowsStyles="rowsStyles"
-          :colsStyles="colStyles"
-          :cells="cells"
-        ></CellsArea>
+        <div class="rowsHeader_container" ref="rowsContainer">
+          <div
+            class="rowsHeader"
+            v-for="(row, i) in rows"
+            :key="i"
+            :style="getRowHeaderStyle(i)"
+          >
+            <div
+              v-if="i > 0"
+              class="row_dragAreaTop"
+              @mousedown="onStartResize($event, i - 1, 'rows')"
+            ></div>
+            <div
+              v-for="(member, j) in row"
+              :key="member.UNAME"
+              class="rowMember"
+              :style="getRowMemberStyle(i, j)"
+            >
+              {{ getRowMemberCaption(i, j) }}
+            </div>
+            <div
+              class="row_dragAreaBottom"
+              @mousedown="onStartResize($event, i, 'rows')"
+            ></div>
+          </div>
+        </div>
+        <div class="cells_container" @scroll="handleScroll">
+          <div class="cell_row" v-for="(cellRow, j) in cellsParsed" :key="j">
+            <div
+              class="cell"
+              v-for="(cell, i) in cellRow"
+              :key="`${i}_${j}`"
+              :style="getCellStyle(i, j)"
+            >
+              {{ getCellValue(cell) }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -248,7 +312,7 @@ export default {
 
 <style lang="scss">
 .pivotTable_container {
-  padding: v-bind(DEFAULT_ROW_HEIGHT_CSS);
+  padding: v-bind(DEFAULT_ROW_HEIGHT);
   height: 100%;
 }
 .pivotTable {
@@ -256,5 +320,132 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.columnHeader_container {
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.columnScroller {
+  display: flex;
+}
+
+.columnHeader {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  line-height: v-bind(DEFAULT_ROW_HEIGHT);
+  position: relative;
+}
+
+.columnHeader:last-child {
+  border-right: 1px silver solid;
+}
+
+.columnMember {
+  border-top: 1px silver solid;
+  padding-left: 3px;
+  font-weight: 600;
+  height: v-bind(DEFAULT_ROW_HEIGHT);
+  border-left: 1px silver solid;
+}
+
+.col_dragAreaLeft {
+  position: absolute;
+  height: 100%;
+  width: 5px;
+  left: 0;
+  top: 0;
+  cursor: ew-resize;
+  z-index: 1;
+}
+
+.col_dragAreaRight {
+  position: absolute;
+  height: 100%;
+  width: 5px;
+  right: -1px;
+  top: 0;
+  cursor: ew-resize;
+  z-index: 1;
+}
+
+.rowsHeader:last-child {
+  border-bottom: 1px silver solid;
+}
+
+.rowsHeader {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-right: 0;
+  border-left: 0;
+  height: v-bind(DEFAULT_ROW_HEIGHT);
+  line-height: v-bind(DEFAULT_ROW_HEIGHT);
+}
+
+.row_dragAreaTop {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  left: 0;
+  top: 0;
+  cursor: ns-resize;
+  z-index: 1;
+}
+
+.row_dragAreaBottom {
+  position: absolute;
+  height: 5px;
+  width: 100%;
+  bottom: -1px;
+  left: 0;
+  cursor: ns-resize;
+  z-index: 1;
+}
+
+.rowMember {
+  width: 150px;
+  border-left: 1px silver solid;
+  border-top: 1px silver solid;
+  padding-left: 3px;
+  font-weight: 600;
+}
+
+.cells_container {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.cell_row {
+  display: flex;
+}
+
+.cell {
+  border: 1px silver solid;
+  border-right: 0;
+  border-bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  width: 150px;
+  height: v-bind(DEFAULT_ROW_HEIGHT);
+  line-height: v-bind(DEFAULT_ROW_HEIGHT);
+  padding-left: 3px;
+}
+
+.cell:last-child {
+  border-right: 1px silver solid;
+}
+
+.cell_row:last-child > .cell {
+  border-bottom: 1px silver solid;
 }
 </style>

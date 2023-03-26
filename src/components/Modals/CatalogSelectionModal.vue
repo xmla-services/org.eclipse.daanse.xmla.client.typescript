@@ -106,7 +106,7 @@ export default {
         <div class="mt-2 va-text-danger">{{ error }}</div>
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok" color="warning">Ok!</va-button>
+        <va-button @click="ok" >Ok!</va-button>
       </va-card-actions>
     </template>
   </va-modal>

@@ -35,8 +35,7 @@ declare interface MDSchemaLevel {
   LEVEL_NAME: string;
   LEVEL_UNIQUE_NAME: string;
   LEVEL_CAPTION: string;
-  LEVEL_NUMBER: string;
-  PARENT_UNIQUE_NAME: string;
+  LEVEL_NUMBER: number;
 }
 
 declare interface MDSchemaMeasureGroup {
@@ -84,10 +83,9 @@ declare interface MDSchemaMember {
   LEVEL_NAME: string;
   LEVEL_UNIQUE_NAME: string;
   LEVEL_CAPTION: string;
-  LEVEL_NUMBER: string;
+  LEVEL_NUMBER: number;
   MEMBER_NAME: string;
   MEMBER_UNIQUE_NAME: string;
   MEMBER_CAPTION: string;
   HAS_CHILDREN: boolean;
-  PARENT_UNIQUE_NAME: string;
 }

@@ -511,22 +511,6 @@ class XMLAApi {
         columnsPropertiesList = `,${columnsPropertiesList}`;
       if (rowsPropertiesList) rowsPropertiesList = `,${rowsPropertiesList}`;
 
-      // if (drillDownHistory.length === 1) {
-      //   if (pivotTableSettings.showEmpty) {
-      //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
-      //     SELECT NON EMPTY Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
-      //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
-      //     NON EMPTY Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
-      //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
-      //   } else {
-      //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
-      //     SELECT Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
-      //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
-      //     Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
-      //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
-      //   }
-      // }
-
       if (pivotTableSettings.showEmpty) {
         mdxRequest = `
             SELECT
@@ -542,7 +526,6 @@ class XMLAApi {
             FROM ${cubename}
         `;
       }
-      console.log(mdxRequest);
     } else {
       mdxRequest = `
           SELECT
@@ -568,42 +551,6 @@ class XMLAApi {
       axis1,
       cells,
     };
-  }
-
-  public async getMember(
-    level: MDSchemaLevel,
-    MEMBER_UNIQUE_NAME: string
-  ): Promise<MDSchemaMember> {
-    const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_MEMBERS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: level.CATALOG_NAME,
-          CUBE_NAME: level.CUBE_NAME,
-          DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
-          HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
-          LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
-          MEMBER_UNIQUE_NAME,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
-
-    const array = this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row
-    ) as MDSchemaMember[];
-
-    return array[0];
   }
 
   public async endSession(): Promise<void> {

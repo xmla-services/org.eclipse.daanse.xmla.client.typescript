@@ -1,10 +1,6 @@
 name: eclipse dash ip-check
 
-on:
-  pull_request:
-    branches:
-      [ "main" ]
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
@@ -21,5 +17,5 @@ jobs:
       - name: Download and run license-check
         run: |
               curl -L 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST' --output licence_tool.jar
-              java -jar licence_tool.jar yarn.lock
+              java -jar licence_tool.jar package-lock.json
                 

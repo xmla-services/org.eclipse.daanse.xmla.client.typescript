@@ -1,0 +1,41 @@
+
+
+
+// color palette - these colors will be the color swatches of the Colors section
+
+@import "general.scss";
+@import "colors.scss";
+
+// additional colors
+
+/* --------------------------------
+
+Texts
+
+-------------------------------- */
+@import "fonts.scss";
+@import "text.scss";
+
+/* --------------------------------
+
+Background
+
+-------------------------------- */
+
+@import "backgrounds.scss";
+
+
+/* --------------------------------
+
+Layouts
+
+-------------------------------- */
+@import "layout.scss";
+
+/* --------------------------------
+
+Logos
+
+-------------------------------- */
+@import "logo.scss";
+

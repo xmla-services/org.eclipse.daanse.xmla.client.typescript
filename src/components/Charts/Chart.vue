@@ -2,107 +2,98 @@
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { optionalArrayToArray } from "@/utils/helpers";
-import { defineComponent, watch, ref, onMounted } from "vue";
+import {defineComponent} from "vue";
 import { Bar } from 'vue-chartjs'
 //@ts-ignore
 import autocolors from 'chartjs-plugin-autocolors';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,Colors } from 'chart.js'
-import { storeToRefs } from "pinia";
-import { useAppSettingsStore } from "@/stores/AppSettings";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, autocolors)
 
 export default defineComponent({
   setup() {
-    // const queryDesignerStore = useQueryDesignerStore();
+    const queryDesignerStore = useQueryDesignerStore();
     const pivotTableStore = usePivotTableStore();
-    const { mdx } = storeToRefs(pivotTableStore);
-    const appSettings = useAppSettingsStore();
-    const api = appSettings.getApi();
 
-    const rows = ref([] as any[]);
-    const columns = ref([] as any[]);
-    const cells = ref([] as any[]);
-    const labels = ref([] as any[]);
-    const datasets = ref([] as any[]);
-
-    const chartOptions = {
-      responsive: true,
-    };
-    const plugins = [autocolors];
-
-    const getData = async () => {
-      const loadingId = appSettings.setLoadingState();
-
-      const mdx = pivotTableStore.mdx;
-      const mdxResponce = await api.getMDX(mdx);
-
-      const axis0 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-          ?.Tuple
-      );
-      const axis1 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-          ?.Tuple
-      );
-      const cellsArray = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
-      );
-
-      columns.value = axis0.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      rows.value = axis1.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      cells.value = parseCells(cellsArray, columns.value, rows.value);
-
-      datasets.value = rows.value.map((row,ind)=>{
-        return {
-          'label': row.map(e=>e.Caption).join('/'),
-          'data': cells.value![ind].map(v=>parseFloat(v.FmtValue))
-        }
-      });
-      
-      labels.value = columns.value.map(e=>e.map(f=>f.Caption).join('/'));
-      appSettings.removeLoadingState(loadingId);
-    };
-
-    function parseCells(cells: any[], columns: any[], rows: any[]) {
-      if (!cells.length) return [];
-      if (!rows.length || !columns.length) {
-        if (rows.length === columns.length) {
-          return [cells];
-        }
-        return [];
-      }
-      const cp = [...cells] as any[];
-
-      const columnsArray = [] as any[];
-      const count = columns.length;
-      while (cp.length) {
-        columnsArray.push(cp.splice(0, count));
-      }
-      return columnsArray;
-    }
-
-    watch(mdx, async () => {
-      await getData();
-    });
-
-    onMounted(async () => {
-      await getData();
-    });
-
+    queryDesignerStore.$subscribe(
+      () => {
+        pivotTableStore.fetchPivotTableData();
+      },
+      { detached: true }
+    );
     return {
-      labels,
-      datasets,
-      chartOptions,
-      plugins,
-    }
+      pivotTableStore,
+      queryDesignerStore,
+    };
   },
   components: { Bar },
   computed: {
+
+
+    columns() {
+      const cols = this.pivotTableStore.state.columns.map((e: { Member: any }) => {
+        return optionalArrayToArray(e.Member);
+      });
+
+      return cols;
+    },
+    labels(){
+      return this.columns.map(e=>e.map(f=>f.Caption).join('/'));
+    },
+
+    rows() {
+      const rows = this.pivotTableStore.state.rows.map((e: { Member: any }) => {
+        return optionalArrayToArray(e.Member);
+      });
+
+      return rows;
+      // return this.pivotTableStore.rows;
+    },
+
+
+    cellsParsed() {
+      if (!this.pivotTableStore.state.cells.length) return;
+      if (
+        !this.pivotTableStore.state.rows.length ||
+        !this.pivotTableStore.state.columns.length
+      ) {
+        if (
+          this.pivotTableStore.state.rows.length ===
+          this.pivotTableStore.state.columns.length
+        ) {
+          return [this.pivotTableStore.state.cells];
+        }
+        return [];
+      }
+
+      const cp = [...this.pivotTableStore.state.cells];
+      const result = [] as any[][];
+      const colsArray = [];
+      const count = this.pivotTableStore.state.rows.length;
+
+      while (cp.length) {
+        colsArray.push(cp.splice(0, count));
+      }
+
+      for (let j = 0; j < colsArray[0].length; j++) {
+        const tmp = [] as any[];
+        for (let i = 0; i < colsArray.length; i++) {
+          tmp.push(colsArray[i][j]);
+        }
+
+        result.push(tmp);
+      }
+
+      return result;
+    },
+    datasets(){
+      return this.rows.map((row,ind)=>{
+        return {
+          'label':  row.map(e=>e.Caption).join('/'),
+          'data': this.cellsParsed![ind].map(v=>parseFloat(v.FmtValue))
+        }
+      })
+    },
     chartData(){
       return {
         labels: this.labels,
@@ -117,6 +108,19 @@ export default defineComponent({
       }
     }
   },
+
+  mounted(){
+  },
+  data() {
+    return {
+
+      chartOptions: {
+        responsive: true
+      },
+      plugins:[autocolors]
+    }
+  }
+
 });
 </script>
 
