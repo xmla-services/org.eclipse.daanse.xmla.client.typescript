@@ -1,3 +1,13 @@
+/*
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+  SPDX-License-Identifier: EPL-2.0
+
+  Contributors:
+
+*/
 import { BasicAuthSecurity, createClient } from '../src/soap'
 import { assert, expect, test } from 'vitest'
 
@@ -17,7 +27,7 @@ test('Encode credentials', () => {
 
 test('Create client', async () => {
   const client = await clientPromise
-  
+
   expect(client).toBeDefined()
 })
 
@@ -45,7 +55,7 @@ test('Create session', async () => {
     }
   )
 
-  expect(createSessionResponce.Header.Session.__attrs.SessionId).toBeTypeOf('string')  
+  expect(createSessionResponce.Header.Session.__attrs.SessionId).toBeTypeOf('string')
   assert(createSessionResponce.Header.Session.__attrs.SessionId)
 })
 

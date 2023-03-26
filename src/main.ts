@@ -43,6 +43,7 @@ import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";
 import "vuestic-ui/styles/reset.css";
 import "vuestic-ui/styles/typography.css";
+import './scss/main.scss';
 
 const app = createApp(App);
 
@@ -74,6 +75,13 @@ app.use(
       VaDropdown,
       VaDropdownContent,
       VaButtonGroup,
+    },
+    config: {
+      colors: {
+        variables: {
+          primary: "#133370"
+        },
+      },
     },
   })
 );

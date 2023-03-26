@@ -1,0 +1,50 @@
+/*
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+  SPDX-License-Identifier: EPL-2.0
+
+  Contributors: Markus Hochstein
+
+*/
+
+
+// color palette - these colors will be the color swatches of the Colors section
+
+@import "general.scss";
+@import "colors.scss";
+
+// additional colors
+
+/* --------------------------------
+
+Texts
+
+-------------------------------- */
+@import "fonts.scss";
+@import "text.scss";
+
+/* --------------------------------
+
+Background
+
+-------------------------------- */
+
+@import "backgrounds.scss";
+
+
+/* --------------------------------
+
+Layouts
+
+-------------------------------- */
+@import "layout.scss";
+
+/* --------------------------------
+
+Logos
+
+-------------------------------- */
+@import "logo.scss";
+
