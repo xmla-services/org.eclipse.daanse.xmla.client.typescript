@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+-->
 <script setup lang="ts">
 import Navbar from "./NavBar.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
@@ -11,7 +21,7 @@ const getLeftWidth = () => {
 </script>
 
 <template>
-  <div class="app-layout-container">
+  <div class="app-layout-container bg grey overflow-hidden">
     <navbar></navbar>
     <div v-if="appSettings.cubeOpened" class="split-container">
       <va-split

@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Markus Hochstein
+
+-->
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
@@ -63,7 +73,7 @@ export default defineComponent({
           'data': cells.value![ind].map(v=>parseFloat(v.FmtValue))
         }
       });
-      
+
       labels.value = columns.value.map(e=>e.map(f=>f.Caption).join('/'));
       appSettings.removeLoadingState(loadingId);
     };

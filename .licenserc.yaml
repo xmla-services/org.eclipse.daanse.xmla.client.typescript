@@ -63,5 +63,7 @@ header:
     - 'vite.config.ts'
     - 'yarn.lock'
     - 'Docker/Dockerfile'
+    - 'src/generated/**'
+    - 'public/def/**'
 
   comment: always
