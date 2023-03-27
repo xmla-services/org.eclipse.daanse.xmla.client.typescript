@@ -6,6 +6,7 @@ import QuertyDesigner from "./components/QueryDesigner/QueryDesigner.vue";
 import PivotTable from "./components/PivotTable/PivotTable.vue";
 import Chart from "./components/Charts/Chart.vue";
 
+
 console.log("https://ssemenkoff.dev/emondrian/xmla");
 </script>
 

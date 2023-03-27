@@ -1,0 +1,17 @@
+<script lang="ts">import { defineComponent } from 'vue';
+export default defineComponent({});
+</script>
+<template>
+  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
+    <path class="st0" d="M0,0h16v16H0V0z"/>
+    <g class="stSecondary">
+      <rect x="4.25" y="11" class="st1" width="3" height="3"/>
+      <rect x="8.75" y="11" class="st1" width="3" height="3"/>
+      <rect x="8.75" y="6.5" class="st1" width="3" height="3"/>
+      <rect x="4.25" y="6.5" class="st1" width="3" height="3"/>
+      <rect x="4.25" y="2" class="st1" width="3" height="3"/>
+      <rect x="8.75" y="2" class="st1" width="3" height="3"/>
+    </g>
+  </svg>
+</template>

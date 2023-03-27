@@ -534,6 +534,7 @@ export const useTreeViewDataStore = defineStore("TreeViewData", {
           MEMBER_NAME: e.Member.UName,
           MEMBER_UNIQUE_NAME: e.Member.UName,
           HAS_CHILDREN: childCount > 0,
+          PARENT_UNIQUE_NAME: level.PARENT_UNIQUE_NAME,
         };
       });
       const treeViewMembers = parsedMembers.map((member: MDSchemaMember) => {
@@ -582,6 +583,7 @@ export const useTreeViewDataStore = defineStore("TreeViewData", {
           MEMBER_NAME: e.Member.UName,
           MEMBER_UNIQUE_NAME: e.Member.UName,
           HAS_CHILDREN: childCount > 0,
+          PARENT_UNIQUE_NAME: member.PARENT_UNIQUE_NAME,
         };
       });
       const treeViewMembers = parsedMembers.map((member: MDSchemaMember) => {

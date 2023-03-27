@@ -18,6 +18,7 @@ import App from "./App.vue";
 import "./assets/main.css";
 import {
   createVuesticEssential,
+  createIconsConfig,
   VaButton,
   VaSplit,
   VaImage,
@@ -51,8 +52,20 @@ pinia.use(SOAPClient);
 app.use(pinia);
 // app.use(router)
 
+const fonts = [{
+  name: 'mdi-{icon}',
+  resolve: ({ icon }) => ({
+    class: 'material-icons-outlined',
+    content: icon,
+    tag: 'span',
+  })
+}]
+
 app.use(
   createVuesticEssential({
+    config: {
+      icons: createIconsConfig({ fonts }),
+    },
     components: {
       VaButton,
       VaSplit,
