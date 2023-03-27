@@ -24,6 +24,7 @@ export enum TreeItemTypesEnum {
   Member,
   Loading,
   LoadMore,
+  MeasuresFolder,
 }
 
 export interface TreeItem {
@@ -56,6 +57,7 @@ export interface FolderTreeItem extends TreeItem {
 export interface LevelTreeItem extends TreeItem {
   type: TreeItemTypesEnum.Level;
   children: TreeItem[];
+  originalItem: MDSchemaLevel;
 }
 
 export interface SetsFolderTreeItem extends TreeItem {
@@ -143,6 +145,7 @@ export function getLevelDesc(level: MDSchemaLevel): LevelTreeItem {
     children: [],
     caption: level.LEVEL_CAPTION,
     id: `Dimension(${level.DIMENSION_UNIQUE_NAME})_Hierarchy(${level.HIERARCHY_UNIQUE_NAME})_Level(${level.LEVEL_UNIQUE_NAME})`,
+    originalItem: level,
   };
 }
 
