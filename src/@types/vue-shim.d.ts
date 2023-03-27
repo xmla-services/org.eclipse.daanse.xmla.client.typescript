@@ -8,7 +8,8 @@ SPDX-License-Identifier: EPL-2.0
 Contributors: Smart City Jena
 
 */
-declare module "*.xml" {
-  const doc: any; // Change this to an actual XML type
-  export default doc;
+
+declare module "*.vue" {
+  import Vue from 'vue'
+  export default Vue
 }

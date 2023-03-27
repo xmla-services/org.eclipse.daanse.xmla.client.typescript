@@ -14,13 +14,16 @@ import { useAppSettingsStore } from "@/stores/AppSettings";
 import { TreeItemTypesEnum } from "../../stores/TreeViewItems";
 import { ref } from "vue";
 import draggable from "vuedraggable";
+import XMLAIconVue from "@/icons/XMLAIcon.vue";
 
 export default {
   setup() {
     const store = useTreeViewDataStore();
     const appSettings = useAppSettingsStore();
     const filter = ref("");
+    const expandedNodes = ref([] as string[]);
     const triggerExpanded = (nodes: string[]) => {
+      expandedNodes.value = nodes;
       store.callExpandedMethods(nodes);
     };
     const dragging = ref("");
@@ -32,11 +35,89 @@ export default {
       triggerExpanded,
       TreeItemTypesEnum,
       dragging,
+      expandedNodes,
     };
   },
   components: {
     draggable,
+    XMLAIconVue,
   },
+  methods: {
+    getTreeViewItemIcon(treeViewItem) {
+      const iconDesc = {
+        name: "",
+        primaryColor: "",
+        secondaryColor: "",
+      }
+      if (treeViewItem.type === TreeItemTypesEnum.Measure) {
+        iconDesc.name = "MeasureIcon";
+      }
+      else if (treeViewItem.type === TreeItemTypesEnum.SetsFolder || treeViewItem.type === TreeItemTypesEnum.Folder) {
+        if (this.expandedNodes.some((e) => e === treeViewItem.id)) {
+          iconDesc.name = "mdi-folder_open";
+        } else {
+          iconDesc.name = "mdi-folder";
+        }
+      }
+      else if (treeViewItem.type === TreeItemTypesEnum.Set) {
+        iconDesc.name = "SetIcon";
+      }
+      else if (treeViewItem.type === TreeItemTypesEnum.Dimension) {
+        if (treeViewItem.isMeasureDimension) {
+          iconDesc.name = "MeasureIcon";
+        } else {
+            iconDesc.name = "DimesionIcon";
+        }
+      } else if (treeViewItem.type === TreeItemTypesEnum.MeasureGroup) {
+        if (this.expandedNodes.some((e) => e === treeViewItem.id)) {
+          iconDesc.name = "MeasureFolderOpened";
+          iconDesc.secondaryColor = "#154EC1";
+        } else {
+          iconDesc.name = "MeasureFolder";
+          iconDesc.secondaryColor = "#154EC1";
+        }
+      } else if (treeViewItem.type === TreeItemTypesEnum.Hierarchy) {
+        if (treeViewItem.originalItem.PARENT_CHILD) {
+          iconDesc.name = "HierarchyParentChild";
+          iconDesc.secondaryColor = "#154EC1";
+        }
+        iconDesc.name = "HierarchyNormal";
+        iconDesc.secondaryColor = "#154EC1";
+      } else if (treeViewItem.type === TreeItemTypesEnum.Level) {
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "0") {
+          iconDesc.name = "LevelZero";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "1") {
+          iconDesc.name = "LevelOne";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "2") {
+          iconDesc.name = "LevelTwo";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "3") {
+          iconDesc.name = "LevelThree";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "4") {
+          iconDesc.name = "LevelFour";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "5") {
+          iconDesc.name = "LevelFive";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "6") {
+          iconDesc.name = "LevelSix";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "7") {
+          iconDesc.name = "LevelSeven";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "8") {
+          iconDesc.name = "LevelEight";
+        }
+        if (treeViewItem.originalItem.LEVEL_NUMBER === "9") {
+          iconDesc.name = "LevelNine";
+        }
+      }
+      return iconDesc;
+    }
+  }
 };
 </script>
 
@@ -67,7 +148,8 @@ export default {
             item-key="id"
           >
             <template #item="{ element }">
-              <div>
+              <div class="d-flex align-center">
+                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -79,7 +161,8 @@ export default {
             item-key="id"
           >
             <template #item="{ element }">
-              <div>
+              <div class="d-flex align-center">
+                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -91,12 +174,13 @@ export default {
             <va-progress-circle indeterminate size="small" />
           </div>
           <div
-            v-else-if="node.type === TreeItemTypesEnum.LoadMore"
+            v-else-if="node.type === TreeItemTypesEnum.LoadMore" 
             class="d-flex align-center"
           >
             <va-button @click="node.onClick()">Load more</va-button>
           </div>
           <div v-else class="d-flex align-center">
+            <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
             {{ node.caption }}
           </div>
         </template>
