@@ -64,9 +64,6 @@ const fonts = [{
 
 app.use(
   createVuesticEssential({
-    config: {
-      icons: createIconsConfig({ fonts }),
-    },
     components: {
       VaButton,
       VaSplit,
@@ -95,6 +92,7 @@ app.use(
           primary: "#133370"
         },
       },
+      icons: createIconsConfig({ fonts }),
     },
   })
 );

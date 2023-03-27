@@ -149,7 +149,7 @@ export default {
           >
             <template #item="{ element }">
               <div class="d-flex align-center">
-                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
+                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -162,7 +162,7 @@ export default {
           >
             <template #item="{ element }">
               <div class="d-flex align-center">
-                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
+                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -180,7 +180,7 @@ export default {
             <va-button @click="node.onClick()">Load more</va-button>
           </div>
           <div v-else class="d-flex align-center">
-            <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="20" :width="20" class="mr-1"></XMLAIconVue>
+            <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
             {{ node.caption }}
           </div>
         </template>
@@ -192,7 +192,7 @@ export default {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .tree-container {
   display: flex;
   flex-direction: column;
@@ -201,6 +201,10 @@ export default {
 
   .tree-view {
     overflow: auto;
+  }
+
+  .va-tree-node-content__body svg {
+    vertical-align: baseline;
   }
 }
 
