@@ -9,8 +9,13 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
+import { usePivotTableStore } from "@/stores/PivotTable";
+import { storeToRefs } from "pinia";
 import type { TinyEmitter } from "tiny-emitter";
 import { inject } from "vue";
+
+const pivotTableStore = usePivotTableStore();
+const { state } = storeToRefs(pivotTableStore);
 
 const props = defineProps(["cells", "rowsStyles", "colsStyles"]);
 
@@ -28,6 +33,7 @@ const handleScroll = (e: any) => {
 
 const getCellStyle = (i: number, j: number) => {
   return {
+    "text-align": state.value.settings.alignContent as "center" | "right" | "left", 
     width: `${props.colsStyles[i] || DEFAULT_COLUMN_WIDTH}px`,
     height: `${props.rowsStyles[j] || DEFAULT_ROW_HEIGHT}px`,
   };
@@ -74,7 +80,7 @@ const getCellValue = (cell: any) => {
   width: 150px;
   height: v-bind(DEFAULT_ROW_HEIGHT_CSS);
   line-height: v-bind(DEFAULT_ROW_HEIGHT_CSS);
-  padding-left: 3px;
+  padding: 3px;
 }
 
 .cell:last-child {

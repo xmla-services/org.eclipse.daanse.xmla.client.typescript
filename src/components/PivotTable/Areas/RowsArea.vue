@@ -9,12 +9,18 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
+import { usePivotTableStore } from "@/stores/PivotTable";
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
 
+const { state } = usePivotTableStore();
+
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
+const MDDISPINFO_CHILD_COUNT = 65535;
+const MDDISPINFO_DRILLED_DOWN = 65536;
+
 const props = defineProps(["rows", "rowsStyles"]);
 const eventBus = inject("eventBus") as TinyEmitter;
 const setParentStylesValue = inject("setRowsStyles") as (
@@ -49,7 +55,7 @@ const getRowMemberStyle = (i: number, j: number) => {
   const nextMember = props.rows?.[i - 1]?.[j];
 
   const styles = {} as { [key: string]: string };
-  styles["padding-left"] = `${currentMember.LNum * 10 + 5}px`;
+  styles["padding-left"] = `${currentMember.LNum * 15 + 5}px`;
 
   if (!currentMember || !nextMember) return styles;
 
@@ -64,6 +70,36 @@ const getRowHeaderStyle = (i: number) => {
     height: `${props.rowsStyles[i] || DEFAULT_ROW_HEIGHT}px`,
   };
 };
+
+const getRowChildCount = (i: number, j: number) => {
+  const currentMember = props.rows?.[i]?.[j];
+  return  currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
+}
+
+const hasChildrenDisplayed = (i: number, j: number) => {
+  const currentMember = props.rows?.[i]?.[j];
+  if (i + 1 === props.rows.length) return false;
+  const currentHierarchyMembers = props.rows.map((e) => e[j]);
+
+  if (currentHierarchyMembers.some((e) => e.PARENT_UNIQUE_NAME === currentMember.UName)) {
+    return true;
+  }
+  return false;
+}
+
+const rowIsExpanded = (i: number, j: number) => {
+  const currentMember = props.rows?.[i]?.[j];
+  
+  return state.rowsExpandedMembers.some(e => e.UName === currentMember.UName);
+}
+
+const sameAsPrevious = (i: number, j: number) => {
+  const currentMember = props.rows?.[i]?.[j];
+  const prevMember = props.rows?.[i - 1]?.[j];
+  
+  if (!currentMember || !prevMember) return false;
+  return currentMember.UName === prevMember.UName;
+}
 
 let resizeInProg = false;
 let itemResized: number = -1;
@@ -94,6 +130,16 @@ const drillupFn = inject("drillup") as Function;
 const drillup = (member: any) => {
   drillupFn(member, "rows");
 };
+
+const expandFn = inject("expand") as Function;
+const expand = (member: any) => {
+  expandFn(member, "rows");
+}
+
+const collapseFn = inject("collapse") as Function;
+const collapse = (member: any) => {
+  collapseFn(member, "rows");
+}
 
 eventBus.on("onResize", onResize);
 eventBus.on("onStopResize", onStopResize);
@@ -128,7 +174,25 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
         <template v-slot="{}">
           <div>
             <div class="rowMember" :style="getRowMemberStyle(i, j)">
-              {{ getRowMemberCaption(i, j) }}
+              <template v-if="!sameAsPrevious(i, j)">
+                <div v-if="getRowChildCount(i, j) && !hasChildrenDisplayed(i, j)" class="expandIcon">
+                  <va-icon
+                    name="chevron_right"
+                    size="small"
+                    @click="expand(member)"
+                  />
+                </div>
+                <div v-else-if="getRowChildCount(i, j) && rowIsExpanded(i, j)" class="expandIcon">
+                  <va-icon
+                    name="expand_more"
+                    size="small"
+                    @click="collapse(member)"
+                  />
+                </div>
+              </template>
+              <div class="rowMemberCaption">
+                {{ getRowMemberCaption(i, j) }}
+              </div>
             </div>
             <div
               class="row_dragAreaBottom"
@@ -184,11 +248,23 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
 
 .rowMember {
   display: flex;
-  align-items: center;
   width: 150px;
   border-left: 1px silver solid;
   border-top: 1px silver solid;
   padding-left: 3px;
+  align-items: flex-start;
+  padding-top: 5px;
+}
+
+.rowMemberCaption {
   font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 100%;
+}
+
+.expandIcon {
+  flex-grow: 0;
 }
 </style>

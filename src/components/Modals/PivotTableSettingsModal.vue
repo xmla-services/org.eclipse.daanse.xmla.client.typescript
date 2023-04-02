@@ -22,18 +22,29 @@ export default {
     const { isOpened, run, close } = usePromisifiedModal(() => {});
 
     const showEmpty = ref(pivotTableStore.state.settings.showEmpty);
+    const alignContent = ref(pivotTableStore.state.settings.alignContent);
+    alignContent.value = alignContent.value.charAt(0).toUpperCase() + alignContent.value.slice(1);
+
+    const textAlignOptions = [
+      "Center",
+      "Left",
+      "Right",
+    ]
 
     return {
       isOpened,
       run,
       close,
       showEmpty,
+      alignContent,
+      textAlignOptions,
     };
   },
   methods: {
     ok() {
       this.close({
         showEmpty: this.showEmpty,
+        alignContent: this.alignContent.toLowerCase(),
       });
     },
   },
@@ -42,13 +53,25 @@ export default {
 <template>
   <va-modal :modelValue="isOpened" no-padding class="server-url-modal" @ok="ok">
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Pivot table settings</va-card-title>
+      <va-card-title><h6 class="va-h6">Pivot table settings</h6></va-card-title>
       <va-card-content>
-        <va-checkbox
-          v-model="showEmpty"
-          class="mb-6"
-          label="Show empty rows/columns"
-        />
+        <div class="mt-3">
+          <div class="va-title mb-3">Pivot Table data</div>
+          <va-checkbox
+            v-model="showEmpty"
+            label="Show empty rows/columns"
+          />
+          <va-divider class="pt-3" />
+        </div>
+        <div class="mt-5 mb-3">
+          <div class="va-title mb-3">Cell styles</div>
+          <va-select
+            v-model="alignContent"
+            label="Align value in cells"
+            :options="textAlignOptions"
+          />
+          <va-divider class="pt-3" />
+        </div>
       </va-card-content>
       <va-card-actions>
         <va-button @click="ok" >Save</va-button>

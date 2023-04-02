@@ -9,15 +9,20 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
+import { usePivotTableStore } from "@/stores/PivotTable";
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
+
+const { state } = usePivotTableStore();
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 
 // const DEFAULT_COLUMN_WIDTH_CSS = `${150}px`;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
+const MDDISPINFO_CHILD_COUNT = 65535;
+const MDDISPINFO_DRILLED_DOWN = 65536;
 
 const props = defineProps(["columns", "columnsStyles", "columnsOffset"]);
 const eventBus = inject("eventBus") as TinyEmitter;
@@ -47,10 +52,11 @@ let maxLevels = [] as number[];
 watch(
   () => props.columns,
   () => {
+    maxLevels = [];
     for (let i = 0; i < props.columns[0]?.length; i++) {
       for (let j = 0; j < props.columns.length; j++) {
         const level = parseInt(props.columns[j][i].LNum);
-        if (maxLevels[i] || 0 <= level) {
+        if ((maxLevels[i] || 0) <= level) {
           maxLevels[i] = level;
         }
       }
@@ -84,6 +90,37 @@ const getColumnMemberCaption = (i: number, j: number) => {
   return currentMember.Caption;
 };
 
+const getColChildCount = (i: number, j: number) => {
+  const currentMember = props.columns?.[i]?.[j];
+  return  currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
+}
+
+const hasChildrenDisplayed = (i: number, j: number) => {
+  const currentMember = props.columns?.[i]?.[j];
+  if (i + 1 === props.columns.length) return false;
+  const currentHierarchyMembers = props.columns.map((e) => e[j]);
+
+  if (currentHierarchyMembers.some((e) => e.PARENT_UNIQUE_NAME === currentMember.UName)) {
+    return true;
+  }
+  return false;
+}
+
+const colIsExpanded = (i: number, j: number) => {
+  const currentMember = props.columns?.[i]?.[j];
+  
+  return state.columnsExpandedMembers.some(e => e.UName === currentMember.UName);
+}
+
+const sameAsPrevious = (i: number, j: number) => {
+  const currentMember = props.columns?.[i]?.[j];
+  const prevMember = props.columns?.[i - 1]?.[j];
+  
+  if (!currentMember || !prevMember) return false;
+  return currentMember.UName === prevMember.UName;
+}
+
+
 let resizeInProg = false;
 let itemResized: number = -1;
 
@@ -113,6 +150,16 @@ const drillupFn = inject("drillup") as Function;
 const drillup = (member: any) => {
   drillupFn(member, "columns");
 };
+
+const expandFn = inject("expand") as Function;
+const expand = (member: any) => {
+  expandFn(member, "columns");
+}
+
+const collapseFn = inject("collapse") as Function;
+const collapse = (member: any) => {
+  collapseFn(member, "columns");
+}
 
 eventBus.on("onResize", onResize);
 eventBus.on("onStopResize", onStopResize);
@@ -148,7 +195,25 @@ eventBus.on("scroll", ({ left }: { left: number }) => {
           <template v-slot="{}">
             <div style="width: 100%">
               <div class="columnMember" :style="getColumnMemberStyle(i, j)">
-                {{ getColumnMemberCaption(i, j) }}
+                <template v-if="!sameAsPrevious(i, j)">
+                  <div v-if="getColChildCount(i, j) && !hasChildrenDisplayed(i, j)" class="expandIcon">
+                    <va-icon
+                      name="chevron_right"
+                      size="small"
+                      @click="expand(member)"
+                    />
+                  </div>
+                  <div v-else-if="getColChildCount(i, j) && colIsExpanded(i, j)" class="expandIcon">
+                    <va-icon
+                      name="expand_more"
+                      size="small"
+                      @click="collapse(member)"
+                    />
+                  </div>
+                </template> 
+                <div class="columnMemberHeader">
+                  {{ getColumnMemberCaption(i, j) }}
+                </div>
               </div>
               <div
                 class="col_dragAreaRight"
@@ -191,11 +256,18 @@ eventBus.on("scroll", ({ left }: { left: number }) => {
 }
 
 .columnMember {
+  display: flex;
   border-top: 1px silver solid;
   padding-left: 3px;
-  font-weight: 600;
   border-left: 1px silver solid;
   width: 100%;
+}
+
+.columnMemberHeader {
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .col_dragAreaLeft {

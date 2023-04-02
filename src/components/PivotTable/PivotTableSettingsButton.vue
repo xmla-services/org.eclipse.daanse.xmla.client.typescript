@@ -22,8 +22,10 @@ export default {
   methods: {
     async openPivotTableSettings() {
       const pivotTableSettingsModal: any = this.$refs.pivotTableSettingsModal;
-      const { showEmpty } = await pivotTableSettingsModal.run();
+      const { showEmpty, alignContent } = await pivotTableSettingsModal.run();
+
       this.pivotTableStore.state.settings.showEmpty = showEmpty;
+      this.pivotTableStore.state.settings.alignContent = alignContent;
     },
   },
   components: {

@@ -99,6 +99,20 @@ export default {
         }
       }
     });
+    provide("expand", (member: any, area: "columns" | "rows") => {
+      if (area === "rows") {
+        pivotTableStore.expandOnRows(member);
+      } else if (area === "columns") {
+        pivotTableStore.expandOnColumns(member);
+      }
+    });
+    provide("collapse", (member: any, area: "columns" | "rows") => {;
+      if (area === "rows") {
+        pivotTableStore.collapseOnRows(member);
+      } else if (area === "columns") {
+        pivotTableStore.collapseOnColumns(member);
+      }
+    });
 
     const getPivotTableData = async () => {
       const loadingId = appSettings.setLoadingState();
