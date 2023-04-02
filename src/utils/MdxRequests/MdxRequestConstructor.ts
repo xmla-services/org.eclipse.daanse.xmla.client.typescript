@@ -17,6 +17,8 @@ export function getMdxRequest(
   cubename: string,
   rowsDrilldownMembers: any,
   columnsDrilldownMembers: any,
+  rowsExpandedMembers: any,
+  columnsExpandedMembers: any,
   rows: any[],
   columns: any[],
   pivotTableSettings: any,
@@ -31,7 +33,7 @@ export function getMdxRequest(
   if (!pivotTableSettings.showEmpty) selectSection += " NON EMPTY";
 
   const rowsProperties = getRowsProperies(rows, properties);
-  const rowsRequest = getRowsRequest(rows, rowsDrilldownMembers);
+  const rowsRequest = getRowsRequest(rows, rowsDrilldownMembers, rowsExpandedMembers);
   if (rowsRequest.with.length) {
     withSection = `${withSection} ${rowsRequest.with}`;
   }
@@ -40,7 +42,7 @@ export function getMdxRequest(
   if (!pivotTableSettings.showEmpty) selectSection += " NON EMPTY";
 
   const colsProperties = getColumnsProperies(columns, properties);
-  const colsRequest = getColumnsRequest(columns, columnsDrilldownMembers);
+  const colsRequest = getColumnsRequest(columns, columnsDrilldownMembers, columnsExpandedMembers);
   if (colsRequest.with.length) {
     withSection = `${withSection} ${colsRequest.with}`;
   }
@@ -58,13 +60,13 @@ export function getMdxRequest(
   return resultString;
 }
 
-function getColumnsRequest(columns: any, columnsDrilldownMembers: any[]) {
+function getColumnsRequest(columns: any, columnsDrilldownMembers: any[], colsExpandedMembers: any[]) {
   let columnsSelect = "";
   let columnsWhere = "";
 
   if (columns.length >= 1) {
     columns.forEach((e: any, i: number) => {
-      const columnsRequest = getSingleColumnRequest(e, columnsDrilldownMembers);
+      const columnsRequest = getSingleColumnRequest(e, columnsDrilldownMembers, colsExpandedMembers);
       if (i === 0) {
         columnsSelect = columnsRequest.select;
         columnsWhere = columnsRequest.with;
@@ -88,7 +90,7 @@ function getColumnsRequest(columns: any, columnsDrilldownMembers: any[]) {
   };
 }
 
-function getSingleColumnRequest(e: any, columnsDrilldownMembers: any[]) {
+function getSingleColumnRequest(e: any, columnsDrilldownMembers: any[], colsExpandedMembers: any[]) {
   const drilledDownMember = columnsDrilldownMembers.find(
     (drilldownedMembers) => {
       return (
@@ -97,8 +99,15 @@ function getSingleColumnRequest(e: any, columnsDrilldownMembers: any[]) {
       );
     }
   );
-  if (drilledDownMember) {
-    const request = getColsDrilldownRequestString(drilledDownMember);
+  const expandedMembers = colsExpandedMembers.filter((drilldownedMembers) => {
+    return (
+      drilldownedMembers.HIERARCHY_UNIQUE_NAME ===
+      e.originalItem.HIERARCHY_UNIQUE_NAME
+    );
+  });
+
+  if (drilledDownMember || expandedMembers.length) {
+    const request = getColsDrilldownRequestString(drilledDownMember, colsExpandedMembers);
 
     return {
       with: request.with,
@@ -111,13 +120,13 @@ function getSingleColumnRequest(e: any, columnsDrilldownMembers: any[]) {
   };
 }
 
-function getRowsRequest(rows: any, rowsDrilldownMembers: any[]) {
+function getRowsRequest(rows: any, rowsDrilldownMembers: any[], rowsExpandedMembers: any[]) {
   let rowsSelect = "";
   let rowsWhere = "";
 
   if (rows.length >= 1) {
     rows.forEach((e: any, i: number) => {
-      const rowsRequest = getSingleRowRequest(e, rowsDrilldownMembers);
+      const rowsRequest = getSingleRowRequest(e, rowsDrilldownMembers, rowsExpandedMembers);
       if (i === 0) {
         rowsSelect = rowsRequest.select;
         rowsWhere = rowsRequest.with;
@@ -141,15 +150,21 @@ function getRowsRequest(rows: any, rowsDrilldownMembers: any[]) {
   };
 }
 
-function getSingleRowRequest(e: any, rowsDrilldownMembers: any[]) {
+function getSingleRowRequest(e: any, rowsDrilldownMembers: any[], rowsExpandedMembers: any[]) {
   const drilledDownMember = rowsDrilldownMembers.find((drilldownedMembers) => {
     return (
       drilldownedMembers.HIERARCHY_UNIQUE_NAME ===
       e.originalItem.HIERARCHY_UNIQUE_NAME
     );
   });
-  if (drilledDownMember) {
-    const request = getRowsDrilldownRequestString(drilledDownMember);
+  const expandedMembers = rowsExpandedMembers.filter((drilldownedMembers) => {
+    return (
+      drilldownedMembers.HIERARCHY_UNIQUE_NAME ===
+      e.originalItem.HIERARCHY_UNIQUE_NAME
+    );
+  });
+  if (drilledDownMember || expandedMembers.length) {
+    const request = getRowsDrilldownRequestString(drilledDownMember, expandedMembers);
 
     return {
       with: request.with,
