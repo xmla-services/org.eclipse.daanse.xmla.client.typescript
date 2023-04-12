@@ -3065,10 +3065,10 @@ vuedraggable@^4.1.0:
   dependencies:
     sortablejs "1.14.0"
 
-vuestic-ui@^1.5.0:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/vuestic-ui/-/vuestic-ui-1.6.2.tgz#0f29cf645167bd4dd62e8545f954c3297400b1d8"
-  integrity sha512-GfsphvjsGAqAVXqsRzNEWXGG7aUGHt/9oTDjVARPjMspNKBhesDZjks/O24dA1Nl006km2eXQVN0fhtpIRp24w==
+vuestic-ui@^1.6.4:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/vuestic-ui/-/vuestic-ui-1.6.4.tgz#45a76d0c8bf9d61cb1c0245764a819dd3577861d"
+  integrity sha512-3ki2gmcr9edo29XLYNCWXOV1ElsoNP1x2EAyallIARU1X9FnLYOZsxkxQqupvSqmjJLtgrv+aZYiQ5dgDlILMw==
   dependencies:
     "@types/lodash" "^4.14.161"
     cleave.js "^1.6.0"
