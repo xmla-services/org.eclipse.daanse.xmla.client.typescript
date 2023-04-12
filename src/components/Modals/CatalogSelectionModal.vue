@@ -135,4 +135,8 @@ export default {
     margin: auto;
   }
 }
+
+.va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper {
+  z-index: 20000;
+}
 </style>
