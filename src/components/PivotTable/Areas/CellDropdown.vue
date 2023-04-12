@@ -12,8 +12,7 @@ Contributors: Smart City Jena
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 
-defineEmits(["drilldown", "drillup", "openMemberProperties"]);
-defineProps(["drillupDisabled"]);
+defineEmits(["openCellProperties"]);
 
 const opened = ref(false);
 const eventBus = inject("eventBus") as TinyEmitter;
@@ -50,29 +49,9 @@ watch(opened, () => {
           class="dropdown_button"
           text-color="#000"
           :hover-opacity="0.5"
-          @click="$emit('drilldown')"
+          @click="$emit('openCellProperties')"
         >
-          Drilldown
-        </va-button>
-        <va-button
-          v-if="!drillupDisabled"
-          preset="plain"
-          class="dropdown_button"
-          text-color="#000"
-          :hover-opacity="0.5"
-          @click="$emit('drillup')"
-        >
-          Drillup
-        </va-button>
-        <va-button
-          v-if="!drillupDisabled"
-          preset="plain"
-          class="dropdown_button"
-          text-color="#000"
-          :hover-opacity="0.5"
-          @click="$emit('openMemberProperties')"
-        >
-          Open Member Properties
+          Open Cell Properties
         </va-button>
       </va-button-group>
     </va-dropdown-content>
@@ -96,10 +75,10 @@ watch(opened, () => {
   padding: 0.25rem !important;
 }
 
-.dropdown_button /deep/ .va-button__content {
+.dropdown_button:deep() .va-button__content {
   color: #000;
 }
-.dropdown_button:hover /deep/ .va-button__content {
+.dropdown_button:hover:deep() .va-button__content {
   color: #555;
 }
 

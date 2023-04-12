@@ -19,6 +19,7 @@ import CellsArea from "./Areas/CellsArea.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { storeToRefs } from "pinia";
 import { useTreeViewDataStore } from "@/stores/TreeView";
+import { useChartStore } from "@/stores/Chart";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -32,6 +33,7 @@ export default {
     const appSettings = useAppSettingsStore();
     const api = appSettings.getApi();
     const treeViewStore = useTreeViewDataStore();
+    const chartStore = useChartStore();
 
     const colStyles = ref([...pivotTableStore.state.styles.columns] as any[]);
     const rowsStyles = ref([...pivotTableStore.state.styles.rows] as any[]);
@@ -57,15 +59,17 @@ export default {
     provide("drilldown", (member: any, area: "columns" | "rows") => {
       if (area === "rows") {
         pivotTableStore.drilldownOnRows(member);
+        chartStore.drilldownOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.drilldownOnColumns(member);
+        chartStore.drilldownOnColumns(member);
       }
     });
     provide("drillup", async (member: any, area: "columns" | "rows") => {
       const parentLevel = treeViewStore.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME &&
-          e.LEVEL_NUMBER === (Math.max(parseInt(member.LNum) - 1, 0)).toString()
+          e.LEVEL_NUMBER === Math.max(parseInt(member.LNum) - 1, 0).toString()
         );
       });
 
@@ -81,7 +85,7 @@ export default {
           return (
             e.HIERARCHY_UNIQUE_NAME === parentMember.HIERARCHY_UNIQUE_NAME &&
             e.LEVEL_NUMBER ===
-              (Math.max(parseInt(parentMember.LEVEL_NUMBER) - 1, 0)).toString()
+              Math.max(parseInt(parentMember.LEVEL_NUMBER) - 1, 0).toString()
           );
         });
         if (requestParentLevel) {
@@ -93,8 +97,10 @@ export default {
           };
           if (area === "rows") {
             pivotTableStore.drilldownOnRows(createdMember);
+            chartStore.drilldownOnRows(createdMember);
           } else if (area === "columns") {
             pivotTableStore.drilldownOnColumns(createdMember);
+            chartStore.drilldownOnColumns(createdMember);
           }
         }
       }
@@ -102,15 +108,19 @@ export default {
     provide("expand", (member: any, area: "columns" | "rows") => {
       if (area === "rows") {
         pivotTableStore.expandOnRows(member);
+        chartStore.expandOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.expandOnColumns(member);
+        chartStore.expandOnColumns(member);
       }
     });
-    provide("collapse", (member: any, area: "columns" | "rows") => {;
+    provide("collapse", (member: any, area: "columns" | "rows") => {
       if (area === "rows") {
         pivotTableStore.collapseOnRows(member);
+        chartStore.collapseOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.collapseOnColumns(member);
+        chartStore.collapseOnColumns(member);
       }
     });
 
@@ -183,7 +193,7 @@ export default {
     columnsOffset() {
       return this.rows?.[0]?.length * DEFAULT_COLUMN_WIDTH;
     },
-    totalContentHeight() {
+    totalContentSize() {
       const xAxisDesc = this.columns.reduce(
         (
           acc: {
@@ -222,18 +232,13 @@ export default {
         },
         { items: [], totalWidth: 0 }
       );
-      return 0;
+      return {
+        xAxis: xAxisDesc,
+        yAxis: yAxisDesc,
+      };
     },
   },
   methods: {
-    handleScroll(e: any) {
-      (
-        this.$refs.rowsContainer as HTMLElement
-      ).style.transform = `translateY(-${e.target.scrollTop}px)`;
-      (
-        this.$refs.columnsContainer as HTMLElement
-      ).style.transform = `translateX(-${e.target.scrollLeft}px)`;
-    },
     onResize(e: MouseEvent) {
       this.eventBus.emit("onResize", e);
     },
@@ -257,12 +262,18 @@ export default {
         :columnsStyles="colStyles"
         :columnsOffset="columnsOffset"
         :columns="columns"
+        :totalContentSize="totalContentSize"
       ></ColumnsArea>
-      <div class="d-flex flex-row overflow-hidden">
-        <RowsArea :rows="rows" :rowsStyles="rowsStyles"></RowsArea>
+      <div class="d-flex flex-row overflow-hidden vertical-scroll">
+        <RowsArea
+          :rows="rows"
+          :rowsStyles="rowsStyles"
+          :totalContentSize="totalContentSize"
+        ></RowsArea>
         <CellsArea
           :rowsStyles="rowsStyles"
           :colsStyles="colStyles"
+          :totalContentSize="totalContentSize"
           :cells="cells"
         ></CellsArea>
       </div>
@@ -280,5 +291,8 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+.vertical-scroll {
+  height: 100%;
 }
 </style>
