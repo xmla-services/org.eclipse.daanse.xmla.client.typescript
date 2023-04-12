@@ -14,7 +14,7 @@ import MainLayout from "./components/MainLayout.vue";
 import QuertyDesignerLayout from "./components/QuertyDesignerLayout.vue";
 import QuertyDesigner from "./components/QueryDesigner/QueryDesigner.vue";
 import PivotTable from "./components/PivotTable/PivotTable.vue";
-import Chart from "./components/Charts/Chart.vue";
+import ChartModule from "./components/Charts/ChartModule.vue";
 
 
 console.log("https://ssemenkoff.dev/emondrian/xmla");

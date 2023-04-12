@@ -96,10 +96,10 @@ watch(opened, () => {
   padding: 0.25rem !important;
 }
 
-.dropdown_button /deep/ .va-button__content {
+.dropdown_button .va-button__content:deep() {
   color: #000;
 }
-.dropdown_button:hover /deep/ .va-button__content {
+.dropdown_button:hover .va-button__content:deep() {
   color: #555;
 }
 
