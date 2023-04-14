@@ -11,29 +11,30 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import type { TinyEmitter } from "tiny-emitter";
-import { inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, type Ref } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
+import MemberPropertiesModal from "@/components/Modals/MemberPropertiesModal.vue";
+import { useTreeViewDataStore } from "@/stores/TreeView";
 
 const { state } = usePivotTableStore();
 
 const DEFAULT_COLUMN_WIDTH = 150;
-const DEFAULT_ROW_HEIGHT = 30;
-
-// const DEFAULT_COLUMN_WIDTH_CSS = `${150}px`;
-const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const MDDISPINFO_CHILD_COUNT = 65535;
-const MDDISPINFO_DRILLED_DOWN = 65536;
 
-const props = defineProps(["columns", "columnsStyles", "columnsOffset"]);
+const props = defineProps([
+  "columns",
+  "columnsStyles",
+  "columnsOffset",
+  "totalContentSize",
+]);
 const eventBus = inject("eventBus") as TinyEmitter;
 const setParentStylesValue = inject("setColumnsStyles") as (
   index: number,
   styles: number
 ) => {};
 
-const scrollValue = ref(0);
-
-const colsContaner = ref(null as null | HTMLElement);
+const scrollPosition = ref(0);
+const translate = ref(0);
 
 const getColumnHeaderOffsetStyle = () => {
   return {
@@ -44,6 +45,7 @@ const getColumnHeaderOffsetStyle = () => {
 const getColumnHeaderStyle = (i: number) => {
   return {
     width: `${props.columnsStyles[i] || DEFAULT_COLUMN_WIDTH}px`,
+    transform: `translate(${translate.value}px, 0)`,
   };
 };
 
@@ -92,34 +94,45 @@ const getColumnMemberCaption = (i: number, j: number) => {
 
 const getColChildCount = (i: number, j: number) => {
   const currentMember = props.columns?.[i]?.[j];
-  return  currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
-}
+  return currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
+};
+
+const getColumnScrollerStyle = () => {
+  return {
+    transform: `translate(-${scrollPosition.value}px, 0)`,
+  };
+};
 
 const hasChildrenDisplayed = (i: number, j: number) => {
   const currentMember = props.columns?.[i]?.[j];
   if (i + 1 === props.columns.length) return false;
   const currentHierarchyMembers = props.columns.map((e) => e[j]);
 
-  if (currentHierarchyMembers.some((e) => e.PARENT_UNIQUE_NAME === currentMember.UName)) {
+  if (
+    currentHierarchyMembers.some(
+      (e) => e.PARENT_UNIQUE_NAME === currentMember.UName
+    )
+  ) {
     return true;
   }
   return false;
-}
+};
 
 const colIsExpanded = (i: number, j: number) => {
   const currentMember = props.columns?.[i]?.[j];
-  
-  return state.columnsExpandedMembers.some(e => e.UName === currentMember.UName);
-}
+
+  return state.columnsExpandedMembers.some(
+    (e) => e.UName === currentMember.UName
+  );
+};
 
 const sameAsPrevious = (i: number, j: number) => {
   const currentMember = props.columns?.[i]?.[j];
   const prevMember = props.columns?.[i - 1]?.[j];
-  
+
   if (!currentMember || !prevMember) return false;
   return currentMember.UName === prevMember.UName;
-}
-
+};
 
 let resizeInProg = false;
 let itemResized: number = -1;
@@ -154,75 +167,155 @@ const drillup = (member: any) => {
 const expandFn = inject("expand") as Function;
 const expand = (member: any) => {
   expandFn(member, "columns");
-}
+};
 
 const collapseFn = inject("collapse") as Function;
 const collapse = (member: any) => {
   collapseFn(member, "columns");
-}
+};
 
 eventBus.on("onResize", onResize);
 eventBus.on("onStopResize", onStopResize);
 eventBus.on("scroll", ({ left }: { left: number }) => {
-  scrollValue.value = left;
-  requestAnimationFrame(() => {
-    if (colsContaner.value) {
-      colsContaner.value.style.transform = `translateX(-${scrollValue.value}px)`;
-    }
-  });
+  scrollPosition.value = left;
+  // requestAnimationFrame(() => {
+  //   if (colsContaner.value) {
+  //     colsContaner.value.style.transform = `translateX(-${scrollValue.value}px)`;
+  //   }
+  // });
 });
+
+const memberPropertiesModal = ref(null) as Ref<any>;
+const openMemberProperties = async (member) => {
+  const treeStore = useTreeViewDataStore();
+  const level = treeStore.levels.find(
+    (e) => e.LEVEL_UNIQUE_NAME === member.LName
+  );
+  await memberPropertiesModal.value?.run({ level, member });
+};
+
+const colsContaner = ref(null) as unknown as Ref<HTMLElement>;
+const currentlyDisplayedValues = computed(() => {
+  if (!colsContaner.value)
+    return {
+      data: [],
+      translate: translate.value,
+    };
+
+  let translateValue = translate.value;
+  let result = props.columns.map((columnMembers, i) => {
+    return columnMembers.map((member) => {
+      return {
+        ...member,
+        i,
+      };
+    });
+  });
+
+  const leftIndex = props.totalContentSize.xAxis.items.findIndex((e) => {
+    const leftCoord = scrollPosition.value;
+    if (e.start <= leftCoord && e.start + e.width > leftCoord) return true;
+    return false;
+  });
+  let rightIndex = props.totalContentSize.xAxis.items.findIndex((e) => {
+    const rightCoord = scrollPosition.value + colsContaner.value.clientWidth;
+
+    if (e.start <= rightCoord && e.start + e.width >= rightCoord) return true;
+    return false;
+  });
+
+  if (leftIndex >= 0 && rightIndex < 0)
+    rightIndex = props.totalContentSize.xAxis.items.length - 1;
+
+  if (leftIndex >= 0 && rightIndex > leftIndex) {
+    result = result.slice(leftIndex, rightIndex + 1);
+    translateValue = props.totalContentSize.xAxis.items[leftIndex].start;
+  }
+
+  return {
+    data: result,
+    translate: translateValue,
+  };
+});
+
+watch(
+  () => currentlyDisplayedValues.value,
+  () => {
+    translate.value = currentlyDisplayedValues.value.translate;
+  }
+);
 </script>
 <template>
   <div class="columnHeader_container" :style="getColumnHeaderOffsetStyle()">
+    <Teleport to="body">
+      <MemberPropertiesModal ref="memberPropertiesModal" />
+    </Teleport>
     <div
       class="columnScroller"
-      :style="getColumnHeaderStyle"
       ref="colsContaner"
+      :style="getColumnScrollerStyle()"
     >
       <div
         class="columnHeader"
-        v-for="(column, i) in columns"
-        :key="i"
-        :style="getColumnHeaderStyle(i)"
+        v-for="column in currentlyDisplayedValues.data"
+        :key="column[0].i"
+        :style="getColumnHeaderStyle(column[0].i)"
       >
         <MemberDropdown
           v-for="(member, j) in column"
           :key="member.UNAME"
+          class="columnMemberWrapper"
           :drillupDisabled="member.LNum === '0'"
           @drilldown="drilldown(member)"
           @drillup="drillup(member)"
+          @openMemberProperties="openMemberProperties(member)"
         >
           <template v-slot="{}">
             <div style="width: 100%">
-              <div class="columnMember" :style="getColumnMemberStyle(i, j)">
-                <template v-if="!sameAsPrevious(i, j)">
-                  <div v-if="getColChildCount(i, j) && !hasChildrenDisplayed(i, j)" class="expandIcon">
+              <div
+                class="columnMember"
+                :style="getColumnMemberStyle(member.i, j)"
+              >
+                <template v-if="!sameAsPrevious(member.i, j)">
+                  <div
+                    v-if="
+                      getColChildCount(member.i, j) &&
+                      !hasChildrenDisplayed(member.i, j)
+                    "
+                    class="expandIcon"
+                  >
                     <va-icon
                       name="chevron_right"
                       size="small"
                       @click="expand(member)"
                     />
                   </div>
-                  <div v-else-if="getColChildCount(i, j) && colIsExpanded(i, j)" class="expandIcon">
+                  <div
+                    v-else-if="
+                      getColChildCount(member.i, j) &&
+                      colIsExpanded(member.i, j)
+                    "
+                    class="expandIcon"
+                  >
                     <va-icon
                       name="expand_more"
                       size="small"
                       @click="collapse(member)"
                     />
                   </div>
-                </template> 
+                </template>
                 <div class="columnMemberHeader">
-                  {{ getColumnMemberCaption(i, j) }}
+                  {{ getColumnMemberCaption(member.i, j) }}
                 </div>
               </div>
               <div
                 class="col_dragAreaRight"
-                @mousedown="onStartResize($event, i)"
+                @mousedown="onStartResize($event, member.i)"
               ></div>
               <div
-                v-if="i > 0"
+                v-if="member.i > 0"
                 class="col_dragAreaLeft"
-                @mousedown="onStartResize($event, i - 1)"
+                @mousedown="onStartResize($event, member.i - 1)"
               ></div>
             </div>
           </template>
@@ -255,12 +348,17 @@ eventBus.on("scroll", ({ left }: { left: number }) => {
   border-right: 1px silver solid;
 }
 
+.columnMemberWrapper {
+  height: 100%;
+}
+
 .columnMember {
   display: flex;
   border-top: 1px silver solid;
   padding-left: 3px;
   border-left: 1px silver solid;
   width: 100%;
+  height: 100%;
 }
 
 .columnMemberHeader {

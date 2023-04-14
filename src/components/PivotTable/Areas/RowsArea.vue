@@ -11,24 +11,26 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import type { TinyEmitter } from "tiny-emitter";
-import { inject, ref } from "vue";
+import { computed, inject, ref, watch, type Ref } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
+import MemberPropertiesModal from "@/components/Modals/MemberPropertiesModal.vue";
+import { useTreeViewDataStore } from "@/stores/TreeView";
 
 const { state } = usePivotTableStore();
 
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const MDDISPINFO_CHILD_COUNT = 65535;
-const MDDISPINFO_DRILLED_DOWN = 65536;
 
-const props = defineProps(["rows", "rowsStyles"]);
+const props = defineProps(["rows", "rowsStyles", "totalContentSize"]);
 const eventBus = inject("eventBus") as TinyEmitter;
 const setParentStylesValue = inject("setRowsStyles") as (
   index: number,
   styles: number
 ) => {};
 
-const scrollValue = ref(0);
+const scrollPosition = ref(0);
+const translate = ref(0);
 
 const getRowMemberCaption = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
@@ -44,11 +46,9 @@ const getRowMemberCaption = (i: number, j: number) => {
 
 const getRowsHeaderContainerStyle = () => {
   return {
-    // transform: `translateY(-${scrollValue.value}px)`,
+    transform: `translate(0, -${scrollPosition.value}px)`,
   };
 };
-
-const rowsContainer = ref(null as null | HTMLElement);
 
 const getRowMemberStyle = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
@@ -68,38 +68,44 @@ const getRowMemberStyle = (i: number, j: number) => {
 const getRowHeaderStyle = (i: number) => {
   return {
     height: `${props.rowsStyles[i] || DEFAULT_ROW_HEIGHT}px`,
+
+    transform: `translate(0, ${translate.value}px)`,
   };
 };
 
 const getRowChildCount = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
-  return  currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
-}
+  return currentMember.DisplayInfo & MDDISPINFO_CHILD_COUNT;
+};
 
 const hasChildrenDisplayed = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
   if (i + 1 === props.rows.length) return false;
   const currentHierarchyMembers = props.rows.map((e) => e[j]);
 
-  if (currentHierarchyMembers.some((e) => e.PARENT_UNIQUE_NAME === currentMember.UName)) {
+  if (
+    currentHierarchyMembers.some(
+      (e) => e.PARENT_UNIQUE_NAME === currentMember.UName
+    )
+  ) {
     return true;
   }
   return false;
-}
+};
 
 const rowIsExpanded = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
-  
-  return state.rowsExpandedMembers.some(e => e.UName === currentMember.UName);
-}
+
+  return state.rowsExpandedMembers.some((e) => e.UName === currentMember.UName);
+};
 
 const sameAsPrevious = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
   const prevMember = props.rows?.[i - 1]?.[j];
-  
+
   if (!currentMember || !prevMember) return false;
   return currentMember.UName === prevMember.UName;
-}
+};
 
 let resizeInProg = false;
 let itemResized: number = -1;
@@ -134,24 +140,81 @@ const drillup = (member: any) => {
 const expandFn = inject("expand") as Function;
 const expand = (member: any) => {
   expandFn(member, "rows");
-}
+};
 
 const collapseFn = inject("collapse") as Function;
 const collapse = (member: any) => {
   collapseFn(member, "rows");
-}
+};
 
 eventBus.on("onResize", onResize);
 eventBus.on("onStopResize", onStopResize);
 
 eventBus.on("scroll", ({ top }: { top: number }) => {
-  scrollValue.value = top;
-  requestAnimationFrame(() => {
-    if (rowsContainer.value) {
-      rowsContainer.value.style.transform = `translateY(-${scrollValue.value}px)`;
-    }
-  });
+  scrollPosition.value = top;
 });
+
+const memberPropertiesModal = ref(null) as Ref<any>;
+const openMemberProperties = async (member) => {
+  const treeStore = useTreeViewDataStore();
+  const level = treeStore.levels.find(
+    (e) => e.LEVEL_UNIQUE_NAME === member.LName
+  );
+  await memberPropertiesModal.value?.run({ level, member });
+};
+
+const rowsContainer = ref(null) as unknown as Ref<HTMLElement>;
+const currentlyDisplayedValues = computed(() => {
+  if (!rowsContainer.value)
+    return {
+      data: [],
+      translate: translate.value,
+    };
+
+  let translateValue = translate.value;
+  let result = props.rows.map((rowMembers, i) => {
+    return rowMembers.map((member) => {
+      return {
+        ...member,
+        i,
+      };
+    });
+  });
+
+  const topIndex = props.totalContentSize.yAxis.items.findIndex((e) => {
+    if (
+      e.start <= scrollPosition.value &&
+      e.start + e.width > scrollPosition.value
+    )
+      return true;
+    return false;
+  });
+  let bottomIndex = props.totalContentSize.yAxis.items.findIndex((e) => {
+    const bottomCoord = scrollPosition.value + rowsContainer.value.clientHeight;
+    if (e.start <= bottomCoord && e.start + e.width >= bottomCoord) return true;
+    return false;
+  });
+
+  if (topIndex >= 0 && bottomIndex < 0)
+    bottomIndex = props.totalContentSize.yAxis.items.length - 1;
+
+  if (topIndex >= 0 && bottomIndex > topIndex) {
+    result = result.slice(topIndex, bottomIndex + 1);
+    translateValue = props.totalContentSize.yAxis.items[topIndex].start;
+  }
+
+  return {
+    data: result,
+    translate: translateValue,
+  };
+});
+
+watch(
+  () => currentlyDisplayedValues.value,
+  () => {
+    translate.value = currentlyDisplayedValues.value.translate;
+  }
+);
 </script>
 <template>
   <div
@@ -159,30 +222,45 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
     :style="getRowsHeaderContainerStyle()"
     ref="rowsContainer"
   >
+    <Teleport to="body">
+      <MemberPropertiesModal ref="memberPropertiesModal" />
+    </Teleport>
     <div
       class="rowsHeader"
-      v-for="(row, i) in rows"
-      :key="i"
-      :style="getRowHeaderStyle(i)"
+      v-for="row in currentlyDisplayedValues.data"
+      :key="row[0].i"
+      :style="getRowHeaderStyle(row[0].i)"
     >
       <MemberDropdown
         v-for="(member, j) in row"
         :key="member.UNAME"
         @drilldown="drilldown(member)"
         @drillup="drillup(member)"
+        @openMemberProperties="openMemberProperties(member)"
       >
         <template v-slot="{}">
-          <div>
-            <div class="rowMember" :style="getRowMemberStyle(i, j)">
-              <template v-if="!sameAsPrevious(i, j)">
-                <div v-if="getRowChildCount(i, j) && !hasChildrenDisplayed(i, j)" class="expandIcon">
+          <div class="d-flex">
+            <div class="rowMember" :style="getRowMemberStyle(member.i, j)">
+              <template v-if="!sameAsPrevious(member.i, j)">
+                <div
+                  v-if="
+                    getRowChildCount(member.i, j) &&
+                    !hasChildrenDisplayed(member.i, j)
+                  "
+                  class="expandIcon"
+                >
                   <va-icon
                     name="chevron_right"
                     size="small"
                     @click="expand(member)"
                   />
                 </div>
-                <div v-else-if="getRowChildCount(i, j) && rowIsExpanded(i, j)" class="expandIcon">
+                <div
+                  v-else-if="
+                    getRowChildCount(member.i, j) && rowIsExpanded(member.i, j)
+                  "
+                  class="expandIcon"
+                >
                   <va-icon
                     name="expand_more"
                     size="small"
@@ -191,17 +269,17 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
                 </div>
               </template>
               <div class="rowMemberCaption">
-                {{ getRowMemberCaption(i, j) }}
+                {{ getRowMemberCaption(member.i, j) }}
               </div>
             </div>
             <div
               class="row_dragAreaBottom"
-              @mousedown="onStartResize($event, i)"
+              @mousedown="onStartResize($event, member.i)"
             ></div>
             <div
-              v-if="i > 0"
+              v-if="row.i > 0"
               class="row_dragAreaTop"
-              @mousedown="onStartResize($event, i - 1)"
+              @mousedown="onStartResize($event, member.i - 1)"
             ></div>
           </div>
         </template>
@@ -212,6 +290,10 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
 <style>
 .rowsHeader:last-child {
   border-bottom: 1px silver solid;
+}
+
+.rowsHeader_container {
+  height: 100%;
 }
 
 .rowsHeader {

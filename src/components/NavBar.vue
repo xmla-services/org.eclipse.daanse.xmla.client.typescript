@@ -37,7 +37,7 @@ export default {
       const serverSelectionModal: any = this.$refs.serverSelectionModal;
       const catalogSelectionModal: any = this.$refs.catalogSelectionModal;
 
-      let url = null;
+      let url = null as string | null;
       if (this.uri) {
         url = this.uri;
       } else {
@@ -45,8 +45,8 @@ export default {
       }
       await this.store.initXmlaApi(url);
 
-      let cube = null,
-        catalog = null;
+      let cube = null as string | null,
+        catalog = null as string | null;
 
       if (this.cube && this.catalog) {
         cube = this.cube;
@@ -68,17 +68,13 @@ export default {
 };
 </script>
 <template>
-
-  <va-navbar color="primary" class="mb-3 high_index" >
-
+  <va-navbar color="primary" class="mb-3 high_index">
     <template #left>
       <va-navbar-item class="logo">
         <div class="white triangle"></div>
         <div class="small logo daanse" id="logo"></div>
         <div class="small logo daanse" id="claim"></div>
-
       </va-navbar-item>
-
     </template>
     <template #right>
       <va-navbar-item v-if="!store.xmlaApiInited">
@@ -97,13 +93,12 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-.high_index{
+.high_index {
   z-index: 5;
   overflow: hidden;
   box-shadow: 0px 0px 9px 1px #33333359;
-
 }
-#logo{
+#logo {
   width: 66px;
   height: 97px;
   position: absolute;
@@ -112,7 +107,7 @@ export default {
   background-size: 138px;
   background-position: 0px;
 }
-#claim{
+#claim {
   width: 131px;
   height: 97px;
   position: absolute;
