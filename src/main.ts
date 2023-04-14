@@ -39,7 +39,7 @@ import {
   VaDropdown,
   VaDropdownContent,
   VaButtonGroup,
-  VaDivider,
+  VaDivider
 } from "vuestic-ui";
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";

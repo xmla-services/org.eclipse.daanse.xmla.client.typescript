@@ -12,19 +12,34 @@ Contributors: Smart City Jena
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { storeToRefs } from "pinia";
 import type { TinyEmitter } from "tiny-emitter";
-import { inject } from "vue";
+import { computed, inject, ref, watch, type Ref } from "vue";
+import CellDropdown from "./CellDropdown.vue";
+import CellPropertiesModal from "@/components/Modals/CellPropertiesModal.vue";
 
 const pivotTableStore = usePivotTableStore();
 const { state } = storeToRefs(pivotTableStore);
 
-const props = defineProps(["cells", "rowsStyles", "colsStyles"]);
+const props = defineProps([
+  "cells",
+  "rowsStyles",
+  "colsStyles",
+  "totalContentSize",
+]);
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const eventBus = inject("eventBus") as TinyEmitter;
 
+const xScrollPosition = ref(0);
+const yScrollPosition = ref(0);
+const xTranslate = ref(0);
+const yTranslate = ref(0);
+
 const handleScroll = (e: any) => {
+  xScrollPosition.value = e.target.scrollLeft;
+  yScrollPosition.value = e.target.scrollTop;
+
   eventBus.emit("scroll", {
     top: e.target.scrollTop,
     left: e.target.scrollLeft,
@@ -33,7 +48,10 @@ const handleScroll = (e: any) => {
 
 const getCellStyle = (i: number, j: number) => {
   return {
-    "text-align": state.value.settings.alignContent as "center" | "right" | "left", 
+    "text-align": state.value.settings.alignContent as
+      | "center"
+      | "right"
+      | "left",
     width: `${props.colsStyles[i] || DEFAULT_COLUMN_WIDTH}px`,
     height: `${props.rowsStyles[j] || DEFAULT_ROW_HEIGHT}px`,
   };
@@ -43,26 +61,137 @@ const getCellValue = (cell: any) => {
   if (typeof cell.FmtValue === "string") return cell.FmtValue;
   return cell.Value;
 };
+
+const computedContainerStyles = computed(() => {
+  return {
+    width: `${props.totalContentSize.xAxis.totalWidth}px`,
+    height: `${props.totalContentSize.yAxis.totalWidth}px`,
+  };
+});
+
+const getRowStyles = computed(() => {
+  return {
+    transform: `translate(${xTranslate.value}px, ${yTranslate.value}px)`,
+  };
+});
+
+const container = ref(null) as unknown as Ref<HTMLElement>;
+const currentlyDisplayedValues = computed(() => {
+  if (!container.value)
+    return {
+      data: [],
+      xTranslate: xTranslate.value,
+      yTranslate: yTranslate.value,
+    };
+
+  let xTranslateValue = xTranslate.value;
+  let yTranslateValue = yTranslate.value;
+
+  const leftIndex = props.totalContentSize.xAxis.items.findIndex((e) => {
+    const leftCoord = xScrollPosition.value;
+    if (e.start <= leftCoord && e.start + e.width > leftCoord) return true;
+    return false;
+  });
+  let rightIndex = props.totalContentSize.xAxis.items.findIndex((e) => {
+    const rightCoord = xScrollPosition.value + container.value.clientWidth;
+
+    if (e.start <= rightCoord && e.start + e.width >= rightCoord) return true;
+    return false;
+  });
+
+  const topIndex = props.totalContentSize.yAxis.items.findIndex((e) => {
+    if (
+      e.start <= yScrollPosition.value &&
+      e.start + e.width > yScrollPosition.value
+    )
+      return true;
+    return false;
+  });
+  let bottomIndex = props.totalContentSize.yAxis.items.findIndex((e) => {
+    const bottomCoord = yScrollPosition.value + container.value.clientHeight;
+    if (e.start <= bottomCoord && e.start + e.width >= bottomCoord) return true;
+    return false;
+  });
+
+  if (leftIndex >= 0 && rightIndex < 0)
+    rightIndex = props.totalContentSize.xAxis.items.length - 1;
+  if (topIndex >= 0 && bottomIndex < 0)
+    bottomIndex = props.totalContentSize.yAxis.items.length - 1;
+
+  let result = props.cells.map((cellRow, j: number) => {
+    return cellRow.map((cell, i: number) => {
+      return {
+        ...cell,
+        i,
+        j,
+      };
+    });
+  });
+  if (leftIndex >= 0 && rightIndex > leftIndex) {
+    result = result.map((e: any[]) => {
+      return e.slice(leftIndex, rightIndex + 1);
+    });
+    xTranslateValue = props.totalContentSize.xAxis.items[leftIndex].start;
+  }
+  if (topIndex >= 0 && bottomIndex > topIndex) {
+    result = result.slice(topIndex, bottomIndex + 1);
+    yTranslateValue = props.totalContentSize.yAxis.items[topIndex].start;
+  }
+
+  return {
+    data: result,
+    xTranslate: xTranslateValue,
+    yTranslate: yTranslateValue,
+  };
+});
+
+watch(
+  () => currentlyDisplayedValues.value,
+  () => {
+    xTranslate.value = currentlyDisplayedValues.value.xTranslate;
+    yTranslate.value = currentlyDisplayedValues.value.yTranslate;
+  }
+);
+
+const cellPropertiesModal = ref(null) as Ref<any>;
+const openCellProperties = async (cell) => {
+  await cellPropertiesModal.value?.run({ cell });
+};
 </script>
 <template>
-  <div class="cells_container" @scroll="handleScroll">
-    <div class="cell_row" v-for="(cellRow, j) in cells" :key="j">
+  <div class="cells_container" @scroll="handleScroll" ref="container">
+    <Teleport to="body">
+      <CellPropertiesModal ref="cellPropertiesModal" />
+    </Teleport>
+    <div :style="computedContainerStyles" class="virtual-scroll-container">
       <div
-        class="cell"
-        v-for="(cell, i) in cellRow"
-        :key="`${i}_${j}`"
-        :style="getCellStyle(i, j)"
+        class="cell_row"
+        v-for="(cellRow, j) in currentlyDisplayedValues.data"
+        :key="j"
+        :style="getRowStyles"
       >
-        {{ getCellValue(cell) }}
+        <CellDropdown
+          v-for="cell in cellRow"
+          :key="`${cell.i}_${cell.j}`"
+          :style="getCellStyle(cell.i, cell.j)"
+          class="cell"
+          @openCellProperties="openCellProperties(cell)"
+        >
+          <template v-slot="{}">
+            <div>
+              {{ getCellValue(cell) }}
+            </div>
+          </template>
+        </CellDropdown>
       </div>
     </div>
   </div>
 </template>
 <style>
 .cells_container {
-  display: flex;
-  flex-direction: column;
   overflow: auto;
+  height: 100%;
+  width: 100%;
 }
 
 .cell_row {
@@ -89,5 +218,9 @@ const getCellValue = (cell: any) => {
 
 .cell_row:last-child > .cell {
   border-bottom: 1px silver solid;
+}
+
+.virtual-scroll-container {
+  overflow: hidden;
 }
 </style>
