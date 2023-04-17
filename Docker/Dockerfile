@@ -1,6 +1,9 @@
 FROM node:19-alpine3.16
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
 ENV NODE_ENV=production
-RUN mkdir -p /docker/artifact
-COPY ../dist /docker/artifact/
-RUN  npm install --global http-server
-CMD [ "http-server", "/docker/artifact/" ]
+RUN  npm install -global http-server
+USER nonroot
+RUN mkdir -p /home/nonroot/docker/artifact
+COPY dist /home/nonroot/docker/artifact/
+CMD [ "http-server", "/home/nonroot/docker/artifact/" ]
