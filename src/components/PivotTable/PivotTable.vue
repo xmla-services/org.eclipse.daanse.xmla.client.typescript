@@ -11,7 +11,7 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { optionalArrayToArray } from "@/utils/helpers";
-import { onMounted, provide, ref, watch } from "vue";
+import { onMounted, provide, ref, watch, type Ref } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -20,6 +20,7 @@ import { useAppSettingsStore } from "@/stores/AppSettings";
 import { storeToRefs } from "pinia";
 import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useChartStore } from "@/stores/Chart";
+import { useElementSize } from '@vueuse/core';
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -34,6 +35,8 @@ export default {
     const api = appSettings.getApi();
     const treeViewStore = useTreeViewDataStore();
     const chartStore = useChartStore();
+    const rowsContainer = ref(null) as Ref<any>;
+    const { width: rowsWidth } = useElementSize(rowsContainer);
 
     const colStyles = ref([...pivotTableStore.state.styles.columns] as any[]);
     const rowsStyles = ref([...pivotTableStore.state.styles.rows] as any[]);
@@ -187,6 +190,8 @@ export default {
       cells,
       rows,
       columns,
+      rowsContainer,
+      rowsWidth,
     };
   },
   computed: {
@@ -232,11 +237,13 @@ export default {
         },
         { items: [], totalWidth: 0 }
       );
+
       return {
         xAxis: xAxisDesc,
         yAxis: yAxisDesc,
       };
     },
+
   },
   methods: {
     onResize(e: MouseEvent) {
@@ -263,9 +270,11 @@ export default {
         :columnsOffset="columnsOffset"
         :columns="columns"
         :totalContentSize="totalContentSize"
+        :leftPadding="rowsWidth"
       ></ColumnsArea>
       <div class="d-flex flex-row overflow-hidden vertical-scroll">
         <RowsArea
+          ref="rowsContainer"
           :rows="rows"
           :rowsStyles="rowsStyles"
           :totalContentSize="totalContentSize"
