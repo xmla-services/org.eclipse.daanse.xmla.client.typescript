@@ -26,6 +26,7 @@ const props = defineProps([
   "columnsStyles",
   "columnsOffset",
   "totalContentSize",
+  "leftPadding",
 ]);
 const eventBus = inject("eventBus") as TinyEmitter;
 const setParentStylesValue = inject("setColumnsStyles") as (
@@ -37,8 +38,9 @@ const scrollPosition = ref(0);
 const translate = ref(0);
 
 const getColumnHeaderOffsetStyle = () => {
+  console.log(props.leftPadding);
   return {
-    "margin-left": `${props.columnsOffset}px`,
+    "margin-left": `${props.leftPadding}px`,
   };
 };
 
@@ -50,6 +52,7 @@ const getColumnHeaderStyle = (i: number) => {
 };
 
 let maxLevels = [] as number[];
+let minLevels = [] as number[];
 
 watch(
   () => props.columns,
@@ -66,13 +69,29 @@ watch(
   }
 );
 
+watch(
+  () => props.columns,
+  () => {
+    minLevels = [];
+    for (let i = 0; i < props.columns[0]?.length; i++) {
+      for (let j = 0; j < props.columns.length; j++) {
+        const level = parseInt(props.columns[j][i].LNum);
+        if (minLevels[i] === void 0 || minLevels[i] >= level) {
+          minLevels[i] = level;
+        }
+      }
+    }
+  }
+);
+
 const getColumnMemberStyle = (i: number, j: number) => {
   const currentMember = props.columns?.[i]?.[j];
   const nextMember = props.columns?.[i - 1]?.[j];
 
   const styles = {} as { [key: string]: string };
-  styles["padding-top"] = `${currentMember.LNum * 5 + 5}px`;
-  styles["height"] = `${30 + maxLevels[j] * 5}px`;
+  const levelCount = minLevels[j] === 0 ? maxLevels[j] + 1 : maxLevels[j];
+
+  styles["height"] = `${30 * levelCount}px`;
 
   if (!currentMember || !nextMember) return styles;
 
@@ -80,6 +99,16 @@ const getColumnMemberStyle = (i: number, j: number) => {
     styles["border-left"] = "none";
   }
   return styles;
+};
+
+const getColumnMemberOffsetItems = (i: number, j: number) => {
+  const currentMember = props.columns?.[i]?.[j];
+
+  let result = "";
+  for (let ind = minLevels[j]; ind < currentMember.LNum; ind++) {
+    result += "<div class='columnMemberOffset'></div>";
+  }
+  return result;
 };
 
 const getColumnMemberCaption = (i: number, j: number) => {
@@ -276,36 +305,41 @@ watch(
                 class="columnMember"
                 :style="getColumnMemberStyle(member.i, j)"
               >
-                <template v-if="!sameAsPrevious(member.i, j)">
-                  <div
-                    v-if="
-                      getColChildCount(member.i, j) &&
-                      !hasChildrenDisplayed(member.i, j)
-                    "
-                    class="expandIcon"
-                  >
-                    <va-icon
-                      name="chevron_right"
-                      size="small"
-                      @click="expand(member)"
-                    />
+                <div class="columnMemberContentWrapper">
+                  <div v-html="getColumnMemberOffsetItems(member.i, j)"></div>
+                  <div class="columnMemberContent">
+                    <template v-if="!sameAsPrevious(member.i, j)">
+                      <div
+                        v-if="
+                          getColChildCount(member.i, j) &&
+                          !hasChildrenDisplayed(member.i, j)
+                        "
+                        class="expandIcon"
+                      >
+                        <va-icon
+                          name="chevron_right"
+                          size="small"
+                          @click="expand(member)"
+                        />
+                      </div>
+                      <div
+                        v-else-if="
+                          getColChildCount(member.i, j) &&
+                          colIsExpanded(member.i, j)
+                        "
+                        class="expandIcon"
+                      >
+                        <va-icon
+                          name="expand_more"
+                          size="small"
+                          @click="collapse(member)"
+                        />
+                      </div>
+                    </template>
+                    <div class="columnMemberHeader">
+                      {{ getColumnMemberCaption(member.i, j) }}
+                    </div>
                   </div>
-                  <div
-                    v-else-if="
-                      getColChildCount(member.i, j) &&
-                      colIsExpanded(member.i, j)
-                    "
-                    class="expandIcon"
-                  >
-                    <va-icon
-                      name="expand_more"
-                      size="small"
-                      @click="collapse(member)"
-                    />
-                  </div>
-                </template>
-                <div class="columnMemberHeader">
-                  {{ getColumnMemberCaption(member.i, j) }}
                 </div>
               </div>
               <div
@@ -355,10 +389,26 @@ watch(
 .columnMember {
   display: flex;
   border-top: 1px silver solid;
-  padding-left: 3px;
   border-left: 1px silver solid;
   width: 100%;
   height: 100%;
+}
+
+.columnMemberContent {
+  display: flex;
+  padding-left: 3px;
+  height: 30px;
+}
+
+.columnMemberContentWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.columnMemberOffset {
+  height: 30px;
+  border-bottom: 1px dashed lightgray;
 }
 
 .columnMemberHeader {

@@ -50,13 +50,48 @@ const getRowsHeaderContainerStyle = () => {
   };
 };
 
+let minLevels = [] as number[];
+let maxLevels = [] as number[];
+
+watch(
+  () => props.rows,
+  () => {
+    maxLevels = [];
+    for (let j = 0; j < props.rows.length; j++) {
+      for (let i = 0; i < props.rows[0]?.length; i++) {
+        const level = parseInt(props.rows[j][i].LNum);
+        if (maxLevels[i] === void 0 || maxLevels[i] <= level) {
+          maxLevels[i] = level;
+        }
+      }
+    }
+  }
+);
+
+watch(
+  () => props.rows,
+  () => {
+    minLevels = [];
+    for (let j = 0; j < props.rows.length; j++) {
+      for (let i = 0; i < props.rows[0]?.length; i++) {
+        const level = parseInt(props.rows[j][i].LNum);
+        if (minLevels[i] === void 0 || minLevels[i] >= level) {
+          minLevels[i] = level;
+        }
+      }
+    }
+  }
+);
+
 const getRowMemberStyle = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
   const nextMember = props.rows?.[i - 1]?.[j];
 
   const styles = {} as { [key: string]: string };
-  styles["padding-left"] = `${currentMember.LNum * 15 + 5}px`;
 
+  const levelCount = minLevels[j] === 0 ? maxLevels[j] + 1 : maxLevels[j];
+
+  styles["width"] = `${150 * levelCount}px`;
   if (!currentMember || !nextMember) return styles;
 
   if (currentMember.UName === nextMember.UName) {
@@ -71,6 +106,16 @@ const getRowHeaderStyle = (i: number) => {
 
     transform: `translate(0, ${translate.value}px)`,
   };
+};
+
+const getRowMemberOffsetItems = (i: number, j: number) => {
+  const currentMember = props.rows?.[i]?.[j];
+
+  let result = "";
+  for (let ind = minLevels[j]; ind < currentMember.LNum; ind++) {
+    result += "<div class='rowMemberOffset'></div>";
+  }
+  return result;
 };
 
 const getRowChildCount = (i: number, j: number) => {
@@ -241,35 +286,41 @@ watch(
         <template v-slot="{}">
           <div class="d-flex">
             <div class="rowMember" :style="getRowMemberStyle(member.i, j)">
-              <template v-if="!sameAsPrevious(member.i, j)">
-                <div
-                  v-if="
-                    getRowChildCount(member.i, j) &&
-                    !hasChildrenDisplayed(member.i, j)
-                  "
-                  class="expandIcon"
-                >
-                  <va-icon
-                    name="chevron_right"
-                    size="small"
-                    @click="expand(member)"
-                  />
+              <div class="rowMemberContentWrapper">
+                <div v-html="getRowMemberOffsetItems(member.i, j)"></div>
+                <div class="rowMemberContent">
+                  <template v-if="!sameAsPrevious(member.i, j)">
+                    <div
+                      v-if="
+                        getRowChildCount(member.i, j) &&
+                        !hasChildrenDisplayed(member.i, j)
+                      "
+                      class="expandIcon"
+                    >
+                      <va-icon
+                        name="chevron_right"
+                        size="small"
+                        @click="expand(member)"
+                      />
+                    </div>
+                    <div
+                      v-else-if="
+                        getRowChildCount(member.i, j) &&
+                        rowIsExpanded(member.i, j)
+                      "
+                      class="expandIcon"
+                    >
+                      <va-icon
+                        name="expand_more"
+                        size="small"
+                        @click="collapse(member)"
+                      />
+                    </div>
+                  </template>
+                  <div class="rowMemberCaption">
+                    {{ getRowMemberCaption(member.i, j) }}
+                  </div>
                 </div>
-                <div
-                  v-else-if="
-                    getRowChildCount(member.i, j) && rowIsExpanded(member.i, j)
-                  "
-                  class="expandIcon"
-                >
-                  <va-icon
-                    name="expand_more"
-                    size="small"
-                    @click="collapse(member)"
-                  />
-                </div>
-              </template>
-              <div class="rowMemberCaption">
-                {{ getRowMemberCaption(member.i, j) }}
               </div>
             </div>
             <div
@@ -306,6 +357,19 @@ watch(
   border-left: 0;
   height: v-bind(DEFAULT_ROW_HEIGHT_CSS);
   line-height: v-bind(DEFAULT_ROW_HEIGHT_CSS);
+  border-top: 1px silver solid;
+}
+
+.rowMemberOffset {
+  width: 150px;
+  height: 100%;
+  border-right: 1px dashed lightgrey;
+}
+
+.rowMemberContentWrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
 }
 
 .row_dragAreaTop {
@@ -330,12 +394,8 @@ watch(
 
 .rowMember {
   display: flex;
-  width: 150px;
   border-left: 1px silver solid;
-  border-top: 1px silver solid;
-  padding-left: 3px;
   align-items: flex-start;
-  padding-top: 5px;
 }
 
 .rowMemberCaption {
@@ -344,6 +404,12 @@ watch(
   white-space: nowrap;
   text-overflow: ellipsis;
   height: 100%;
+}
+
+.rowMemberContent {
+  width: 150px;
+  padding-left: 5px;
+  display: flex;
 }
 
 .expandIcon {
