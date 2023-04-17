@@ -31,7 +31,6 @@ const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const eventBus = inject("eventBus") as TinyEmitter;
 
-console.log(props.totalContentSize);
 
 const xScrollPosition = ref(0);
 const yScrollPosition = ref(0);
@@ -95,7 +94,6 @@ const currentlyDisplayedValues = computed(() => {
     return false;
   });
   let rightIndex = props.totalContentSize.xAxis.items.findIndex((e) => {
-    console.log(container.value.clientWidth, e);
     const rightCoord = xScrollPosition.value + container.value.clientWidth;
 
     if (e.start <= rightCoord && e.start + e.width >= rightCoord) return true;
