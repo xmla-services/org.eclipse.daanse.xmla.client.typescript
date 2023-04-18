@@ -12,7 +12,7 @@ Contributors: Smart City Jena
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 export default {
   name: "ServerSelectionModal",
@@ -24,19 +24,33 @@ export default {
 
     const { isOpened, run, close } = usePromisifiedModal(reset);
 
+    const ok = () => {
+      if (!serverUrl.value) return;
+      close(serverUrl.value);
+    };
+
+    const onKeyPress = (e) => {
+      if (e.key === "Enter") {
+        ok();
+      }
+    };
+
+    watch(isOpened, () => {
+      if (isOpened.value) {
+        window.addEventListener("keypress", onKeyPress);
+      } else {
+        window.removeEventListener("keypress", onKeyPress);
+      }
+    });
+
     return {
       serverUrl,
       isOpened,
       run,
       close,
       reset,
+      ok,
     };
-  },
-  methods: {
-    ok() {
-      if (!this.serverUrl) return;
-      this.close(this.serverUrl);
-    },
   },
 };
 </script>
