@@ -74,6 +74,28 @@ export default {
       }
     };
 
+    const ok = () => {
+      if (!selectedCube.value) return;
+      close({
+        cube: selectedCube.value,
+        catalog: selectedCatalog.value,
+      });
+    };
+
+    const onKeyPress = (e) => {
+      if (e.key === "Enter") {
+        ok();
+      }
+    };
+
+    watch(isOpened, () => {
+      if (isOpened.value) {
+        window.addEventListener("keypress", onKeyPress);
+      } else {
+        window.removeEventListener("keypress", onKeyPress);
+      }
+    });
+
     return {
       store,
       isOpened,
@@ -86,16 +108,8 @@ export default {
       catalogs,
       fetchingCatalogs,
       error,
+      ok
     };
-  },
-  methods: {
-    ok() {
-      if (!this.selectedCube) return;
-      this.close({
-        cube: this.selectedCube,
-        catalog: this.selectedCatalog,
-      });
-    },
   },
 };
 </script>
