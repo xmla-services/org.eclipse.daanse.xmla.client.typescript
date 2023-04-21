@@ -20,7 +20,7 @@
     "chartjs-plugin-autocolors": "^0.2.2",
     "chartjs-plugin-hierarchical": "^4.1.2",
     "lodash": "^4.17.21",
-    "pinia": "^2.0.34",
+    "pinia": "^2.0.35",
     "process": "^0.11.10",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "tiny-emitter": "^2.1.0",
