@@ -78,7 +78,6 @@ export default defineComponent({
             }
           });
         });
-        console.log(chart.data.datasets)
 
         chart.update();
       }, 100);
@@ -281,7 +280,13 @@ export default defineComponent({
       plugins:{
         legend:{
           display:true,
-          position:'right'
+          position:'right',
+          labels: {
+            usePointStyle: true,
+            font: {
+              size: 9
+            }
+          }
         }
       },
       scales: {
@@ -315,7 +320,6 @@ export default defineComponent({
     },
     myStyles() {
       const height = (this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
-      console.log(height)
       return {
         height: `${height}px`,
         position: "relative",
