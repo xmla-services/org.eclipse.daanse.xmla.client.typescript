@@ -10,13 +10,15 @@
 */
 import { useTreeViewDataStore } from "@/stores/TreeView";
 
-export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expandedMembers: any[]) {
+export function getRowsDrilldownRequestString(
+  rowsDrilldownMember: any,
+  expandedMembers: any[]
+) {
   const treeViewStore = useTreeViewDataStore();
 
   if (rowsDrilldownMember) {
     const uid = Math.random().toString(16).slice(2);
     const setSection = `SET [Row_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${rowsDrilldownMember.UName}), Descendants(${rowsDrilldownMember.UName})})))'`;
-
 
     const rowsMemberLevel = treeViewStore.levels.find(
       (e) => e.LEVEL_UNIQUE_NAME === rowsDrilldownMember.LName
@@ -49,23 +51,23 @@ export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expanded
       }
     }
 
-    if(expandedMembers) {
+    if (expandedMembers) {
       const rowsRootLevel = treeViewStore.levels.find((e) => {
         return (
-          e.HIERARCHY_UNIQUE_NAME === expandedMembers[0]?.HIERARCHY_UNIQUE_NAME &&
-          e.LEVEL_NUMBER === "0"
+          e.HIERARCHY_UNIQUE_NAME ===
+            expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
         );
       });
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (!hierarchizeString.length) {
-          hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`
+          hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
             DrilldownMember({{
               ${hierarchizeString}
             }}, {${expandedMembers[i].UName}})
-          `
+          `;
         }
       }
     }
@@ -75,7 +77,6 @@ export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expanded
         ${hierarchizeString}
       }), [Row_Dim_${uid}]))
     `;
-
 
     return {
       with: setSection,
@@ -92,14 +93,14 @@ export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expanded
     });
 
     for (let i = 0; i < expandedMembers.length; i++) {
-      if (i===0) {
-        hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`
+      if (i === 0) {
+        hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
       } else {
         hierarchizeString = `
           DrilldownMember({{
             ${hierarchizeString}
           }}, {${expandedMembers[i].UName}})
-        `
+        `;
       }
     }
     hierarchizeString = `
@@ -109,7 +110,7 @@ export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expanded
           ${hierarchizeString}
         )
       )`;
-    
+
     return {
       with: "",
       select: hierarchizeString,
@@ -117,13 +118,15 @@ export function getRowsDrilldownRequestString(rowsDrilldownMember: any, expanded
   }
 }
 
-export function getColsDrilldownRequestString(columnsDrilldownMember: any, expandedMembers: any[]) {
+export function getColsDrilldownRequestString(
+  columnsDrilldownMember: any,
+  expandedMembers: any[]
+) {
   const treeViewStore = useTreeViewDataStore();
 
   if (columnsDrilldownMember) {
     const uid = Math.random().toString(16).slice(2);
     const setSection = `SET [Col_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${columnsDrilldownMember.UName}), Descendants(${columnsDrilldownMember.UName})})))'`;
-
 
     const colsMemberLevel = treeViewStore.levels.find(
       (e) => e.LEVEL_UNIQUE_NAME === columnsDrilldownMember.LName
@@ -155,23 +158,23 @@ export function getColsDrilldownRequestString(columnsDrilldownMember: any, expan
       }
     }
 
-    if(expandedMembers) {
+    if (expandedMembers) {
       const colsRootLevel = treeViewStore.levels.find((e) => {
         return (
-          e.HIERARCHY_UNIQUE_NAME === expandedMembers[0]?.HIERARCHY_UNIQUE_NAME &&
-          e.LEVEL_NUMBER === "0"
+          e.HIERARCHY_UNIQUE_NAME ===
+            expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
         );
       });
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (!hierarchizeString.length) {
-          hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`
+          hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
             DrilldownMember({{
               ${hierarchizeString}
             }}, {${expandedMembers[i].UName}})
-          `
+          `;
         }
       }
     }
@@ -197,14 +200,14 @@ export function getColsDrilldownRequestString(columnsDrilldownMember: any, expan
     });
 
     for (let i = 0; i < expandedMembers.length; i++) {
-      if (i===0) {
-        hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`
+      if (i === 0) {
+        hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
       } else {
         hierarchizeString = `
           DrilldownMember({{
             ${hierarchizeString}
           }}, {${expandedMembers[i].UName}})
-        `
+        `;
       }
     }
     hierarchizeString = `
@@ -214,7 +217,7 @@ export function getColsDrilldownRequestString(columnsDrilldownMember: any, expan
           ${hierarchizeString}
         )
       )`;
-    
+
     return {
       with: "",
       select: hierarchizeString,

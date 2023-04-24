@@ -16,11 +16,12 @@ import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
 import CellsArea from "./Areas/CellsArea.vue";
+import DrillthroughModal from "../Modals/DrillthroughModal.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { storeToRefs } from "pinia";
 import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useChartStore } from "@/stores/Chart";
-import { useElementSize } from '@vueuse/core';
+import { useElementSize } from "@vueuse/core";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -192,6 +193,7 @@ export default {
       columns,
       rowsContainer,
       rowsWidth,
+      DrillthroughModal,
     };
   },
   computed: {
@@ -243,7 +245,6 @@ export default {
         yAxis: yAxisDesc,
       };
     },
-
   },
   methods: {
     onResize(e: MouseEvent) {
@@ -252,8 +253,14 @@ export default {
     onStopResize() {
       this.eventBus.emit("onStopResize");
     },
+    drillthrough(cell) {
+      (this.$refs.drillthroughModal as any)?.run({
+        rows: this.rows[cell.j],
+        columns: this.columns[cell.i],
+      });
+    },
   },
-  components: { RowsArea, ColumnsArea, CellsArea },
+  components: { RowsArea, ColumnsArea, CellsArea, DrillthroughModal },
 };
 </script>
 
@@ -264,6 +271,7 @@ export default {
     @mouseup="onStopResize"
     @mouseleave="onStopResize"
   >
+    <DrillthroughModal ref="drillthroughModal" />
     <div class="pivotTable">
       <ColumnsArea
         :columnsStyles="colStyles"
@@ -284,6 +292,7 @@ export default {
           :colsStyles="colStyles"
           :totalContentSize="totalContentSize"
           :cells="cells"
+          @drillthrough="drillthrough"
         ></CellsArea>
       </div>
     </div>

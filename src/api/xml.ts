@@ -617,6 +617,29 @@ class XMLAApi {
     return array[0];
   }
 
+  public async getDrillthroughMDX(mdx: string): Promise<any> {
+    const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
+      Headers: {
+        Session: {
+          __attrs: {
+            xmlns: "urn:schemas-microsoft-com:xml-analysis",
+            SessionId: this.sessionId,
+          },
+        },
+      },
+      Command: {
+        Statement: mdx,
+      },
+      Properties: {
+        PropertyList: {
+          Format: "Tabular",
+        },
+      },
+    });
+
+    return propertiesResponce;
+  }
+
   public async endSession(): Promise<void> {
     await this.SOAPClient?.ExecuteAsync({
       Headers: {

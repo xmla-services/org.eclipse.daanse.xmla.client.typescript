@@ -26,11 +26,12 @@ const props = defineProps([
   "totalContentSize",
 ]);
 
+const emit = defineEmits(["drillthrough"]);
+
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const eventBus = inject("eventBus") as TinyEmitter;
-
 
 const xScrollPosition = ref(0);
 const yScrollPosition = ref(0);
@@ -158,6 +159,10 @@ const cellPropertiesModal = ref(null) as Ref<any>;
 const openCellProperties = async (cell) => {
   await cellPropertiesModal.value?.run({ cell });
 };
+
+const drillthrough = (cell) => {
+  emit("drillthrough", cell);
+};
 </script>
 <template>
   <div class="cells_container" @scroll="handleScroll" ref="container">
@@ -177,6 +182,7 @@ const openCellProperties = async (cell) => {
           :style="getCellStyle(cell.i, cell.j)"
           class="cell"
           @openCellProperties="openCellProperties(cell)"
+          @drillthrough="drillthrough(cell)"
         >
           <template v-slot="{}">
             <div>

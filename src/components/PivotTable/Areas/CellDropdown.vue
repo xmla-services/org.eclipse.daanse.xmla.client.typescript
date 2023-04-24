@@ -12,7 +12,7 @@ Contributors: Smart City Jena
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 
-defineEmits(["openCellProperties"]);
+defineEmits(["openCellProperties", "drillthrough"]);
 
 const opened = ref(false);
 const eventBus = inject("eventBus") as TinyEmitter;
@@ -52,6 +52,15 @@ watch(opened, () => {
           @click="$emit('openCellProperties')"
         >
           Open Cell Properties
+        </va-button>
+        <va-button
+          preset="plain"
+          class="dropdown_button"
+          text-color="#000"
+          :hover-opacity="0.5"
+          @click="$emit('drillthrough')"
+        >
+          Drillthrough
         </va-button>
       </va-button-group>
     </va-dropdown-content>
