@@ -78,6 +78,7 @@ export default defineComponent({
             }
           });
         });
+        console.log(chart.data.datasets)
 
         chart.update();
       }, 100);
@@ -276,13 +277,21 @@ export default defineComponent({
 
     const chartOptions = {
       responsive: true,
+      maintainAspectRatio: false,
+      plugins:{
+        legend:{
+          display:true,
+          position:'right'
+        }
+      },
       scales: {
         x: {
           type: "hierarchical",
+          padding:5
         },
       },
       layout: {
-        padding: 100,
+        padding: 50,
       },
     };
 
@@ -306,6 +315,7 @@ export default defineComponent({
     },
     myStyles() {
       const height = (this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      console.log(height)
       return {
         height: `${height}px`,
         position: "relative",
