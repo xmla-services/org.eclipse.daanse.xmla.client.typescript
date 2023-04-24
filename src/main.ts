@@ -39,7 +39,8 @@ import {
   VaDropdown,
   VaDropdownContent,
   VaButtonGroup,
-  VaDivider
+  VaDivider,
+  VaDataTable,
 } from "vuestic-ui";
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";
@@ -87,6 +88,7 @@ app.use(
       VaDropdownContent,
       VaButtonGroup,
       VaDivider,
+      VaDataTable,
     },
     config: {
       colors: {
