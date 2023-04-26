@@ -15,13 +15,34 @@ import QuertyDesignerLayout from "./components/QuertyDesignerLayout.vue";
 import QuertyDesigner from "./components/QueryDesigner/QueryDesigner.vue";
 import PivotTable from "./components/PivotTable/PivotTable.vue";
 import Chart from "./components/Charts/ChartModule.vue";
+import {onMounted, ref} from "vue";
+import axios from "axios";
+import InfoBox from './components/Modals/InfoBox.vue';
+
 
 
 console.log("https://ssemenkoff.dev/emondrian/xmla");
+
+const showInfoBox = ref(false);
+const  infoUri= ref(null);
+
+onMounted(async () => {
+  try {
+    const base = window.location.protocol+'//'+window.location.host;
+    const config = (await axios.get(`config/config.json`)).data;
+    if(config && config.INFO_CHECK_URI && config.INFO_CHECK_URI){
+      infoUri.value= config.INFO_BASE_URI;
+      showInfoBox.value = (await axios.get(config.INFO_CHECK_URI)).status == 200
+    }
+  }catch (e){
+    console.log(e)
+  }
+})
 </script>
 
+
 <template>
-  <test></test>
+  <InfoBox v-if="showInfoBox" :infoUri="infoUri||''"></InfoBox>
   <MainLayout>
     <template #left_container>
       <QuertyDesignerLayout layout="vertical">

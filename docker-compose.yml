@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  daanse_client:
+    build:
+      context: .
+      dockerfile: ./Docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - INFO_CHECK_URI=http://192.168.0.122:3001/info
+      - INFO_BASE_URI=http://192.168.0.122:3001/info.html
+
