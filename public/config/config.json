@@ -1,0 +1,4 @@
+{
+  "INFO_CHECK_URI":"http://127.0.0.1:3001/info",
+  "INFO_BASE_URI":"http://127.0.0.1:3001/info.html"
+}
