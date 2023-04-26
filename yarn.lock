@@ -584,10 +584,10 @@
   resolved "https://registry.npmjs.org/@vue/test-utils/-/test-utils-2.2.7.tgz"
   integrity sha512-BMuoruUFTEqhLoOgsMcgNVMiByYbfHCKGr2C4CPdGtz/affUtDVX5zr1RnPuq0tYSiaqq+Enw5voUpG6JY8Q7g==
 
-"@vue/tsconfig@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@vue/tsconfig/-/tsconfig-0.2.0.tgz#25560eda1894430c18a84f0332cd55aa4abea687"
-  integrity sha512-T1bRYMEanZ7PYjUQskcI5wWyXoUKnubjlySPKaDYcU+bPLaupxSYSwOTEXr7D91SMC1K6tnbKmWj0Z+2F5VSzg==
+"@vue/tsconfig@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@vue/tsconfig/-/tsconfig-0.3.2.tgz#612ba0b6aefde5ac1a513545eee7d4ed01c407f5"
+  integrity sha512-jWzZbGyrZAEbHYGn0kPzJ+MMtIkIxb0+hL5+RghBowyOxMRs9jMdp5XvpXz3wgCzjRZiUucy29042HBe9cxoYA==
 
 "@vueuse/core@^10.1.0":
   version "10.1.0"
