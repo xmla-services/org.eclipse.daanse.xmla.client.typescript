@@ -63,6 +63,8 @@ header:
     - 'vite.config.ts'
     - 'yarn.lock'
     - 'Docker/Dockerfile'
+    - 'Docker/start.sh'
+    - 'docker-compose.yml'
     - 'src/generated/**'
     - 'public/def/**'
 
