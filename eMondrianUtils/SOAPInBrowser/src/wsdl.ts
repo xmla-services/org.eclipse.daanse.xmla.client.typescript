@@ -493,9 +493,8 @@ export class WSDL {
     })
 
     // p.on('text', function(text) {
-    pHandler.onCharacters(function (text: string | number | any[] | Date) {
-      text = trim(text as string)
-      if (!text.length) return
+    pHandler.onCharacters(function (text: string) {
+      if (!trim(text).length) return;
 
       const top = stack[stack.length - 1]
       const name = splitNSName(top.schema).name
