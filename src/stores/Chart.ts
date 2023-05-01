@@ -37,6 +37,7 @@ export const useChartStore = defineStore("Chart", () => {
   function getMDX() {
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
+    const measures = queryDesignerStore.measures;
     const settings = state.value.settings;
 
     const mdxRequest = getMdxRequest(
@@ -47,6 +48,7 @@ export const useChartStore = defineStore("Chart", () => {
       state.value.columnsExpandedMembers,
       rows,
       columns,
+      measures,
       settings,
       treeViewStore.properties
     );
