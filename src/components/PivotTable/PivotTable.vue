@@ -22,6 +22,7 @@ import { storeToRefs } from "pinia";
 import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useChartStore } from "@/stores/Chart";
 import { useElementSize } from "@vueuse/core";
+import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -35,6 +36,7 @@ export default {
     const appSettings = useAppSettingsStore();
     const api = appSettings.getApi();
     const treeViewStore = useTreeViewDataStore();
+    const queryDesignerState = useQueryDesignerStore();
     const chartStore = useChartStore();
     const rowsContainer = ref(null) as Ref<any>;
     const { width: rowsWidth } = useElementSize(rowsContainer);
@@ -134,8 +136,9 @@ export default {
 
       const mdxResponce = await api.getMDX(mdx);
       const axis0 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-          ?.Tuple
+        optionalArrayToArray(
+          mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis
+        )?.[0]?.Tuples?.Tuple
       );
       const axis1 = optionalArrayToArray(
         mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
@@ -145,24 +148,35 @@ export default {
         mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
       );
 
-      columns.value = axis0.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      rows.value = axis1.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-      });
-      cells.value = parseCells(cellsArray, columns.value, rows.value);
+      if (!queryDesignerState.columns.length) {
+        columns.value = axis1.map((e: { Member: any }) => {
+          return optionalArrayToArray(e.Member);
+        });
+        rows.value = axis0.map((e: { Member: any }) => {
+          return optionalArrayToArray(e.Member);
+        });
+        cells.value = parseCells(cellsArray, columns.value, rows.value);
+      } else {
+        columns.value = axis0.map((e: { Member: any }) => {
+          return optionalArrayToArray(e.Member);
+        });
+        rows.value = axis1.map((e: { Member: any }) => {
+          return optionalArrayToArray(e.Member);
+        });
+        cells.value = parseCells(cellsArray, columns.value, rows.value);
+      }
+
+      console.log(cells);
 
       appSettings.removeLoadingState(loadingId);
     };
 
     function parseCells(cells: any[], columns: any[], rows: any[]) {
       if (!cells.length) return [];
-      if (!rows.length || !columns.length) {
-        if (rows.length === columns.length) {
-          return [cells];
-        }
-        return [];
+      if (!rows.length) {
+        return [cells];
+      } else if (!columns.length) {
+        return cells.map((e) => [e]);
       }
       const cp = [...cells] as any[];
 
@@ -181,6 +195,20 @@ export default {
     onMounted(async () => {
       await getPivotTableData();
     });
+
+    watch(
+      () => queryDesignerState.rows,
+      async () => {
+        await getPivotTableData();
+      }
+    );
+
+    watch(
+      () => queryDesignerState.columns,
+      async () => {
+        await getPivotTableData();
+      }
+    );
 
     return {
       pivotTableStore,

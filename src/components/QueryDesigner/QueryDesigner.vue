@@ -25,6 +25,7 @@ export default {
       area: "filters" as "rows" | "columns" | "filters",
       e: null,
       hasCache: false,
+      cancelRemoving: false,
     });
 
     return {
@@ -36,6 +37,13 @@ export default {
     changeItems(area: "rows" | "columns" | "filters", e: any) {
       const { added, moved, removed } = e;
       if (added) {
+        if (area === "filters") {
+          if (added.element.type === "Values") {
+            this.addedOperationCache.cancelRemoving = true;
+            return;
+          }
+        }
+
         const element: HierarchyTreeItem = added.element;
         const newIndex = added.newIndex;
         const duplicate = this.queryDesignerStore.hierarchyUniqueNames.find(
@@ -52,7 +60,7 @@ export default {
 
         const arrayBefore = areaContent.slice(0, newIndex);
         const arrayAfter = areaContent.slice(newIndex);
-        const newElement = {
+        const newElement: HierarchyTreeItem = {
           originalItem: element.originalItem,
           id: element.id,
           caption: element.caption,
@@ -64,13 +72,18 @@ export default {
         };
 
         this.queryDesignerStore[area] = [
-          ...arrayBefore,
+          ...(arrayBefore as HierarchyTreeItem[]),
           newElement,
-          ...arrayAfter,
+          ...(arrayAfter as HierarchyTreeItem[]),
         ];
       }
       // Event only occurs when moving item from one area to another
       if (removed) {
+        if (this.addedOperationCache.cancelRemoving) {
+          this.addedOperationCache.cancelRemoving = false;
+          return;
+        }
+
         const areaContent = this.queryDesignerStore[area];
         const index = areaContent.findIndex((e) => e.id === removed.element.id);
         areaContent.splice(index, 1);
@@ -128,6 +141,18 @@ export default {
         if (duplicate) {
           return;
         }
+        if (this.queryDesignerStore.measures.length === 1) {
+          this.queryDesignerStore.columns.push({
+            type: "Values",
+            id: "Values",
+            children: [],
+            caption: "Values",
+            originalItem: {
+              HIERARCHY_UNIQUE_NAME: "Values",
+            },
+            filters: null,
+          });
+        }
 
         const arrayBefore = areaContent.slice(0, newIndex);
         const arrayAfter = areaContent.slice(newIndex);
@@ -183,6 +208,17 @@ export default {
       if (!event) {
         const areaContent = this.queryDesignerStore[area];
         const index = areaContent.findIndex((e) => e.id === item.id);
+
+        if (area === "measures") {
+          if (areaContent.length === 2) {
+            this.queryDesignerStore["rows"] = this.queryDesignerStore[
+              "rows"
+            ].filter((e) => (e as any).type !== "Values");
+            this.queryDesignerStore["columns"] = this.queryDesignerStore[
+              "columns"
+            ].filter((e) => (e as any).type !== "Values");
+          }
+        }
         if (index >= 0) {
           areaContent.splice(index, 1);
         }
@@ -285,7 +321,7 @@ export default {
             <template #item="{ element }">
               <va-chip
                 :model-value="true"
-                closeable
+                :closeable="element.type !== 'Values'"
                 @update:model-value="remove('columns', element, $event)"
               >
                 <div class="d-flex chip_caption">
@@ -293,6 +329,7 @@ export default {
                     {{ element.caption }}
                   </span>
                   <va-icon
+                    v-if="element.type !== 'Values'"
                     class="filter-icon ml-2"
                     name="filter_list"
                     size="small"
@@ -320,7 +357,7 @@ export default {
             <template #item="{ element }">
               <va-chip
                 :model-value="true"
-                closeable
+                :closeable="element.type !== 'Values'"
                 @update:model-value="remove('rows', element, $event)"
               >
                 <div class="d-flex chip_caption">
@@ -328,6 +365,7 @@ export default {
                     {{ element.caption }}
                   </span>
                   <va-icon
+                    v-if="element.type !== 'Values'"
                     class="filter-icon ml-2"
                     name="filter_list"
                     size="small"

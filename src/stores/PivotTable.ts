@@ -41,6 +41,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
   function getMDX() {
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
+    const measures = queryDesignerStore.measures;
     const pivotTableSettings = state.value.settings;
 
     const mdxRequest = getMdxRequest(
@@ -51,6 +52,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       state.value.columnsExpandedMembers,
       rows,
       columns,
+      measures,
       pivotTableSettings,
       treeViewStore.properties
     );

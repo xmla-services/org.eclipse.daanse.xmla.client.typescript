@@ -11,12 +11,23 @@
 import { defineStore } from "pinia";
 import type { HierarchyTreeItem, MeasureTreeItem } from "./TreeViewItems";
 
+export interface ValuesItem {
+  id: "Values";
+  type: "Values";
+  caption: "Values";
+  originalItem: {
+    HIERARCHY_UNIQUE_NAME: "Values";
+  };
+  filters: null;
+  children: [];
+}
+
 export const useQueryDesignerStore = defineStore("queryDesignerStore", {
   state: () => {
     return {
       filters: <HierarchyTreeItem[]>[],
       rows: <HierarchyTreeItem[]>[],
-      columns: <HierarchyTreeItem[]>[],
+      columns: <(HierarchyTreeItem | ValuesItem)[]>[],
       measures: <MeasureTreeItem[]>[],
       manualUpdate: false,
     };

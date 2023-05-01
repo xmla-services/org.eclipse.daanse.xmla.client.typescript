@@ -141,8 +141,10 @@ export default defineComponent({
 
       datasets.value = rows.value.map((col, ind) => {
         const data = columns.value.map((e, i) => {
-          if (typeof cells.value[ind][i].FmtValue === "object") return 0;
-          return parseFloat(cells.value[ind][i].FmtValue.replaceAll(",", ""));
+          const formatedValue =
+            cells.value[ind][i].FmtValue || cells.value[ind][i].Value || "";
+          if (formatedValue === "object") return 0;
+          return parseFloat(formatedValue.replaceAll(",", ""));
         });
 
         return {
@@ -277,22 +279,22 @@ export default defineComponent({
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      plugins:{
-        legend:{
-          display:true,
-          position:'right',
+      plugins: {
+        legend: {
+          display: true,
+          position: "right",
           labels: {
             usePointStyle: true,
             font: {
-              size: 9
-            }
-          }
-        }
+              size: 9,
+            },
+          },
+        },
       },
       scales: {
         x: {
           type: "hierarchical",
-          padding:5
+          padding: 5,
         },
       },
       layout: {
