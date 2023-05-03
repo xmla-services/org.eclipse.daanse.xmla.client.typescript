@@ -67,5 +67,7 @@ header:
     - 'docker-compose.yml'
     - 'src/generated/**'
     - 'public/def/**'
+    - 'nightwatch/**'
+    - 'nightwatch.conf.js'
 
   comment: always
