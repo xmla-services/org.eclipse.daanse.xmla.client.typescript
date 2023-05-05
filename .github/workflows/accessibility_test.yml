@@ -1,0 +1,46 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Accessibility Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: yarn-install
+        run: yarn install
+      - run: sudo apt-get install xvfb
+
+      - name: Run Nightwatch tests
+        run: xvfb-run --auto-servernum npm run test.axe -- --env chrome
+        env:
+          TEST_RESULTS_PATH: ${{ github.workspace }}/tests_output/axe.json
+
+      - name: Archive test artifacts
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: test_results
+          path: |
+            tests_output
+
+  
+
+
