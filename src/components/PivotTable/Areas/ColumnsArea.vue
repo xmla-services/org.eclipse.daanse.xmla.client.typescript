@@ -38,7 +38,6 @@ const scrollPosition = ref(0);
 const translate = ref(0);
 
 const getColumnHeaderOffsetStyle = () => {
-  console.log(props.leftPadding);
   return {
     "margin-left": `${props.leftPadding}px`,
   };
@@ -139,7 +138,7 @@ const hasChildrenDisplayed = (i: number, j: number) => {
 
   if (
     currentHierarchyMembers.some(
-      (e) => e.PARENT_UNIQUE_NAME === currentMember.UName
+      (e) => e && e.PARENT_UNIQUE_NAME === currentMember.UName
     )
   ) {
     return true;
@@ -233,6 +232,13 @@ const currentlyDisplayedValues = computed(() => {
 
   let translateValue = translate.value;
   let result = props.columns.map((columnMembers, i) => {
+    if (columnMembers.isProperty) {
+      return {
+        ...columnMembers,
+        i,
+      };
+    }
+
     return columnMembers.map((member) => {
       return {
         ...member,
@@ -267,6 +273,21 @@ const currentlyDisplayedValues = computed(() => {
   };
 });
 
+const showMemberProperties = (member) => {
+  state.membersWithProps.push(member.HIERARCHY_UNIQUE_NAME);
+};
+
+const hideMemberProperties = (member) => {
+  const indexToRemove = state.membersWithProps.indexOf(
+    (e) => e === member.HIERARCHY_UNIQUE_NAME
+  );
+  state.membersWithProps.splice(indexToRemove, 1);
+};
+
+const isMemberPropsVisible = (member) => {
+  return state.membersWithProps.includes(member.HIERARCHY_UNIQUE_NAME);
+};
+
 watch(
   () => currentlyDisplayedValues.value,
   () => {
@@ -287,17 +308,30 @@ watch(
       <div
         class="columnHeader"
         v-for="column in currentlyDisplayedValues.data"
-        :key="column[0].i"
-        :style="getColumnHeaderStyle(column[0].i)"
+        :key="column.isProperty ? column.i : column[0].i"
+        :style="
+          getColumnHeaderStyle(column.isProperty ? column.i : column[0].i)
+        "
       >
+        <template v-if="column.isProperty">
+          <div
+            class="columnMember columnMemberContent columnMemberHeader propertyColumn"
+          >
+            {{ column.PROPERTY_NAME }}
+          </div>
+        </template>
         <MemberDropdown
+          v-else
           v-for="(member, j) in column"
           :key="member.UNAME"
           class="columnMemberWrapper"
           :drillupDisabled="member.LNum === '0'"
+          :propertiesShown="isMemberPropsVisible(member)"
           @drilldown="drilldown(member)"
           @drillup="drillup(member)"
           @openMemberProperties="openMemberProperties(member)"
+          @showMemberProperties="showMemberProperties(member)"
+          @hideMemberProperties="hideMemberProperties(member)"
         >
           <template v-slot="{}">
             <div style="width: 100%">
@@ -436,5 +470,10 @@ watch(
   top: 0;
   cursor: ew-resize;
   z-index: 1;
+}
+.propertyColumn {
+  font-style: italic;
+  height: 100%;
+  font-weight: 500;
 }
 </style>

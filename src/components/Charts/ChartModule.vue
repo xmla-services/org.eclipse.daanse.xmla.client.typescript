@@ -30,6 +30,7 @@ import { useAppSettingsStore } from "@/stores/AppSettings";
 import { HierarchicalScale } from "chartjs-plugin-hierarchical";
 import { useChartStore } from "@/stores/Chart";
 import { usePivotTableStore } from "@/stores/PivotTable";
+import { debounce } from "lodash";
 
 ChartJS.register(
   Title,
@@ -83,7 +84,7 @@ export default defineComponent({
       }, 100);
     };
 
-    const getData = async () => {
+    const getData = debounce(async () => {
       shouldBeHidden = [];
       expandedIndexes = [];
       notExpandableIndexes = [];
@@ -219,7 +220,7 @@ export default defineComponent({
 
       updateChartData();
       appSettings.removeLoadingState(loadingId);
-    };
+    }, 100);
 
     function parseCells(cells: any[], columns: any[], rows: any[]) {
       if (!cells.length) return [];
