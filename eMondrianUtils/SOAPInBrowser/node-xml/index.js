@@ -8,8 +8,8 @@
   Contributors:
 
 */
-var whitespace = "\n\r\t ";
-var iRet, theatts, splits, nameobject, that, theattsandnamespace, strEnt;
+let whitespace = "\n\r\t ";
+let iRet, theatts, splits, nameobject, that, theattsandnamespace, strEnt;
 
 //XMLP is a pull-based parser. The calling application passes in a XML string
 //to the constructor, then repeatedly calls .next() to parse the next segment.
@@ -20,7 +20,7 @@ var iRet, theatts, splits, nameobject, that, theattsandnamespace, strEnt;
 //Basically, XMLP is the lowest common denominator parser - an very simple
 //API which other wrappers can be built against.
 
-var XMLP = function (strXML) {
+let XMLP = function (strXML) {
   // Normalize line breaks
   strXML = SAXStrings.replace(strXML, null, null, "\r\n", "\n");
   strXML = SAXStrings.replace(strXML, null, null, "\r", "\n");
@@ -62,32 +62,52 @@ XMLP._STATE_DOCUMENT = 2;
 XMLP._STATE_MISC = 3;
 
 XMLP._errs = new Array();
-XMLP._errs[(XMLP.ERR_CLOSE_PI = 0)] = "PI: missing closing sequence";
-XMLP._errs[(XMLP.ERR_CLOSE_DTD = 1)] = "DTD: missing closing sequence";
-XMLP._errs[(XMLP.ERR_CLOSE_COMMENT = 2)] = "Comment: missing closing sequence";
-XMLP._errs[(XMLP.ERR_CLOSE_CDATA = 3)] = "CDATA: missing closing sequence";
-XMLP._errs[(XMLP.ERR_CLOSE_ELM = 4)] = "Element: missing closing sequence";
-XMLP._errs[(XMLP.ERR_CLOSE_ENTITY = 5)] = "Entity: missing closing sequence";
-XMLP._errs[(XMLP.ERR_PI_TARGET = 6)] = "PI: target is required";
-XMLP._errs[(XMLP.ERR_ELM_EMPTY = 7)] =
+
+XMLP.ERR_CLOSE_PI = 0;
+XMLP.ERR_CLOSE_DTD = 1;
+XMLP.ERR_CLOSE_COMMENT = 2;
+XMLP.ERR_CLOSE_CDATA = 3;
+XMLP.ERR_CLOSE_ELM = 4;
+XMLP.ERR_CLOSE_ENTITY = 5;
+XMLP.ERR_PI_TARGET = 6;
+XMLP.ERR_ELM_EMPTY = 7;
+XMLP.ERR_ELM_NAME = 8;
+XMLP.ERR_ELM_LT_NAME = 9;
+XMLP.ERR_ATT_VALUES = 10;
+XMLP.ERR_ATT_LT_NAME = 11;
+XMLP.ERR_ATT_LT_VALUE = 12;
+XMLP.ERR_ATT_DUP = 13;
+XMLP.ERR_ENTITY_UNKNOWN = 14;
+XMLP.ERR_INFINITELOOP = 15;
+XMLP.ERR_DOC_STRUCTURE = 16;
+XMLP.ERR_ELM_NESTING = 17;
+
+XMLP._errs[XMLP.ERR_CLOSE_PI] = "PI: missing closing sequence";
+XMLP._errs[XMLP.ERR_CLOSE_DTD] = "DTD: missing closing sequence";
+XMLP._errs[XMLP.ERR_CLOSE_COMMENT] = "Comment: missing closing sequence";
+XMLP._errs[XMLP.ERR_CLOSE_CDATA] = "CDATA: missing closing sequence";
+XMLP._errs[XMLP.ERR_CLOSE_ELM] = "Element: missing closing sequence";
+XMLP._errs[XMLP.ERR_CLOSE_ENTITY] = "Entity: missing closing sequence";
+XMLP._errs[XMLP.ERR_PI_TARGET] = "PI: target is required";
+XMLP._errs[XMLP.ERR_ELM_EMPTY] =
   "Element: cannot be both empty and closing";
-XMLP._errs[(XMLP.ERR_ELM_NAME = 8)] =
+XMLP._errs[XMLP.ERR_ELM_NAME] =
   'Element: name must immediatly follow "<"';
-XMLP._errs[(XMLP.ERR_ELM_LT_NAME = 9)] =
+XMLP._errs[XMLP.ERR_ELM_LT_NAME] =
   'Element: "<" not allowed in element names';
-XMLP._errs[(XMLP.ERR_ATT_VALUES = 10)] =
+XMLP._errs[XMLP.ERR_ATT_VALUES] =
   "Attribute: values are required and must be in quotes";
-XMLP._errs[(XMLP.ERR_ATT_LT_NAME = 11)] =
+XMLP._errs[XMLP.ERR_ATT_LT_NAME] =
   'Element: "<" not allowed in attribute names';
-XMLP._errs[(XMLP.ERR_ATT_LT_VALUE = 12)] =
+XMLP._errs[XMLP.ERR_ATT_LT_VALUE] =
   'Attribute: "<" not allowed in attribute values';
-XMLP._errs[(XMLP.ERR_ATT_DUP = 13)] =
+XMLP._errs[XMLP.ERR_ATT_DUP] =
   "Attribute: duplicate attributes not allowed";
-XMLP._errs[(XMLP.ERR_ENTITY_UNKNOWN = 14)] = "Entity: unknown entity";
-XMLP._errs[(XMLP.ERR_INFINITELOOP = 15)] = "Infininte loop";
-XMLP._errs[(XMLP.ERR_DOC_STRUCTURE = 16)] =
+XMLP._errs[XMLP.ERR_ENTITY_UNKNOWN] = "Entity: unknown entity";
+XMLP._errs[XMLP.ERR_INFINITELOOP] = "Infininte loop";
+XMLP._errs[XMLP.ERR_DOC_STRUCTURE] =
   "Document: only comments, processing instructions, or whitespace allowed outside of document element";
-XMLP._errs[(XMLP.ERR_ELM_NESTING = 17)] = "Element: must be nested correctly";
+XMLP._errs[XMLP.ERR_ELM_NESTING] = "Element: must be nested correctly";
 
 XMLP.prototype.continueParsing = function (strXML) {
   if (this.m_chunkTransitionContinuation) {
@@ -100,8 +120,6 @@ XMLP.prototype.continueParsing = function (strXML) {
   this.m_xml = strXML;
   this.m_iP = 0;
   this.m_iState = XMLP._STATE_DOCUMENT;
-  //this.m_stack = new Stack();
-  //this._clearAttributes();
   this.m_pause = false;
   this.m_preInterruptIState = XMLP._STATE_PROLOG;
   this.m_chunkTransitionContinuation = null;
@@ -136,7 +154,7 @@ XMLP.prototype._checkStructure = function (iEvent) {
     }
 
     if (XMLP._ELM_E == iEvent || XMLP._ELM_EMP == iEvent) {
-      var strTop = this.m_stack.pop();
+      let strTop = this.m_stack.pop();
       if (strTop == null || strTop != this.getName()) {
         return this._setErr(XMLP.ERR_ELM_NESTING);
       }
@@ -178,7 +196,7 @@ XMLP.prototype._clearAttributes = function () {
 };
 
 XMLP.prototype._findAttributeIndex = function (name) {
-  for (var i = 0; i < this.m_atts.length; i++) {
+  for (let i = 0; i < this.m_atts.length; i++) {
     if (this.m_atts[i][XMLP._ATT_NAME] == name) {
       return i;
     }
@@ -257,13 +275,13 @@ XMLP.prototype._parse = function () {
   function _indexOf(needle, haystack, start) {
     // This is an improvement over the native indexOf because it stops at the
     // end of the needle and doesn't continue to the end of the haystack looking.
-    for (var i = 0; i < needle.length; i++) {
+    for (let i = 0; i < needle.length; i++) {
       if (needle.charAt(i) != haystack.charAt(start + i)) return -1;
     }
     return start;
   }
 
-  var fc = this.m_xml.charAt(this.m_iP);
+  let fc = this.m_xml.charAt(this.m_iP);
   if (fc !== "<" && fc !== "&") {
     return this._parseText(this.m_iP);
   } else if (this.m_iP == _indexOf("<?", this.m_xml, this.m_iP)) {
@@ -296,8 +314,8 @@ XMLP.prototype._parseNamespacesAndAtts = function (atts) {
   //translate namespaces into objects with "prefix","uri", "scopetag" Add them to: this.m_namespaceList
   //The function should return a new list of tag attributes with the namespaces filtered
   that = this;
-  var newnamespaces = [];
-  var filteredatts = [];
+  let newnamespaces = [];
+  let filteredatts = [];
   atts.map(function (item) {
     if (item[0].slice(0, 5) === "xmlns") {
       newnamespaces.push({
@@ -321,17 +339,17 @@ XMLP.prototype._parseNamespacesAndAtts = function (atts) {
 
 XMLP.prototype._getContextualNamespace = function (prefix) {
   if (prefix !== "") {
-    for (item in this.m_namespaceList) {
-      item = this.m_namespaceList[item];
-      if (item.prefix === prefix) {
-        return item.uri;
+    for (let item in this.m_namespaceList) {
+      const itemProp = this.m_namespaceList[item];
+      if (itemProp.prefix === prefix) {
+        return itemProp.uri;
       }
     }
   }
 
   //no match was found for the prefix so pop off the first non-prefix namespace
-  for (var i = this.m_namespaceList.length - 1; i >= 0; i--) {
-    var item = this.m_namespaceList[i];
+  for (let i = this.m_namespaceList.length - 1; i >= 0; i--) {
+    const item = this.m_namespaceList[i];
     if (item.prefix === "") {
       return item.uri;
     }
@@ -343,7 +361,7 @@ XMLP.prototype._getContextualNamespace = function (prefix) {
 
 XMLP.prototype._removeExpiredNamesapces = function (closingtagname) {
   //remove the expiring namespaces from the list (you can id them by scopetag)
-  var keeps = [];
+  const keeps = [];
   this.m_namespaceList.map(function (item) {
     if (item.scopetag !== closingtagname) {
       keeps.push(item);
@@ -356,8 +374,8 @@ XMLP.prototype._removeExpiredNamesapces = function (closingtagname) {
 ////////////////////////////////////////////////////////////////////////
 
 XMLP.prototype._parseAttribute = function (iB, iE) {
-  var iNB, iNE, iEq, iVB, iVE;
-  var cQuote, strN, strV;
+  let iNB, iNE, iEq, iVB, iVE;
+  let cQuote, strN, strV;
 
   this.m_cAlt = ""; //resets the value so we don't use an old one by accident (see testAttribute7 in the test suite)
 
@@ -420,12 +438,11 @@ XMLP.prototype._parseAttribute = function (iB, iE) {
 };
 
 XMLP.prototype._parseCDATA = function (iB) {
-  var iE = this.m_xml.indexOf("]]>", iB);
+  const iE = this.m_xml.indexOf("]]>", iB);
   if (iE == -1) {
     //This item never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 9); //the '-<![CDATA[ adds the '<!DOCTYPE' back into the string
     return XMLP._INTERRUPT;
-    //return this._setErr(XMLP.ERR_CLOSE_CDATA);
   }
 
   this._setContent(XMLP._CONT_XML, iB, iE);
@@ -436,12 +453,11 @@ XMLP.prototype._parseCDATA = function (iB) {
 };
 
 XMLP.prototype._parseComment = function (iB) {
-  var iE = this.m_xml.indexOf("-" + "->", iB);
+  const iE = this.m_xml.indexOf("-" + "->", iB);
   if (iE == -1) {
     //This item never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 4); //the '-4' adds the '<!--' back into the string
     return XMLP._INTERRUPT;
-    //return this._setErr(XMLP.ERR_CLOSE_COMMENT);
   }
 
   this._setContent(XMLP._CONT_XML, iB, iE);
@@ -453,14 +469,13 @@ XMLP.prototype._parseComment = function (iB) {
 
 XMLP.prototype._parseDTD = function (iB) {
   // Eat DTD
-  var iE, strClose, iInt, iLast;
+  let iE, strClose, iInt, iLast;
 
   iE = this.m_xml.indexOf(">", iB);
   if (iE == -1) {
     //This item never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 9); //the '-9' adds the '<!DOCTYPE' back into the string
     return XMLP._INTERRUPT;
-    //return this._setErr(XMLP.ERR_CLOSE_DTD);
   }
 
   iInt = this.m_xml.indexOf("[", iB);
@@ -492,15 +507,14 @@ XMLP.prototype._parseDTD = function (iB) {
 };
 
 XMLP.prototype._parseElement = function (iB) {
-  var iE, iDE, iNE, iRet;
-  var iType, strN, iLast;
+  let iE, iDE, iNE, iRet;
+  let iType, strN, iLast;
 
   iDE = iE = this.m_xml.indexOf(">", iB);
   if (iE == -1) {
     //This element never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 1); //the '-1' adds the '<' back into the string
     return XMLP._INTERRUPT;
-    //return this._setErr(XMLP.ERR_CLOSE_ELM);
   }
 
   if (this.m_xml.charAt(iB) == "/") {
@@ -530,10 +544,6 @@ XMLP.prototype._parseElement = function (iB) {
   }
   // end hack -- original code below
 
-  /*
-    if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB)
-        return this._setErr(XMLP.ERR_ELM_NAME);
-    */
   this._clearAttributes();
 
   iNE = SAXStrings.indexOfWhitespace(this.m_xml, iB, iDE);
@@ -565,12 +575,11 @@ XMLP.prototype._parseElement = function (iB) {
 };
 
 XMLP.prototype._parseEntity = function (iB) {
-  var iE = this.m_xml.indexOf(";", iB);
+  const iE = this.m_xml.indexOf(";", iB);
   if (iE == -1) {
     //This item never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 1); //the '-1' adds the '&' back into the string
     return XMLP._INTERRUPT;
-    //return this._setErr(XMLP.ERR_CLOSE_ENTITY);
   }
 
   this.m_iP = iE + 1;
@@ -579,14 +588,13 @@ XMLP.prototype._parseEntity = function (iB) {
 };
 
 XMLP.prototype._parsePI = function (iB) {
-  var iE, iTB, iTE, iCB, iCE;
+  let iE, iTB, iTE, iCB, iCE;
 
   iE = this.m_xml.indexOf("?>", iB);
   if (iE == -1) {
     //This item never closes, although it could be a malformed document, we will assume that we are mid-chunck, save the string and reurn as interrupted
     this.m_chunkTransitionContinuation = this.m_xml.slice(iB - 2); //the '-2' adds the '?>' back into the string
     return XMLP._INTERRUPT;
-    return this._setErr(XMLP.ERR_CLOSE_PI);
   }
 
   iTB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
@@ -617,7 +625,7 @@ XMLP.prototype._parsePI = function (iB) {
 };
 
 XMLP.prototype._parseText = function (iB) {
-  var iE, ch;
+  let iE, ch;
 
   for (iE = iB; iE < this.m_xml.length; ++iE) {
     ch = this.m_xml.charAt(iE);
@@ -723,7 +731,6 @@ XMLP.prototype._replaceEntity = function (strD, iB, iE) {
         strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)));
       } else {
         strEnt = " ";
-        //return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
       }
       break;
   }
@@ -733,7 +740,7 @@ XMLP.prototype._replaceEntity = function (strD, iB, iE) {
 };
 
 XMLP.prototype._setContent = function (iSrc) {
-  var args = arguments;
+  const args = arguments;
 
   if (XMLP._CONT_XML == iSrc) {
     this.m_cAlt = null;
@@ -748,7 +755,7 @@ XMLP.prototype._setContent = function (iSrc) {
 };
 
 XMLP.prototype._setErr = function (iErr) {
-  var strErr = XMLP._errs[iErr];
+  const strErr = XMLP._errs[iErr];
 
   this.m_cAlt = strErr;
   this.m_cB = 0;
@@ -761,10 +768,10 @@ XMLP.prototype._setErr = function (iErr) {
 //SaxParser is an object that basically wraps an XMLP instance, and provides an
 //event-based interface for parsing. This is the object users interact with when coding
 //with XML for <SCRIPT>
-var SaxParser = function (eventhandlerfactory) {
-  var eventhandler = new (function () {})();
+const SaxParser = function (eventhandlerfactory) {
+  const eventhandler = new (function () {})();
 
-  var thehandler = function () {};
+  const thehandler = new Function();
   thehandler.prototype.onStartDocument = function (funct) {
     eventhandler.onStartDocument = funct;
   };
@@ -795,7 +802,6 @@ var SaxParser = function (eventhandlerfactory) {
   };
 
   eventhandlerfactory(new thehandler());
-  //eventhandler = eventhandler(eventhandler);
   this.m_hndDoc = eventhandler;
   this.m_hndErr = eventhandler;
   this.m_hndLex = eventhandler;
@@ -816,19 +822,14 @@ SaxParser.DTD_B = 10;
 SaxParser.DTD_E = 11;
 
 SaxParser.prototype.parseString = function (strD) {
-  var that = this;
-  var startnew = true;
+  const that = this;
+  let startnew = true;
   if (!that.m_parser) {
     that.m_parser = new XMLP(strD);
     startnew = false;
   } else {
     that.m_parser.continueParsing(strD);
-    startnew = true;
   }
-
-  //if(that.m_hndDoc && that.m_hndDoc.setDocumentLocator) {
-  //    that.m_hndDoc.setDocumentLocator(that);
-  //}
 
   that.m_bErr = false;
 
@@ -855,7 +856,7 @@ SaxParser.prototype.resume = function () {
   this.m_interrupted = false;
 
   //now start up the parse loop
-  var that = this;
+  const that = this;
   setTimeout(function () {
     that._parseLoop();
     if (!that.m_bErr && !that.m_interrupted) {
@@ -916,13 +917,13 @@ SaxParser.prototype._fireError = function (strMsg) {
   this.m_strErrMsg = strMsg;
   this.m_bErr = true;
 
-  if (this.m_hndErr && this.m_hndErr.onError) {
+  if (this.m_hndErr?.onError) {
     this.m_hndErr.onError(this.m_strErrMsg);
   }
 };
 
 SaxParser.prototype._fireEvent = function (iEvt) {
-  var hnd,
+  let hnd,
     func,
     args = arguments,
     iLen = args.length - 1;
@@ -958,7 +959,7 @@ SaxParser.prototype._fireEvent = function (iEvt) {
     hnd = this.m_hndLex;
   }
 
-  if (hnd && hnd[func]) {
+  if (hnd?.[func]) {
     if (0 == iLen) {
       hnd[func]();
     } else if (1 == iLen) {
@@ -977,8 +978,8 @@ SaxParser.prototype._fireEvent = function (iEvt) {
   }
 };
 
-SaxParser.prototype._parseLoop = function (parser) {
-  var iEvent, parser;
+SaxParser.prototype._parseLoop = function () {
+  let iEvent, parser;
 
   parser = this.m_parser;
   while (!this.m_bErr) {
@@ -988,7 +989,7 @@ SaxParser.prototype._parseLoop = function (parser) {
       theatts = this.m_parser.m_atts;
       nameobject = parser._parsePrefixAndElementName(parser.getName());
       theattsandnamespace = parser._parseNamespacesAndAtts(theatts);
-      var theuri = parser._getContextualNamespace(nameobject.prefix);
+      const theuri = parser._getContextualNamespace(nameobject.prefix);
       this._fireEvent(
         SaxParser.ELM_B,
         nameobject.name,
@@ -999,7 +1000,7 @@ SaxParser.prototype._parseLoop = function (parser) {
       );
     } else if (iEvent == XMLP._ELM_E) {
       nameobject = parser._parsePrefixAndElementName(parser.getName());
-      var theuri = parser._getContextualNamespace(nameobject.prefix);
+      const theuri = parser._getContextualNamespace(nameobject.prefix);
       parser._removeExpiredNamesapces(parser.getName());
       this._fireEvent(
         SaxParser.ELM_E,
@@ -1012,7 +1013,7 @@ SaxParser.prototype._parseLoop = function (parser) {
       theatts = this.m_parser.m_atts;
       nameobject = parser._parsePrefixAndElementName(parser.getName());
       theattsandnamespace = parser._parseNamespacesAndAtts(theatts);
-      var theuri = parser._getContextualNamespace(nameobject.prefix);
+      const theuri = parser._getContextualNamespace(nameobject.prefix);
       this._fireEvent(
         SaxParser.ELM_B,
         nameobject.name,
@@ -1031,8 +1032,6 @@ SaxParser.prototype._parseLoop = function (parser) {
         theuri === "" ? null : theuri,
         true
       );
-      //this._fireEvent(SaxParser.ELM_B, parser.getName(), this.m_parser.m_atts.map(function(item){return { name : item[0], value : item[1], };}) );
-      //this._fireEvent(SaxParser.ELM_E, parser.getName());
     } else if (iEvent == XMLP._TEXT) {
       this._fireEvent(
         SaxParser.CHARS,
@@ -1072,6 +1071,7 @@ SaxParser.prototype._parseLoop = function (parser) {
           .slice(parser.getContentBegin(), parser.getContentEnd())
       );
     } else if (iEvent == XMLP._DTD) {
+      return;
     } else if (iEvent == XMLP._ERROR) {
       this._fireError(parser.getContent());
     } else if (iEvent == XMLP._INTERRUPT) {
@@ -1084,7 +1084,7 @@ SaxParser.prototype._parseLoop = function (parser) {
 };
 
 //SAXStrings: a useful object containing string manipulation functions
-var SAXStrings = function () {
+const SAXStrings = function () {
   //This is the constructor of the SAXStrings object
 };
 
@@ -1098,10 +1098,9 @@ SAXStrings.getColumnNumber = function (strD, iP) {
   }
   iP = iP || strD.length;
 
-  var arrD = strD.substring(0, iP).split("\n");
-  var strLine = arrD[arrD.length - 1];
+  const arrD = strD.substring(0, iP).split("\n");
   arrD.length--;
-  var iLinePos = arrD.join("\n").length;
+  const iLinePos = arrD.join("\n").length;
 
   return iP - iLinePos;
 };
@@ -1122,7 +1121,7 @@ SAXStrings.indexOfNonWhitespace = function (strD, iB, iE) {
   iB = iB || 0;
   iE = iE || strD.length;
 
-  for (var i = iB; i < iE; i++) {
+  for (let i = iB; i < iE; i++) {
     if (SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1) {
       return i;
     }
@@ -1174,7 +1173,7 @@ SAXStrings.replace = function (strD, iB, iE, strF, strR) {
   return strD.toString().substring(iB, iE).split(strF).join(strR);
 };
 
-var Stack = function () {
+const Stack = function () {
   this.m_arr = new Array();
 };
 
@@ -1203,7 +1202,7 @@ Stack.prototype.pop = function () {
     return null;
   }
 
-  var o = this.m_arr[this.m_arr.length - 1];
+  const o = this.m_arr[this.m_arr.length - 1];
   this.m_arr.length--;
   return o;
 };
@@ -1233,10 +1232,10 @@ function trim(trimString, leftTrim, rightTrim) {
     rightTrim = true;
   }
 
-  var left = 0;
-  var right = 0;
-  var i = 0;
-  var k = 0;
+  let left = 0;
+  let right = 0;
+  let i = 0;
+  let k = 0;
 
   // modified to properly handle strings that are all whitespace
   if (leftTrim == true) {
@@ -1257,11 +1256,11 @@ function trim(trimString, leftTrim, rightTrim) {
 }
 
 function __escapeString(str) {
-  var escAmpRegEx = /&/g;
-  var escLtRegEx = /</g;
-  var escGtRegEx = />/g;
-  var quotRegEx = /"/g;
-  var aposRegEx = /'/g;
+  const escAmpRegEx = /&/g;
+  const escLtRegEx = /</g;
+  const escGtRegEx = />/g;
+  const quotRegEx = /"/g;
+  const aposRegEx = /'/g;
 
   str = str.replace(escAmpRegEx, "&amp;");
   str = str.replace(escLtRegEx, "&lt;");
@@ -1273,11 +1272,11 @@ function __escapeString(str) {
 }
 
 function __unescapeString(str) {
-  var escAmpRegEx = /&amp;/g;
-  var escLtRegEx = /&lt;/g;
-  var escGtRegEx = /&gt;/g;
-  var quotRegEx = /&quot;/g;
-  var aposRegEx = /&apos;/g;
+  const escAmpRegEx = /&amp;/g;
+  const escLtRegEx = /&lt;/g;
+  const escGtRegEx = /&gt;/g;
+  const quotRegEx = /&quot;/g;
+  const aposRegEx = /&apos;/g;
 
   str = str.replace(escAmpRegEx, "&");
   str = str.replace(escLtRegEx, "<");

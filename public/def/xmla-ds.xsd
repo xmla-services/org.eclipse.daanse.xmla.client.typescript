@@ -25,7 +25,6 @@
 
 	<xsd:complexType name="mddataset">
 		<xsd:sequence>
-			<!-- <xsd:element ref="xs:Schema" /> -->
 			<xsd:element name="OlapInfo" minOccurs="0"
 				type="OlapInfo" />
 			<xsd:element name="Axes" minOccurs="0" type="Axes" />
@@ -187,8 +186,6 @@
 	<xsd:complexType name="CellTypeError">
 		<xsd:attribute name="ErrorCode" type="xsd:long" />
 		<xsd:attribute name="Description" type="xsd:string" />
-		<!-- <xsd:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"
-			/> -->
 	</xsd:complexType>
 
 

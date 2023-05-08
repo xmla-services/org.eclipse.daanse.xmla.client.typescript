@@ -130,7 +130,7 @@ const hasChildrenDisplayed = (i: number, j: number) => {
 
   if (
     currentHierarchyMembers.some(
-      (e) => e.PARENT_UNIQUE_NAME === currentMember.UName
+      (e) => e && e.PARENT_UNIQUE_NAME === currentMember.UName
     )
   ) {
     return true;
@@ -218,6 +218,13 @@ const currentlyDisplayedValues = computed(() => {
 
   let translateValue = translate.value;
   let result = props.rows.map((rowMembers, i) => {
+    if (rowMembers.isProperty) {
+      return {
+        ...rowMembers,
+        i,
+      };
+    }
+
     return rowMembers.map((member) => {
       return {
         ...member,
@@ -254,6 +261,21 @@ const currentlyDisplayedValues = computed(() => {
   };
 });
 
+const showMemberProperties = (member) => {
+  state.membersWithProps.push(member.HIERARCHY_UNIQUE_NAME);
+};
+
+const hideMemberProperties = (member) => {
+  const indexToRemove = state.membersWithProps.indexOf(
+    (e) => e === member.HIERARCHY_UNIQUE_NAME
+  );
+  state.membersWithProps.splice(indexToRemove, 1);
+};
+
+const isMemberPropsVisible = (member) => {
+  return state.membersWithProps.includes(member.HIERARCHY_UNIQUE_NAME);
+};
+
 watch(
   () => currentlyDisplayedValues.value,
   () => {
@@ -273,15 +295,24 @@ watch(
     <div
       class="rowsHeader"
       v-for="row in currentlyDisplayedValues.data"
-      :key="row[0].i"
-      :style="getRowHeaderStyle(row[0].i)"
+      :key="row.isProperty ? row.i : row[0].i"
+      :style="getRowHeaderStyle(row.isProperty ? row.i : row[0].i)"
     >
+      <template v-if="row.isProperty">
+        <div class="rowMember rowMemberContent propertyRow">
+          {{ row.PROPERTY_NAME }}
+        </div>
+      </template>
       <MemberDropdown
+        v-else
         v-for="(member, j) in row"
         :key="member.UNAME"
+        :propertiesShown="isMemberPropsVisible(member)"
         @drilldown="drilldown(member)"
         @drillup="drillup(member)"
         @openMemberProperties="openMemberProperties(member)"
+        @showMemberProperties="showMemberProperties(member)"
+        @hideMemberProperties="hideMemberProperties(member)"
       >
         <template v-slot="{}">
           <div class="d-flex">
@@ -414,5 +445,11 @@ watch(
 
 .expandIcon {
   flex-grow: 0;
+}
+
+.propertyRow {
+  width: 100%;
+  font-style: italic;
+  font-weight: 500;
 }
 </style>

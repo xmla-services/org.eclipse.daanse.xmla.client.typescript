@@ -230,7 +230,6 @@ function getSingleRowRequest(
   rowsExpandedMembers: any[],
   measures: any[]
 ) {
-  console.log(measures);
   if (e.type === "Values") {
     const selectRequest = measures
       .map((e) => e.originalItem.MEASURE_UNIQUE_NAME)

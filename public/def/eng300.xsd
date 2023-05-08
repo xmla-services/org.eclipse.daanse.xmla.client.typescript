@@ -47,8 +47,6 @@
 		<xsd:sequence>
 			<!-- we do not put displayfolder in visualization properties because it 
 				already is in plain udm on other objects -->
-			<!--<xsd:element name="DisplayFolder" type="xsd:boolean" minOccurs="0" 
-				maxOccurs="1"/> -->
 			<xsd:element name="FolderPosition" type="xsd:integer"
 				minOccurs="0" maxOccurs="1" default="-1" />
 			<xsd:element name="ContextualNameRule" minOccurs="0"

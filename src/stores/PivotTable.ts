@@ -33,6 +33,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     columnsDrilldownMembers: [] as any,
     rowsExpandedMembers: [] as any,
     columnsExpandedMembers: [] as any,
+    membersWithProps: [] as any[],
     inited: false,
   });
 

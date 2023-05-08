@@ -12,8 +12,14 @@ Contributors: Smart City Jena
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 
-defineEmits(["drilldown", "drillup", "openMemberProperties"]);
-defineProps(["drillupDisabled"]);
+defineEmits([
+  "drilldown",
+  "drillup",
+  "openMemberProperties",
+  "showMemberProperties",
+  "hideMemberProperties",
+]);
+defineProps(["drillupDisabled", "propertiesShown"]);
 
 const opened = ref(false);
 const eventBus = inject("eventBus") as TinyEmitter;
@@ -73,6 +79,26 @@ watch(opened, () => {
           @click="$emit('openMemberProperties')"
         >
           Open Member Properties
+        </va-button>
+        <va-button
+          v-if="propertiesShown"
+          preset="plain"
+          class="dropdown_button"
+          text-color="#000"
+          :hover-opacity="0.5"
+          @click="$emit('hideMemberProperties')"
+        >
+          Hide Hierarchy Properties
+        </va-button>
+        <va-button
+          v-else
+          preset="plain"
+          class="dropdown_button"
+          text-color="#000"
+          :hover-opacity="0.5"
+          @click="$emit('showMemberProperties')"
+        >
+          Show Hierarchy Properties
         </va-button>
       </va-button-group>
     </va-dropdown-content>
