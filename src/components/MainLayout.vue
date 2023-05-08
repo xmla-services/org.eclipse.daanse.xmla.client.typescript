@@ -26,7 +26,7 @@ const getLeftWidth = () => {
     <div v-if="appSettings.cubeOpened" class="split-container">
       <va-split
         class="split"
-        :model-value="30"
+        :model-value="0"
         :limits="[
           [getLeftWidth(), 'any'],
           ['500px', 'any'],

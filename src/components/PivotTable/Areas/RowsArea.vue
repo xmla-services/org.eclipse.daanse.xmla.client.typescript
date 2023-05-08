@@ -90,6 +90,7 @@ const getRowMemberStyle = (i: number, j: number) => {
   const styles = {} as { [key: string]: string };
 
   const levelCount = minLevels[j] === 0 ? maxLevels[j] + 1 : maxLevels[j];
+  console.log(levelCount);
 
   styles["width"] = `${150 * levelCount}px`;
   if (!currentMember || !nextMember) return styles;
@@ -318,7 +319,7 @@ watch(
           <div class="d-flex">
             <div class="rowMember" :style="getRowMemberStyle(member.i, j)">
               <div class="rowMemberContentWrapper">
-                <div v-html="getRowMemberOffsetItems(member.i, j)"></div>
+                <div class="rowMemberOffsetContainer" v-html="getRowMemberOffsetItems(member.i, j)"></div>
                 <div class="rowMemberContent">
                   <template v-if="!sameAsPrevious(member.i, j)">
                     <div
@@ -398,6 +399,12 @@ watch(
 }
 
 .rowMemberContentWrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.rowMemberOffsetContainer {
   display: flex;
   flex-direction: row;
   height: 100%;
