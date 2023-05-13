@@ -41,7 +41,7 @@
     "@types/node": "^20.1.0",
     "@types/sax": "^1.2.4",
     "@types/uuid": "^9.0.1",
-    "@vitejs/plugin-vue": "^4.2.1",
+    "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.2.6",
