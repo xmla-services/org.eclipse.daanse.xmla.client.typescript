@@ -43,6 +43,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
     const measures = queryDesignerStore.measures;
+    const filters = queryDesignerStore.filters;
     const pivotTableSettings = state.value.settings;
 
     const mdxRequest = getMdxRequest(
@@ -55,7 +56,8 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       columns,
       measures,
       pivotTableSettings,
-      treeViewStore.properties
+      treeViewStore.properties,
+      filters
     );
 
     mdx.value = mdxRequest;
