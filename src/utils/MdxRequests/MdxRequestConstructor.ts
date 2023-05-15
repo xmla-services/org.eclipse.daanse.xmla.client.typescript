@@ -23,8 +23,11 @@ export function getMdxRequest(
   columns: any[],
   measures: any[],
   pivotTableSettings: any,
-  properties: any[]
+  properties: any[],
+  filters: any[]
 ) {
+  const filtersRequest = getFiltersRequest(filters);
+
   if (!rows.length || !columns.length) {
     return getSingleHierarchyRequest(
       rows,
@@ -36,14 +39,13 @@ export function getMdxRequest(
       rowsExpandedMembers,
       columnsExpandedMembers,
       pivotTableSettings,
-      properties
+      properties,
+      filtersRequest
     );
   } else {
     let withSection = "WITH";
     let selectSection = "SELECT";
-    const cellPropertiesSection =
-      " CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS";
-    const fromSection = `FROM ${cubename}`;
+    const fromSection = getFromPart(measures, cubename, filtersRequest.where);
 
     if (!pivotTableSettings.showEmpty) selectSection += " NON EMPTY";
 
@@ -75,14 +77,17 @@ export function getMdxRequest(
 
     let resultString = "";
 
+    if (filtersRequest.with) {
+      withSection += filtersRequest.with;
+    }
+
     if (withSection.length > 4) {
       resultString += withSection;
     }
+
     resultString += "\n";
     resultString += selectSection;
     resultString += fromSection;
-    resultString += cellPropertiesSection;
-
     return resultString;
   }
 }
@@ -322,10 +327,11 @@ function getSingleHierarchyRequest(
   rowsExpandedMembers: any,
   columnsExpandedMembers: any,
   pivotTableSettings: any,
-  properties: any[]
+  properties: any[],
+  filtersRequest: any
 ) {
   const selectPart = getSelectWithOptions(pivotTableSettings);
-  const fromPart = getFromPart(measures, cubename);
+  const fromPart = getFromPart(measures, cubename, filtersRequest.where);
 
   if (rows.length) {
     const request = getRowsRequest(
@@ -336,7 +342,13 @@ function getSingleHierarchyRequest(
     );
 
     const rowsSelect = request.select;
-    const rowsWith = request.with ? `WITH ${request.with}` : "";
+    let rowsWith = request.with ? `WITH ${request.with}` : "";
+
+    if (filtersRequest.with) {
+      if (rowsWith) rowsWith += filtersRequest.with;
+      else rowsWith = `WITH ${filtersRequest.with}`;
+    }
+
     const rowsProperties = getRowsProperies(rows, properties);
 
     return `
@@ -355,7 +367,13 @@ function getSingleHierarchyRequest(
     );
 
     const colsSelect = request.select;
-    const colsWith = request.with ? `WITH ${request.with}` : "";
+    let colsWith = request.with ? `WITH ${request.with}` : "";
+
+    if (filtersRequest.with) {
+      if (colsWith) colsWith += filtersRequest.with;
+      else colsWith = `WITH ${filtersRequest.with}`;
+    }
+
     const colsProperties = getColumnsProperies(columns, properties);
 
     return `
@@ -364,6 +382,10 @@ function getSingleHierarchyRequest(
       ${colsSelect}
       DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${colsProperties} ON 0
       ${fromPart}
+    `;
+  } else if (measures.length) {
+    return `
+      SELECT ${fromPart}
     `;
   }
   return "";
@@ -375,11 +397,59 @@ function getSelectWithOptions(pivotTableSettings) {
   return result;
 }
 
-function getFromPart(measures, cubename) {
+function getFromPart(measures, cubename, filtersWhere) {
   let measuresPart = "";
   if (measures.length === 1) {
-    measuresPart = `WHERE(${measures[0].originalItem.MEASURE_UNIQUE_NAME})`;
+    measuresPart = `${measures[0].originalItem.MEASURE_UNIQUE_NAME}`;
   }
-  const result = `FROM [${cubename}] ${measuresPart} CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+
+  let result = "";
+  if (filtersWhere) {
+    if (measuresPart) {
+      result = `FROM [${cubename}] WHERE (${filtersWhere},${measuresPart}) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+    } else {
+      result = `FROM [${cubename}] WHERE (${filtersWhere}) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+    }
+  } else {
+    result = `FROM [${cubename}] WHERE ${measuresPart} CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+  }
   return result;
+}
+
+function getFiltersRequest(filters) {
+  let withSection = "";
+  let whereSection = "";
+  if (!filters) {
+    return {
+      where: null,
+      with: null,
+    };
+  }
+
+  const filtersArray = filters.map((e) => e.filters);
+
+  filtersArray.forEach((filter) => {
+    if (!filter.enabled) return;
+
+    if (filter.multipleChoise) {
+      const uid = Math.random().toString(16).slice(2);
+      console.log(filter);
+      const filterSetName = `${filter.originalItem.DIMENSION_UNIQUE_NAME}.[FILTER_${uid}]`;
+
+      const selectedItems = filter.selectedItems.map((e) => e.UName).join(",");
+      withSection += ` MEMBER ${filterSetName} AS 'Aggregate({${selectedItems}})'`;
+
+      if (whereSection.length) whereSection += ",";
+      whereSection += filterSetName;
+      // TODO
+    } else {
+      if (whereSection.length) whereSection += ",";
+      whereSection += filter.selectedItem.UName;
+    }
+  });
+
+  return {
+    where: whereSection,
+    with: withSection,
+  };
 }

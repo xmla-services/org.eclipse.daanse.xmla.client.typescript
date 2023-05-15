@@ -42,12 +42,14 @@ export default {
           selectAll: initialFilters.selectAll,
           selectedItems: initialFilters.selectedItems,
           deselectedItems: initialFilters.deselectedItems,
+          originalItem: initialFilters.originalItem,
         };
       } else {
         filterConfigured.value = {
           enabled: initialFilters.enabled,
           multipleChoise: initialFilters.multipleChoise,
           selectedItem: initialFilters.selectedItem,
+          originalItem: initialFilters.originalItem,
         };
 
         currentlySelected.value = initialFilters.selectedItem;
@@ -62,6 +64,7 @@ export default {
       selectAll,
       selectedItems,
       deselectedItems,
+      originalItem,
     }: {
       enabled: boolean;
       multipleChoise: boolean;
@@ -69,6 +72,7 @@ export default {
       selectedItem: any;
       selectedItems: any[];
       deselectedItems: any[];
+      originalItem: any;
     }) => {
       if (multipleChoise) {
         filterConfigured.value = {
@@ -77,12 +81,14 @@ export default {
           selectAll,
           selectedItems,
           deselectedItems,
+          originalItem,
         };
       } else {
         filterConfigured.value = {
           enabled,
           multipleChoise,
           selectedItem,
+          originalItem,
         };
 
         currentlySelected.value = selectedItem;

@@ -117,6 +117,7 @@ const emitSelectFunc = () => {
       selectAll: searchSelectAll.value,
       deselectedItems: searchDeselectedItems.value,
       selectedItems: searchSelectedItems.value,
+      originalItem: props.rootHierarchy.item,
     });
   } else {
     emit("setSelection", {
@@ -126,6 +127,7 @@ const emitSelectFunc = () => {
       selectAll: selectAll.value,
       deselectedItems: deselectedItems.value,
       selectedItems: selectedItems.value,
+      originalItem: props.rootHierarchy.item,
     });
   }
 };

@@ -292,7 +292,7 @@ export async function useFilterTreeDataSource(element: {
 
     if (!hasSelection) {
       selectAll.value = false;
-      deselectedItems.value = [];
+      // deselectedItems.value = [];
     }
   }
 
