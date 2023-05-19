@@ -8,12 +8,15 @@
   Contributors: Smart City Jena
 
 */
+import { useTreeViewDataStore } from "@/stores/TreeView";
 import {
   getRowsDrilldownRequestString,
   getColsDrilldownRequestString,
 } from "./Drilldown";
+import { useAppSettingsStore } from "@/stores/AppSettings";
+import { optionalArrayToArray } from "../helpers";
 
-export function getMdxRequest(
+export async function getMdxRequest(
   cubename: string,
   rowsDrilldownMembers: any,
   columnsDrilldownMembers: any,
@@ -50,7 +53,7 @@ export function getMdxRequest(
     if (!pivotTableSettings.showEmpty) selectSection += " NON EMPTY";
 
     const rowsProperties = getRowsProperies(rows, properties);
-    const rowsRequest = getRowsRequest(
+    const rowsRequest = await getRowsRequest(
       rows,
       rowsDrilldownMembers,
       rowsExpandedMembers,
@@ -64,7 +67,7 @@ export function getMdxRequest(
     if (!pivotTableSettings.showEmpty) selectSection += " NON EMPTY";
 
     const colsProperties = getColumnsProperies(columns, properties);
-    const colsRequest = getColumnsRequest(
+    const colsRequest = await getColumnsRequest(
       columns,
       columnsDrilldownMembers,
       columnsExpandedMembers,
@@ -92,7 +95,7 @@ export function getMdxRequest(
   }
 }
 
-function getColumnsRequest(
+async function getColumnsRequest(
   columns: any,
   columnsDrilldownMembers: any[],
   colsExpandedMembers: any[],
@@ -102,13 +105,15 @@ function getColumnsRequest(
   let columnsWhere = "";
 
   if (columns.length >= 1) {
-    columns.forEach((e: any, i: number) => {
-      const columnsRequest = getSingleColumnRequest(
+    for (let i = 0; i < columns.length; i++) {
+      const e = columns[i];
+      const columnsRequest = await getSingleColumnRequest(
         e,
         columnsDrilldownMembers,
         colsExpandedMembers,
         measures
       );
+
       if (i === 0) {
         columnsSelect = columnsRequest.select;
         columnsWhere = columnsRequest.with;
@@ -121,14 +126,7 @@ function getColumnsRequest(
             ${columnsRequest.select}
           )`;
       }
-    });
-  } else if (columns.length === 1) {
-    columnsSelect = getSingleColumnRequest(
-      columns[0],
-      columnsDrilldownMembers,
-      colsExpandedMembers,
-      measures
-    ).select;
+    }
   } else {
     columnsSelect = "";
   }
@@ -139,7 +137,7 @@ function getColumnsRequest(
   };
 }
 
-function getSingleColumnRequest(
+async function getSingleColumnRequest(
   e: any,
   columnsDrilldownMembers: any[],
   colsExpandedMembers: any[],
@@ -154,6 +152,8 @@ function getSingleColumnRequest(
       with: "",
     };
   }
+
+  const filteredRequest = await getAxisFilterRequest(e);
 
   const drilledDownMember = columnsDrilldownMembers.find(
     (drilldownedMembers) => {
@@ -171,7 +171,8 @@ function getSingleColumnRequest(
   });
 
   if (drilledDownMember || expandedMembers.length) {
-    const request = getColsDrilldownRequestString(
+    const request = await getColsDrilldownRequestString(
+      e,
       drilledDownMember,
       colsExpandedMembers
     );
@@ -181,13 +182,28 @@ function getSingleColumnRequest(
       select: request.select,
     };
   }
+
+  if (filteredRequest) {
+    return {
+      select: filteredRequest.select,
+      with: filteredRequest.with,
+    };
+  }
+
+  // Default request with no drilldowns and filters
+  const treeViewStore = useTreeViewDataStore();
+  const rootLevel = treeViewStore.levels.find(
+    (l) =>
+      l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+      l.LEVEL_NUMBER === "0"
+  );
   return {
-    select: `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`,
+    select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
     with: "",
   };
 }
 
-function getRowsRequest(
+async function getRowsRequest(
   rows: any,
   rowsDrilldownMembers: any[],
   rowsExpandedMembers: any[],
@@ -197,8 +213,10 @@ function getRowsRequest(
   let rowsWhere = "";
 
   if (rows.length >= 1) {
-    rows.forEach((e: any, i: number) => {
-      const rowsRequest = getSingleRowRequest(
+    for (let i = 0; i < rows.length; i++) {
+      const e = rows[i];
+
+      const rowsRequest = await getSingleRowRequest(
         e,
         rowsDrilldownMembers,
         rowsExpandedMembers,
@@ -216,7 +234,7 @@ function getRowsRequest(
             ${rowsRequest.select}
           )`;
       }
-    });
+    }
   } else if (rows.length === 1) {
     rowsSelect = `{ ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
   } else {
@@ -229,7 +247,7 @@ function getRowsRequest(
   };
 }
 
-function getSingleRowRequest(
+async function getSingleRowRequest(
   e: any,
   rowsDrilldownMembers: any[],
   rowsExpandedMembers: any[],
@@ -245,6 +263,8 @@ function getSingleRowRequest(
     };
   }
 
+  const filteredRequest = await getAxisFilterRequest(e);
+
   const drilledDownMember = rowsDrilldownMembers.find((drilldownedMembers) => {
     return (
       drilldownedMembers.HIERARCHY_UNIQUE_NAME ===
@@ -258,7 +278,8 @@ function getSingleRowRequest(
     );
   });
   if (drilledDownMember || expandedMembers.length) {
-    const request = getRowsDrilldownRequestString(
+    const request = await getRowsDrilldownRequestString(
+      e,
       drilledDownMember,
       expandedMembers
     );
@@ -268,8 +289,23 @@ function getSingleRowRequest(
       select: request.select,
     };
   }
+  if (filteredRequest) {
+    return {
+      select: filteredRequest.select,
+      with: filteredRequest.with,
+    };
+  }
+
+  // Default request with no drilldowns and filters
+  const treeViewStore = useTreeViewDataStore();
+  const rootLevel = treeViewStore.levels.find(
+    (l) =>
+      l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+      l.LEVEL_NUMBER === "0"
+  );
+
   return {
-    select: `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`,
+    select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
     with: "",
   };
 }
@@ -317,7 +353,7 @@ function getColumnsProperies(columns: any, properties: any[]) {
   return columnsPropertiesList;
 }
 
-function getSingleHierarchyRequest(
+async function getSingleHierarchyRequest(
   rows: any[],
   columns: any[],
   measures: any[],
@@ -334,7 +370,7 @@ function getSingleHierarchyRequest(
   const fromPart = getFromPart(measures, cubename, filtersRequest.where);
 
   if (rows.length) {
-    const request = getRowsRequest(
+    const request = await getRowsRequest(
       rows,
       rowsDrilldownMembers,
       rowsExpandedMembers,
@@ -359,7 +395,7 @@ function getSingleHierarchyRequest(
       ${fromPart}
     `;
   } else if (columns.length) {
-    const request = getColumnsRequest(
+    const request = await getColumnsRequest(
       columns,
       columnsDrilldownMembers,
       columnsExpandedMembers,
@@ -410,8 +446,10 @@ function getFromPart(measures, cubename, filtersWhere) {
     } else {
       result = `FROM [${cubename}] WHERE (${filtersWhere}) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
     }
-  } else {
+  } else if (measuresPart) {
     result = `FROM [${cubename}] WHERE ${measuresPart} CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+  } else {
+    result = `FROM [${cubename}] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
   }
   return result;
 }
@@ -433,7 +471,6 @@ function getFiltersRequest(filters) {
 
     if (filter.multipleChoise) {
       const uid = Math.random().toString(16).slice(2);
-      console.log(filter);
       const filterSetName = `${filter.originalItem.DIMENSION_UNIQUE_NAME}.[FILTER_${uid}]`;
 
       const selectedItems = filter.selectedItems.map((e) => e.UName).join(",");
@@ -451,5 +488,132 @@ function getFiltersRequest(filters) {
   return {
     where: whereSection,
     with: withSection,
+  };
+}
+
+async function getAxisFilterRequest(e) {
+  // const appSettings = useAppSettingsStore();
+  // const api = appSettings.getApi();
+  const filter = e.filters;
+  let withSection = "";
+  let selectSection = "";
+
+  if (!filter.enabled) return null;
+
+  const selectedFilters = [] as any[];
+  if (filter.multipleChoise) {
+    selectedFilters.push(...filter.selectedItems);
+  } else {
+    selectedFilters.push(filter.selectedItem);
+  }
+
+  const filtersLevels = [] as any[][];
+  selectedFilters.forEach((e) => {
+    const levelNum = e.LNum;
+    if (filtersLevels[levelNum]) {
+      filtersLevels[levelNum].push(e);
+    } else {
+      filtersLevels[levelNum] = [e];
+    }
+  });
+
+  const deseclectedFiltersLevels = [] as any[][];
+  filter.deselectedItems.forEach((e) => {
+    const levelNum = e.LNum;
+    if (deseclectedFiltersLevels[levelNum]) {
+      deseclectedFiltersLevels[levelNum].push(e);
+    } else {
+      deseclectedFiltersLevels[levelNum] = [e];
+    }
+  });
+
+  const filtersDepth = Math.max(
+    filtersLevels.length,
+    deseclectedFiltersLevels.length
+  );
+
+  const treeViewStore = useTreeViewDataStore();
+  if (filter.selectAll && !deseclectedFiltersLevels.length) {
+    const uid = Math.random().toString(16).slice(2);
+    const filterSetName = `[FILTER_${uid}]`;
+
+    const rootLevel = treeViewStore.levels.find(
+      (l) =>
+        l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+        l.LEVEL_NUMBER === "0"
+    );
+
+    withSection = `SET ${filterSetName} AS 'VisualTotals(Distinct(Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))))' `;
+    selectSection = `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`;
+  } else {
+    const rowsLevels = treeViewStore.levels.filter((l) => {
+      return l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME;
+    });
+
+    const rootLevel = rowsLevels.find((e) => e.LEVEL_NUMBER === "0");
+    if (filter.selectAll) {
+      const appSettings = useAppSettingsStore();
+      const members = await appSettings.api?.getLevelMembers(
+        rootLevel as MDSchemaLevel,
+        100,
+        0
+      );
+
+      const req =
+        members
+          ?.map(
+            (e) =>
+              `Ascendants(${e.Member.UName}), Descendants(${e.Member.UName})`
+          )
+          .join(",") || "";
+
+      withSection = `{${req}}`;
+    }
+
+    if (!rootLevel) return null;
+
+    const uid = Math.random().toString(16).slice(2);
+    const filterSetName = `[FILTER_${uid}]`;
+
+    const set = selectedFilters
+      .map((e) => `Ascendants(${e.UName}), Descendants(${e.UName})`)
+      .join(",");
+
+    for (let i = 0; i < filtersDepth; i++) {
+      if (filtersLevels[i]) {
+        const aggregatedFiltersForLevel = filtersLevels[i]
+          .map((e) => `Ascendants(${e.UName}), Descendants(${e.UName})`)
+          .join(",");
+
+        if (withSection.length) {
+          withSection = `Union({${aggregatedFiltersForLevel}}, {${withSection}})`;
+        } else {
+          withSection = `{${aggregatedFiltersForLevel}}`;
+        }
+      }
+      if (deseclectedFiltersLevels[i]) {
+        const aggregatedFiltersForLevel = deseclectedFiltersLevels[i]
+          .map((e) => `Descendants(${e.UName})`)
+          .join(",");
+
+        if (withSection.length) {
+          withSection = `Except({${withSection}}, {${aggregatedFiltersForLevel}})`;
+        } else {
+          withSection = `{${aggregatedFiltersForLevel}}`;
+        }
+      }
+    }
+
+    if (filter.selectAll) {
+      withSection = `SET ${filterSetName} AS 'VisualTotals(Distinct(Hierarchize(${withSection})))' `;
+    } else {
+      withSection = `SET ${filterSetName} AS 'VisualTotals(Distinct(Hierarchize(Intersect({${set}}, ${withSection}))))' `;
+    }
+    selectSection = `Hierarchize(Intersect(AddCalculatedMembers({${rootLevel.LEVEL_UNIQUE_NAME}.members}), ${filterSetName}))`;
+  }
+
+  return {
+    with: withSection,
+    select: selectSection,
   };
 }

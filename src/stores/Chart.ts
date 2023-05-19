@@ -34,13 +34,14 @@ export const useChartStore = defineStore("Chart", () => {
 
   const mdx = ref("");
 
-  function getMDX() {
+  async function getMDX() {
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
     const measures = queryDesignerStore.measures;
     const settings = state.value.settings;
+    const filters = queryDesignerStore.filters;
 
-    const mdxRequest = getMdxRequest(
+    const mdxRequest = await getMdxRequest(
       appSettings.selectedCube,
       state.value.rowsDrilldownMembers,
       state.value.columnsDrilldownMembers,
@@ -50,7 +51,8 @@ export const useChartStore = defineStore("Chart", () => {
       columns,
       measures,
       settings,
-      treeViewStore.properties
+      treeViewStore.properties,
+      filters
     );
 
     mdx.value = mdxRequest;

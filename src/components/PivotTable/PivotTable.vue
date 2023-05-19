@@ -143,10 +143,16 @@ export default {
           mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis
         )?.[0]?.Tuples?.Tuple
       );
-      const axis1 = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-          ?.Tuple
-      );
+      let axis1 = [] as any[];
+      if (
+        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.__attrs
+          .name === "Axis1"
+      ) {
+        axis1 = optionalArrayToArray(
+          mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
+            ?.Tuple
+        );
+      }
       const cellsArray = optionalArrayToArray(
         mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
       );
@@ -168,11 +174,6 @@ export default {
         });
         cells.value = parseCells(cellsArray, columns.value, rows.value);
       }
-
-      console.log("axis0", axis0);
-      console.log("axis1", axis1);
-      console.log("columns", columns);
-      console.log("rows", rows);
 
       const columnProperties = [] as any[];
       const rowsProperties = [] as any[];
@@ -269,8 +270,6 @@ export default {
           const propsOrigin = rowDesc.find(
             (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME
           );
-
-          console.log(rowPropertiesDescription);
 
           const rowHierarchyIndex = rowDesc.indexOf(propsOrigin);
           const desc = rowPropertiesDescription[rowHierarchyIndex];
