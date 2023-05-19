@@ -105,6 +105,7 @@ export async function useFilterTreeDataSource(element: {
       );
       treeSelection = treeSelectionTupples.map((e) => {
         return {
+          ...e.Member,
           UName: e.Member.UName,
           hasChild: treeSelectionTupples.some(
             (member) => member.Member.PARENT_UNIQUE_NAME === e.Member.UName
@@ -235,7 +236,7 @@ export async function useFilterTreeDataSource(element: {
         } else {
           selectedItems.value = [
             ...selectedItems.value,
-            { UName: treeNode.UName, timestamp: Date.now() },
+            { UName: treeNode.UName, ...treeNode, timestamp: Date.now() },
           ];
         }
       }
@@ -259,7 +260,7 @@ export async function useFilterTreeDataSource(element: {
         } else {
           deselectedItems.value = [
             ...deselectedItems.value,
-            { UName: treeNode.UName, timestamp: Date.now() },
+            { UName: treeNode.UName, ...treeNode, timestamp: Date.now() },
           ];
         }
       }
@@ -332,7 +333,7 @@ export async function useFilterTreeDataSource(element: {
       } else {
         deselectedItems.value = [
           ...deselectedItems.value,
-          { UName: unique_name, timestamp: Date.now() },
+          { UName: unique_name, ...node, timestamp: Date.now() },
         ];
       }
     } else {
@@ -346,7 +347,7 @@ export async function useFilterTreeDataSource(element: {
       } else {
         selectedItems.value = [
           ...selectedItems.value,
-          { UName: unique_name, timestamp: Date.now() },
+          { UName: unique_name, ...node, timestamp: Date.now() },
         ];
       }
     }
