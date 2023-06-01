@@ -11,6 +11,7 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
+import { v4 } from "uuid";
 
 defineEmits([
   "drilldown",
@@ -23,7 +24,7 @@ defineProps(["drillupDisabled", "propertiesShown"]);
 
 const opened = ref(false);
 const eventBus = inject("eventBus") as TinyEmitter;
-const uid = "id" + Math.random().toString(16).slice(2);
+const uid = "id" + v4();
 
 eventBus.on("DropdownOpened", (openedUid: string) => {
   if (uid === openedUid) return;

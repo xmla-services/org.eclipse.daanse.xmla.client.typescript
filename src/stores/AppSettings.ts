@@ -13,6 +13,7 @@ import { defineStore } from "pinia";
 import { useTreeViewDataStore } from "./TreeView";
 import { usePivotTableStore } from "./PivotTable";
 import { findIndex } from "lodash";
+import { v4 } from "uuid";
 
 export const useAppSettingsStore = defineStore("appSettingsStore", {
   state: () => ({
@@ -52,7 +53,7 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
       this.removeLoadingState(loadingId);
     },
     setLoadingState() {
-      const uid = "id" + Math.random().toString(16).slice(2);
+      const uid = "id" + v4();
       this.loadingUids.push(uid);
       return uid;
     },
