@@ -392,7 +392,7 @@ watch(
 }
 
 .rowMemberOffset {
-  width: 150px;
+  width: 50px;
   height: 100%;
   border-right: 1px dashed lightgrey;
 }
