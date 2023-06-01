@@ -11,7 +11,7 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
-import { v4 } from 'uuid';
+import { v4 } from "uuid";
 
 defineEmits(["openCellProperties", "drillthrough"]);
 

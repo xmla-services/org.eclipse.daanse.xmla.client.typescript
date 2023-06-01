@@ -1272,7 +1272,6 @@ function __escapeString(str) {
 }
 
 function __unescapeString(str) {
-  // const escAmpRegEx = /&amp;/g;
   const escLtRegEx = /&lt;/g;
   const escGtRegEx = /&gt;/g;
   const quotRegEx = /&quot;/g;
@@ -1282,7 +1281,6 @@ function __unescapeString(str) {
   str = str.replace(escGtRegEx, ">");
   str = str.replace(quotRegEx, '"');
   str = str.replace(aposRegEx, "'");
-  // str = str.replace(escAmpRegEx, "&");
   str = str.replace(/&amp;/g, "&");
 
   return str;
