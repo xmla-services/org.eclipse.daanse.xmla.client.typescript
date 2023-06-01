@@ -10,6 +10,7 @@
 */
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { useTreeViewDataStore } from "@/stores/TreeView";
+import { v4 } from "uuid";
 
 export async function getRowsDrilldownRequestString(
   hierarchy: any,
@@ -19,7 +20,7 @@ export async function getRowsDrilldownRequestString(
   const treeViewStore = useTreeViewDataStore();
 
   if (rowsDrilldownMember) {
-    const uid = Math.random().toString(16).slice(2);
+    const uid = "id" + v4();
     const setSection = `SET [Row_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${rowsDrilldownMember.UName}), Descendants(${rowsDrilldownMember.UName})})))'`;
 
     const rowsMemberLevel = treeViewStore.levels.find(
@@ -157,7 +158,7 @@ export async function getRowsDrilldownRequestString(
           with: "",
         };
 
-      const uid = Math.random().toString(16).slice(2);
+      const uid = "id" + v4();
       const filterSetName = `[FILTER_${uid}]`;
 
       const set = selectedFilters
@@ -277,7 +278,7 @@ export async function getColsDrilldownRequestString(
   const treeViewStore = useTreeViewDataStore();
 
   if (columnsDrilldownMember) {
-    const uid = Math.random().toString(16).slice(2);
+    const uid = "id" + v4();
     const setSection = `SET [Col_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${columnsDrilldownMember.UName}), Descendants(${columnsDrilldownMember.UName})})))'`;
 
     const colsMemberLevel = treeViewStore.levels.find(
@@ -414,7 +415,7 @@ export async function getColsDrilldownRequestString(
           with: "",
         };
 
-      const uid = Math.random().toString(16).slice(2);
+      const uid = "id" + v4();
       const filterSetName = `[FILTER_${uid}]`;
 
       const set = selectedFilters

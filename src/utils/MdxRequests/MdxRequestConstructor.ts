@@ -14,7 +14,7 @@ import {
   getColsDrilldownRequestString,
 } from "./Drilldown";
 import { useAppSettingsStore } from "@/stores/AppSettings";
-import { optionalArrayToArray } from "../helpers";
+import { v4 } from "uuid";
 
 export async function getMdxRequest(
   cubename: string,
@@ -470,7 +470,7 @@ function getFiltersRequest(filters) {
     if (!filter.enabled) return;
 
     if (filter.multipleChoise) {
-      const uid = Math.random().toString(16).slice(2);
+      const uid = "id" + v4();
       const filterSetName = `${filter.originalItem.DIMENSION_UNIQUE_NAME}.[FILTER_${uid}]`;
 
       const selectedItems = filter.selectedItems.map((e) => e.UName).join(",");
@@ -534,7 +534,7 @@ async function getAxisFilterRequest(e) {
 
   const treeViewStore = useTreeViewDataStore();
   if (filter.selectAll && !deseclectedFiltersLevels.length) {
-    const uid = Math.random().toString(16).slice(2);
+    const uid = "id" + v4();
     const filterSetName = `[FILTER_${uid}]`;
 
     const rootLevel = treeViewStore.levels.find(
@@ -572,7 +572,7 @@ async function getAxisFilterRequest(e) {
 
     if (!rootLevel) return null;
 
-    const uid = Math.random().toString(16).slice(2);
+    const uid = "id" + v4();
     const filterSetName = `[FILTER_${uid}]`;
 
     const set = selectedFilters

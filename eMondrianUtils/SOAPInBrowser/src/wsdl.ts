@@ -232,6 +232,13 @@ export class WSDL {
     for (const alias in xmlns) {
       if (alias === '') continue
       const ns: string = xmlns[alias]
+      const url = new URL(ns);
+      const allowedHosts = [
+        'www.w3.org',
+        'schemas.xmlsoap.org',
+        'xml.apache.org',
+        'schemas.microsoft.com',
+      ]
       switch (ns) {
         case 'http://xml.apache.org/xml-soap': // apachesoap
         case 'http://schemas.xmlsoap.org/wsdl/': // wsdl
@@ -240,9 +247,7 @@ export class WSDL {
         case 'http://www.w3.org/2001/XMLSchema': // xsd
           continue
       }
-      if (~ns.indexOf('http://schemas.xmlsoap.org/')) continue
-      if (~ns.indexOf('http://www.w3.org/')) continue
-      if (~ns.indexOf('http://xml.apache.org/')) continue
+      if (allowedHosts.includes(url.host)) continue
       str += ` xmlns:${alias}="${ns}"`
     }
     return str
