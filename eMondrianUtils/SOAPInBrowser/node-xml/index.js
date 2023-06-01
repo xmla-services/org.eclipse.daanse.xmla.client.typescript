@@ -978,7 +978,7 @@ SaxParser.prototype._fireEvent = function (iEvt) {
   }
 };
 
-SaxParser.prototype._parseLoop = function () {
+SaxParser.prototype._parseLoop = function () { //NOSONAR
   let iEvent, parser;
 
   parser = this.m_parser;
