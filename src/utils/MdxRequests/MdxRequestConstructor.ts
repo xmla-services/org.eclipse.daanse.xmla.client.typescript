@@ -170,7 +170,8 @@ async function getSingleColumnRequest(
     );
   });
 
-  if (drilledDownMember || expandedMembers.length) {
+  const rootExpanded = expandedMembers.some((member) => member.LNum === "0");
+  if (drilledDownMember || (expandedMembers.length && rootExpanded)) {
     const request = await getColsDrilldownRequestString(
       e,
       drilledDownMember,
@@ -277,7 +278,10 @@ async function getSingleRowRequest(
       e.originalItem.HIERARCHY_UNIQUE_NAME
     );
   });
-  if (drilledDownMember || expandedMembers.length) {
+
+  const rootExpanded = expandedMembers.some((member) => member.LNum === "0");
+  if (drilledDownMember || (expandedMembers.length && rootExpanded)) {
+    console.log(expandedMembers);
     const request = await getRowsDrilldownRequestString(
       e,
       drilledDownMember,
