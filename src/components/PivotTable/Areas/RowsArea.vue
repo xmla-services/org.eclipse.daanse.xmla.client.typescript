@@ -91,7 +91,7 @@ const getRowMemberStyle = (i: number, j: number) => {
 
   const levelCount = minLevels[j] === 0 ? maxLevels[j] + 1 : maxLevels[j];
 
-  styles["width"] = `${150 * levelCount}px`;
+  styles["width"] = `${50 * (levelCount - 1) + 150}px`;
   if (!currentMember || !nextMember) return styles;
 
   if (currentMember.UName === nextMember.UName) {

@@ -64,6 +64,7 @@ export async function getRowsDrilldownRequestString(
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (!hierarchizeString.length) {
+          // hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
           hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
@@ -98,7 +99,8 @@ export async function getRowsDrilldownRequestString(
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (i === 0) {
-          hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
+          hierarchizeString = `DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
+          // hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
             DrilldownMember({{
@@ -109,10 +111,7 @@ export async function getRowsDrilldownRequestString(
       }
       hierarchizeString = `
         Hierarchize(
-          AddCalculatedMembers
-          (
             ${hierarchizeString}
-          )
         )`;
 
       return {
@@ -355,7 +354,8 @@ export async function getColsDrilldownRequestString(
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (i === 0) {
-          hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
+          hierarchizeString = `DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
+          //hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
             DrilldownMember({{
@@ -452,6 +452,7 @@ export async function getColsDrilldownRequestString(
       });
 
       if (levels.length) {
+        console.log(levels);
         for (let i = 0; i < levels.length; i++) {
           const joinedMembers = levels[i].map((e) => e.UName).join(",");
           if (i === 0) {
