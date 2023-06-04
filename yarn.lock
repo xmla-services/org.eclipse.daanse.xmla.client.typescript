@@ -2680,15 +2680,15 @@ functions-have-names@^1.2.2:
   resolved "https://registry.npmjs.org/functions-have-names/-/functions-have-names-1.2.3.tgz"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-geckodriver@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-4.0.0.tgz"
-  integrity sha512-1R1cuqqz+gqZ4Eux//TSbYDBpyYHHs9xLzG6BWJolORlaGkKWbg5qN3415fIi/5IkS7kTA2BEYvplB2GjH8oyw==
+geckodriver@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.0.2.tgz#87bf0db5a6e4c5a80460fea0acc14f2a08eedb76"
+  integrity sha512-TQavhcyQ0UvHK+oBOllrFNs1C71vL83kfDBnTExY2HdGSH0F5/HqmzsWgzbA4JC/YM8s1/dON2qDYigLGRyOsQ==
   dependencies:
     "@wdio/logger" "^8.6.6"
     decamelize "^6.0.0"
-    http-proxy-agent "^6.0.1"
-    https-proxy-agent "^6.1.0"
+    http-proxy-agent "^7.0.0"
+    https-proxy-agent "^7.0.0"
     node-fetch "^3.3.1"
     tar-fs "^2.1.1"
     unzipper "^0.10.14"
@@ -2917,10 +2917,10 @@ http-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
-http-proxy-agent@^6.0.1:
-  version "6.1.1"
-  resolved "https://registry.npmjs.org/http-proxy-agent/-/http-proxy-agent-6.1.1.tgz"
-  integrity sha512-JRCz+4Whs6yrrIoIlrH+ZTmhrRwtMnmOHsHn8GFEn9O2sVfSE+DAZ3oyyGIKF8tjJEeSJmP89j7aTjVsSqsU0g==
+http-proxy-agent@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/http-proxy-agent/-/http-proxy-agent-7.0.0.tgz#e9096c5afd071a3fce56e6252bb321583c124673"
+  integrity sha512-+ZT+iBxVUQ1asugqnD6oWoRiS25AkjNfG085dKJGtGxkdwLQrMKU5wJr2bOOFAXzKcTuqq+7fZlTMgG3SRfIYQ==
   dependencies:
     agent-base "^7.1.0"
     debug "^4.3.4"
@@ -2933,10 +2933,10 @@ https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
     agent-base "6"
     debug "4"
 
-https-proxy-agent@^6.1.0:
-  version "6.2.1"
-  resolved "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-6.2.1.tgz"
-  integrity sha512-ONsE3+yfZF2caH5+bJlcddtWqNI3Gvs5A38+ngvljxaBiRXRswym2c7yf8UAeFpRFKjFNHIFEHqR/OLAWJzyiA==
+https-proxy-agent@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.0.tgz#75cb70d04811685667183b31ab158d006750418a"
+  integrity sha512-0euwPCRyAPSgGdzD1IVN9nJYHtBhJwb6XPfbpQcYbPCwrBidX6GzxmchnaF4sfF/jPb74Ojx5g4yTg3sixlyPw==
   dependencies:
     agent-base "^7.0.2"
     debug "4"
