@@ -10,7 +10,17 @@ Contributors: Smart City Jena
 -->
 
 <script setup lang="ts">
-const props = defineProps(["layout"]);
+import {computed} from "vue";
+
+const props = defineProps(["layout","max","min"]);
+const split = computed(() => {
+  if(props.max)
+    return 100
+  if(props.min)
+    return 0
+  return undefined
+})
+
 </script>
 <template>
   <div class="split-container">
@@ -33,10 +43,11 @@ const props = defineProps(["layout"]);
             <slot name="right_container" />
           </div>
         </template>
+
       </va-split>
     </template>
     <template v-if="props.layout === 'vertical'">
-      <va-split class="split vertical" vertical>
+      <va-split class="split vertical" vertical :model-value="split">
         <template #start>
           <div class="section-block">
             <slot name="left_container" />

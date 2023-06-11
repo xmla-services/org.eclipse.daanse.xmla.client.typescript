@@ -9,11 +9,12 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts">
-import { useAppSettingsStore } from "@/stores/AppSettings";
+import {OptionalSelects, useAppSettingsStore, ViewOptions} from "@/stores/AppSettings";
 import ServerSelectionModal from "@/components/Modals/ServerSelectionModal.vue";
 import CatalogSelectionModal from "@/components/Modals/CatalogSelectionModal.vue";
 import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
 import { useLocationManager } from "@/composables/locationManager";
+import {ref} from "vue";
 
 // const url = "https://ssemenkoff.dev/emondrian/xmla";
 const locationManager = useLocationManager();
@@ -26,12 +27,53 @@ export default {
     const cube = locationManager.queryState.value.cube;
     const catalog = locationManager.queryState.value.catalog;
 
+    const viewOption = store.viewOption;
+    const optionsSwitch = store.optionalSelect;
+
+    const optionsSwitchoptions = ref([
+      { icon: 'insert_chart', value: OptionalSelects.CHART },
+      { icon: 'map', value: OptionalSelects.MAP },
+
+    ]);
+
     return {
       store,
       uri,
       cube,
       catalog,
+      viewOption,
+      optionsSwitch,
+      optionsSwitchoptions
     };
+  },
+  computed:{
+    viewOptionoptions(){
+
+      if(this.store.optionalSelect == OptionalSelects.MAP){
+        return [
+          { icon: 'table_chart', value: ViewOptions.TABLE },
+          { "icon":'table_chart',"iconRight":'map',label:'/', value:  ViewOptions.SPLIT},
+          { icon: 'map', value: ViewOptions.OPTIONAL },
+
+        ];
+      }
+      else{
+        return [
+          { icon: 'table_chart', value: ViewOptions.TABLE },
+          { "icon":'table_chart',"iconRight":'insert_chart',label:'/', value: ViewOptions.SPLIT},
+          { icon: 'insert_chart', value: ViewOptions.OPTIONAL },
+
+        ];
+      }
+    }
+  },
+  watch:{
+    viewOption(val){
+      this.store.switchViewOption(val)
+    },
+    optionsSwitch(val){
+      this.store.switchOptional(val)
+    }
   },
   methods: {
     async connect() {
@@ -94,9 +136,22 @@ export default {
       <va-navbar-item v-if="!store.xmlaApiInited">
         <va-button @click="connect">Connect</va-button>
       </va-navbar-item>
+      <va-navbar-item v-if="store.xmlaApiInited">
+        <va-button-toggle
+            v-model="store.viewOption"
+            :options="viewOptionoptions"
+        />
+      </va-navbar-item>
+      <va-navbar-item v-if="store.xmlaApiInited">
+        <va-button-toggle
+            v-model="store.optionalSelect"
+            :options="optionsSwitchoptions"
+        />
+      </va-navbar-item>
       <va-navbar-item>
         <PivotTableSettingsButton />
       </va-navbar-item>
+
     </template>
 
     <Teleport to="body">

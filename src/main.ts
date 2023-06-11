@@ -20,6 +20,7 @@ import {
   createVuesticEssential,
   createIconsConfig,
   VaButton,
+  VaButtonToggle,
   VaSplit,
   VaImage,
   VaModal,
@@ -68,6 +69,7 @@ app.use(
   createVuesticEssential({
     components: {
       VaButton,
+      VaButtonToggle,
       VaSplit,
       VaImage,
       VaModal,
