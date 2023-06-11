@@ -18,11 +18,16 @@ import Chart from "./components/Charts/ChartModule.vue";
 import { onMounted, ref } from "vue";
 import axios from "axios";
 import InfoBox from "./components/Modals/InfoBox.vue";
+import Map from "./components/Map/Map.vue"
+import {OptionalSelects, useAppSettingsStore, ViewOptions} from "@/stores/AppSettings";
 
 console.log("https://ssemenkoff.dev/emondrian/xmla");
 
 const showInfoBox = ref(false);
 const infoUri = ref(null);
+const appSettings = useAppSettingsStore();
+const viewOptionEnum = ViewOptions;
+const optionalSelectsEnum = OptionalSelects;
 
 onMounted(async () => {
   try {
@@ -51,12 +56,17 @@ onMounted(async () => {
       </QuertyDesignerLayout>
     </template>
     <template #right_container>
-      <QuertyDesignerLayout layout="vertical">
+      <QuertyDesignerLayout layout="vertical" :max="appSettings.viewOption === viewOptionEnum.TABLE" :min="appSettings.viewOption === viewOptionEnum.OPTIONAL">
         <template #left_container>
           <PivotTable />
         </template>
         <template #right_container>
-          <Chart />
+          <Chart v-if="(appSettings.viewOption === viewOptionEnum.SPLIT || appSettings.viewOption === viewOptionEnum.OPTIONAL)
+                        && appSettings.optionalSelect === optionalSelectsEnum.CHART
+                      "/>
+          <Map v-if="(appSettings.viewOption === viewOptionEnum.SPLIT || appSettings.viewOption === viewOptionEnum.OPTIONAL)
+                        && appSettings.optionalSelect === optionalSelectsEnum.MAP
+                      "/>
         </template>
       </QuertyDesignerLayout>
     </template>

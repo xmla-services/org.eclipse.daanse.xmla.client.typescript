@@ -249,7 +249,15 @@ export default {
           const desc = colPropertiesDescription[colHierarchyIndex];
           const propName = `${prop.HIERARCHY_UNIQUE_NAME}.[${prop.PROPERTY_NAME}]`;
           const objPropName = Object.entries(desc).find((keyValue: any) => {
-            return keyValue[1]?.__attrs?.name === propName;
+            if(Array.isArray(keyValue[1])){
+                const att = keyValue[1].find(entry=>{
+                return entry.__attrs?.name === propName;
+              })
+              if(att) return att;
+            }else {
+              return keyValue[1]?.__attrs?.name === propName;
+            }
+
           });
 
           if (objPropName) {

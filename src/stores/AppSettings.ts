@@ -15,6 +15,16 @@ import { findIndex } from "lodash";
 import { v4 } from "uuid";
 import { useMetadataStorage } from "@/composables/metadataStorage";
 
+export enum ViewOptions{
+  'TABLE',
+  'SPLIT',
+  'OPTIONAL'
+}
+export enum OptionalSelects{
+  'CHART',
+  'MAP',
+}
+
 export const useAppSettingsStore = defineStore("appSettingsStore", {
   state: () => ({
     xmlaApiInited: false,
@@ -23,6 +33,8 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
     selectedCube: "",
     cubeOpened: false,
     loadingUids: [] as string[],
+    viewOption: ViewOptions.SPLIT as ViewOptions,
+    optionalSelect: OptionalSelects.CHART as OptionalSelects
   }),
   actions: {
     async initXmlaApi(url: string) {
@@ -64,6 +76,12 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
         this.loadingUids.splice(loadingIdIndex, 1);
       }
     },
+    switchViewOption(option:ViewOptions){
+      this.viewOption = option;
+    },
+    switchOptional(selection:OptionalSelects){
+      this.optionalSelect = selection;
+    }
   },
   getters: {
     loading(state) {
