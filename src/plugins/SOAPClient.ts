@@ -8,9 +8,26 @@
   Contributors: Smart City Jena
 
 */
-import { createClientAsync } from "@/XMLAClient";
+import { createClientAsync, type XmlaClient } from "@/XMLAClient";
 import type { PiniaPluginContext } from "pinia";
 
+let client: XmlaClient;
+let clientResolveFn;
+let inited = false;
+const clientPromise: Promise<XmlaClient> = new Promise((res) => {
+  clientResolveFn = res;
+});
+
+const initClient = async (url) => {
+  if (!inited) {
+    inited = true;
+    client = await createClientAsync(url);
+    clientResolveFn(client);
+  }
+
+  return clientPromise;
+};
+
 export default async function ({ store }: PiniaPluginContext) {
-  store.$state.$soapClient = await createClientAsync("def/xmla.wsdl");
+  store.$state.$soapClient = initClient("def/xmla.wsdl");
 }

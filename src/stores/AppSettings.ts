@@ -10,10 +10,10 @@
 */
 import { XMLAApi } from "../api/xml";
 import { defineStore } from "pinia";
-import { useTreeViewDataStore } from "./TreeView";
 import { usePivotTableStore } from "./PivotTable";
 import { findIndex } from "lodash";
 import { v4 } from "uuid";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 export const useAppSettingsStore = defineStore("appSettingsStore", {
   state: () => ({
@@ -45,8 +45,9 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
       this.cubeOpened = true;
       const loadingId = this.setLoadingState();
 
-      const treeViewDataStore = useTreeViewDataStore();
-      await treeViewDataStore.fetchCubeData(catalogName, cube);
+      const metadataStorage = useMetadataStorage();
+      await metadataStorage.initMetadataStorage(this.api, catalogName, cube);
+
       const pivotTableStore = usePivotTableStore();
       pivotTableStore.fetchPivotTableData();
 
@@ -62,11 +63,11 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
       if (loadingIdIndex >= 0) {
         this.loadingUids.splice(loadingIdIndex, 1);
       }
-    }
+    },
   },
   getters: {
     loading(state) {
       return !!state.loadingUids.length;
-    }
-  }
+    },
+  },
 });

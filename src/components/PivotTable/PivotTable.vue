@@ -19,11 +19,11 @@ import CellsArea from "./Areas/CellsArea.vue";
 import DrillthroughModal from "../Modals/DrillthroughModal.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { storeToRefs } from "pinia";
-import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useChartStore } from "@/stores/Chart";
 import { useElementSize } from "@vueuse/core";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { debounce } from "lodash";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -36,7 +36,7 @@ export default {
     const { mdx } = storeToRefs(pivotTableStore);
     const appSettings = useAppSettingsStore();
     const api = appSettings.getApi();
-    const treeViewStore = useTreeViewDataStore();
+    const metadataStorage = useMetadataStorage();
     const queryDesignerState = useQueryDesignerStore();
     const chartStore = useChartStore();
     const rowsContainer = ref(null) as Ref<any>;
@@ -75,7 +75,9 @@ export default {
       }
     });
     provide("drillup", async (member: any, area: "columns" | "rows") => {
-      const parentLevel = treeViewStore.levels.find((e) => {
+      const levels = (await metadataStorage.getMetadataStorage()).levels;
+
+      const parentLevel = levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME &&
           e.LEVEL_NUMBER === Math.max(parseInt(member.LNum) - 1, 0).toString()
@@ -90,7 +92,7 @@ export default {
         );
         appSettings.removeLoadingState(loadingId);
 
-        const requestParentLevel = treeViewStore.levels.find((e) => {
+        const requestParentLevel = levels.find((e) => {
           return (
             e.HIERARCHY_UNIQUE_NAME === parentMember.HIERARCHY_UNIQUE_NAME &&
             e.LEVEL_NUMBER ===
@@ -138,6 +140,7 @@ export default {
       const mdx = pivotTableStore.mdx;
 
       const mdxResponce = await api.getMDX(mdx);
+      const properties = (await metadataStorage.getMetadataStorage()).properties;
       const axis0 = optionalArrayToArray(
         optionalArrayToArray(
           mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis
@@ -184,7 +187,7 @@ export default {
         );
         if (!colPropsShown) return;
 
-        const colProps: any[] = treeViewStore.properties.filter(
+        const colProps: any[] = properties.filter(
           (prop) => prop.HIERARCHY_UNIQUE_NAME === col.HIERARCHY_UNIQUE_NAME
         );
         columnProperties.push(...colProps);
@@ -196,7 +199,7 @@ export default {
         );
         if (!rowPropsShown) return;
 
-        const rowProps: any[] = treeViewStore.properties.filter(
+        const rowProps: any[] = properties.filter(
           (prop) => prop.HIERARCHY_UNIQUE_NAME === row.HIERARCHY_UNIQUE_NAME
         );
         rowsProperties.push(...rowProps);

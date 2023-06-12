@@ -13,6 +13,6 @@ import type XmlaClient from "@/XMLAClient";
 
 declare module "pinia" {
   export interface PiniaCustomStateProperties {
-    $soapClient: XmlaClient;
+    $soapClient: Promise<XmlaClient>;
   }
 }

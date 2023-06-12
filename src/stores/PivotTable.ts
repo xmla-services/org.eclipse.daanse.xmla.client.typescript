@@ -12,13 +12,12 @@ import { defineStore } from "pinia";
 import { useAppSettingsStore } from "./AppSettings";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { ref, watch } from "vue";
-import { useTreeViewDataStore } from "./TreeView";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 export const usePivotTableStore = defineStore("PivotTable", () => {
   const queryDesignerStore = useQueryDesignerStore();
   const appSettings = useAppSettingsStore();
-  const treeViewStore = useTreeViewDataStore();
 
   const state = ref({
     settings: ref({
@@ -45,6 +44,10 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     const measures = queryDesignerStore.measures;
     const filters = queryDesignerStore.filters;
     const pivotTableSettings = state.value.settings;
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
+
+    console.log(rows);
 
     const mdxRequest = await getMdxRequest(
       appSettings.selectedCube,
@@ -56,7 +59,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       columns,
       measures,
       pivotTableSettings,
-      treeViewStore.properties,
+      metadata.properties,
       filters
     );
 
