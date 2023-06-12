@@ -8,8 +8,8 @@
   Contributors: Smart City Jena
 
 */
+import { useMetadataStorage } from "@/composables/metadataStorage";
 import { useAppSettingsStore } from "@/stores/AppSettings";
-import { useTreeViewDataStore } from "@/stores/TreeView";
 import { v4 } from "uuid";
 
 export async function getRowsDrilldownRequestString(
@@ -17,17 +17,18 @@ export async function getRowsDrilldownRequestString(
   rowsDrilldownMember: any,
   expandedMembers: any[]
 ) {
-  const treeViewStore = useTreeViewDataStore();
+  const metadataStorage = useMetadataStorage();
+  const metadata = await metadataStorage.getMetadataStorage();
 
   if (rowsDrilldownMember) {
     const uid = "id" + v4();
     const setSection = `SET [Row_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${rowsDrilldownMember.UName}), Descendants(${rowsDrilldownMember.UName})})))'`;
 
-    const rowsMemberLevel = treeViewStore.levels.find(
+    const rowsMemberLevel = metadata.levels.find(
       (e) => e.LEVEL_UNIQUE_NAME === rowsDrilldownMember.LName
     );
 
-    const rowsLevels = treeViewStore.levels.filter((e) => {
+    const rowsLevels = metadata.levels.filter((e) => {
       return (
         e.HIERARCHY_UNIQUE_NAME === rowsMemberLevel?.HIERARCHY_UNIQUE_NAME &&
         e.LEVEL_NUMBER <= rowsMemberLevel.LEVEL_NUMBER
@@ -55,7 +56,7 @@ export async function getRowsDrilldownRequestString(
     }
 
     if (expandedMembers) {
-      const rowsRootLevel = treeViewStore.levels.find((e) => {
+      const rowsRootLevel = metadata.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -90,7 +91,7 @@ export async function getRowsDrilldownRequestString(
     if (!hierarchy.filters.enabled) {
       let hierarchizeString = "";
 
-      const rowsRootLevel = treeViewStore.levels.find((e) => {
+      const rowsRootLevel = metadata.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -140,9 +141,7 @@ export async function getRowsDrilldownRequestString(
         }
       });
 
-      const treeViewStore = useTreeViewDataStore();
-
-      const rowsLevels = treeViewStore.levels.filter((e) => {
+      const rowsLevels = metadata.levels.filter((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
           hierarchy.originalItem.HIERARCHY_UNIQUE_NAME
@@ -274,17 +273,18 @@ export async function getColsDrilldownRequestString(
   columnsDrilldownMember: any,
   expandedMembers: any[]
 ) {
-  const treeViewStore = useTreeViewDataStore();
+  const metadataStorage = useMetadataStorage();
+  const metadata = await metadataStorage.getMetadataStorage();
 
   if (columnsDrilldownMember) {
     const uid = "id" + v4();
     const setSection = `SET [Col_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${columnsDrilldownMember.UName}), Descendants(${columnsDrilldownMember.UName})})))'`;
 
-    const colsMemberLevel = treeViewStore.levels.find(
+    const colsMemberLevel = metadata.levels.find(
       (e) => e.LEVEL_UNIQUE_NAME === columnsDrilldownMember.LName
     );
 
-    const colsLevels = treeViewStore.levels.filter((e) => {
+    const colsLevels = metadata.levels.filter((e) => {
       return (
         e.HIERARCHY_UNIQUE_NAME === colsMemberLevel?.HIERARCHY_UNIQUE_NAME &&
         e.LEVEL_NUMBER <= colsMemberLevel.LEVEL_NUMBER
@@ -311,7 +311,7 @@ export async function getColsDrilldownRequestString(
     }
 
     if (expandedMembers) {
-      const colsRootLevel = treeViewStore.levels.find((e) => {
+      const colsRootLevel = metadata.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -345,7 +345,7 @@ export async function getColsDrilldownRequestString(
     if (!hierarchy.filters.enabled) {
       let hierarchizeString = "";
 
-      const colsRootLevel = treeViewStore.levels.find((e) => {
+      const colsRootLevel = metadata.levels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -398,9 +398,7 @@ export async function getColsDrilldownRequestString(
         }
       });
 
-      const treeViewStore = useTreeViewDataStore();
-
-      const rowsLevels = treeViewStore.levels.filter((e) => {
+      const rowsLevels = metadata.levels.filter((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
           hierarchy.originalItem.HIERARCHY_UNIQUE_NAME

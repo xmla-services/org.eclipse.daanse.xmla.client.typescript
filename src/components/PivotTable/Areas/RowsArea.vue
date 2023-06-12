@@ -14,7 +14,7 @@ import type { TinyEmitter } from "tiny-emitter";
 import { computed, inject, ref, watch, type Ref } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
 import MemberPropertiesModal from "@/components/Modals/MemberPropertiesModal.vue";
-import { useTreeViewDataStore } from "@/stores/TreeView";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 const { state } = usePivotTableStore();
 
@@ -201,10 +201,10 @@ eventBus.on("scroll", ({ top }: { top: number }) => {
 
 const memberPropertiesModal = ref(null) as Ref<any>;
 const openMemberProperties = async (member) => {
-  const treeStore = useTreeViewDataStore();
-  const level = treeStore.levels.find(
-    (e) => e.LEVEL_UNIQUE_NAME === member.LName
-  );
+  const metadataStorage = useMetadataStorage();
+  const levels = (await metadataStorage.getMetadataStorage()).levels;
+
+  const level = levels.find((e) => e.LEVEL_UNIQUE_NAME === member.LName);
   await memberPropertiesModal.value?.run({ level, member });
 };
 
@@ -318,7 +318,10 @@ watch(
           <div class="d-flex">
             <div class="rowMember" :style="getRowMemberStyle(member.i, j)">
               <div class="rowMemberContentWrapper">
-                <div class="rowMemberOffsetContainer" v-html="getRowMemberOffsetItems(member.i, j)"></div>
+                <div
+                  class="rowMemberOffsetContainer"
+                  v-html="getRowMemberOffsetItems(member.i, j)"
+                ></div>
                 <div class="rowMemberContent">
                   <template v-if="!sameAsPrevious(member.i, j)">
                     <div

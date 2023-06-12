@@ -8,7 +8,7 @@
   Contributors: Smart City Jena
 
 */
-import { useTreeViewDataStore } from "@/stores/TreeView";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 import {
   getRowsDrilldownRequestString,
   getColsDrilldownRequestString,
@@ -192,8 +192,10 @@ async function getSingleColumnRequest(
   }
 
   // Default request with no drilldowns and filters
-  const treeViewStore = useTreeViewDataStore();
-  const rootLevel = treeViewStore.levels.find(
+  const metadataStorage = useMetadataStorage();
+  const metadata = await metadataStorage.getMetadataStorage();
+
+  const rootLevel = metadata.levels.find(
     (l) =>
       l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
       l.LEVEL_NUMBER === "0"
@@ -301,8 +303,10 @@ async function getSingleRowRequest(
   }
 
   // Default request with no drilldowns and filters
-  const treeViewStore = useTreeViewDataStore();
-  const rootLevel = treeViewStore.levels.find(
+  const metadataStorage = useMetadataStorage();
+  const metadata = await metadataStorage.getMetadataStorage();
+
+  const rootLevel = metadata.levels.find(
     (l) =>
       l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
       l.LEVEL_NUMBER === "0"
@@ -536,12 +540,14 @@ async function getAxisFilterRequest(e) {
     deseclectedFiltersLevels.length
   );
 
-  const treeViewStore = useTreeViewDataStore();
+  const metadataStorage = useMetadataStorage();
+  const metadata = await metadataStorage.getMetadataStorage();
+
   if (filter.selectAll && !deseclectedFiltersLevels.length) {
     const uid = "id" + v4();
     const filterSetName = `[FILTER_${uid}]`;
 
-    const rootLevel = treeViewStore.levels.find(
+    const rootLevel = metadata.levels.find(
       (l) =>
         l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
         l.LEVEL_NUMBER === "0"
@@ -550,7 +556,7 @@ async function getAxisFilterRequest(e) {
     withSection = `SET ${filterSetName} AS 'VisualTotals(Distinct(Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))))' `;
     selectSection = `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`;
   } else {
-    const rowsLevels = treeViewStore.levels.filter((l) => {
+    const rowsLevels = metadata.levels.filter((l) => {
       return l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME;
     });
 

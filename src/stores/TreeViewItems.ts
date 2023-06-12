@@ -31,6 +31,7 @@ export interface TreeItem {
   caption: string;
   id: string;
   type: number;
+  children?: TreeItem[] | undefined;
 }
 
 export interface DimensionTreeItem extends TreeItem {
@@ -91,7 +92,7 @@ export interface LoadingTreeItem extends TreeItem {
 export interface LoadMoreTreeItem extends TreeItem {
   type: TreeItemTypesEnum.LoadMore;
   caption: "";
-  onClick: Function;
+  parentId: string;
 }
 
 export interface MemberTreeItem extends TreeItem {
@@ -235,15 +236,12 @@ export function getLoadingItemDesc(parentId: string): LoadingTreeItem {
     id: `${parentId}_Loading`,
   };
 }
-export function getLoadMoreItemDesc(
-  parentId: string,
-  onClick: Function
-): LoadMoreTreeItem {
+export function getLoadMoreItemDesc(parentId: string): LoadMoreTreeItem {
   return {
     type: TreeItemTypesEnum.LoadMore,
     caption: "",
     id: `${parentId}_LoadMore`,
-    onClick,
+    parentId: parentId,
   };
 }
 

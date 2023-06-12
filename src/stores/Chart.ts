@@ -12,13 +12,12 @@ import { defineStore } from "pinia";
 import { useAppSettingsStore } from "./AppSettings";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { ref, watch } from "vue";
-import { useTreeViewDataStore } from "./TreeView";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 export const useChartStore = defineStore("Chart", () => {
   const queryDesignerStore = useQueryDesignerStore();
   const appSettings = useAppSettingsStore();
-  const treeViewStore = useTreeViewDataStore();
 
   const state = ref({
     settings: ref({
@@ -35,6 +34,9 @@ export const useChartStore = defineStore("Chart", () => {
   const mdx = ref("");
 
   async function getMDX() {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
+
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
     const measures = queryDesignerStore.measures;
@@ -51,7 +53,7 @@ export const useChartStore = defineStore("Chart", () => {
       columns,
       measures,
       settings,
-      treeViewStore.properties,
+      metadata.properties,
       filters
     );
 

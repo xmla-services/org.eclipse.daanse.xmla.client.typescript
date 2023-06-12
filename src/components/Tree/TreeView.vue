@@ -9,33 +9,48 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts">
-import { useTreeViewDataStore } from "@/stores/TreeView";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { TreeItemTypesEnum } from "../../stores/TreeViewItems";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import draggable from "vuedraggable";
 import XMLAIconVue from "@/icons/XMLAIcon.vue";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 export default {
   setup() {
-    const store = useTreeViewDataStore();
     const appSettings = useAppSettingsStore();
+    const metadataStorage = useMetadataStorage();
+
+    const treeViewData = ref(null as any);
+    onMounted(async () => {
+      treeViewData.value = await metadataStorage.getTreeViewNodes();
+    });
+
     const filter = ref("");
+
     const expandedNodes = ref([] as string[]);
-    const triggerExpanded = (nodes: string[]) => {
+    const triggerExpanded = async (nodes: string[]) => {
       expandedNodes.value = nodes;
-      store.callExpandedMethods(nodes);
+      await metadataStorage.setExpandedNodes(nodes);
+      treeViewData.value = await metadataStorage.getTreeViewNodes();
     };
+
+    const loadMore = async (id) => {
+      await metadataStorage.loadMoreForNode(id);
+      treeViewData.value = await metadataStorage.getTreeViewNodes();
+    };
+
     const dragging = ref("");
 
     return {
-      store,
+      treeViewData,
       appSettings,
       filter,
       triggerExpanded,
       TreeItemTypesEnum,
       dragging,
       expandedNodes,
+      loadMore,
     };
   },
   components: {
@@ -48,25 +63,25 @@ export default {
         name: "",
         primaryColor: "",
         secondaryColor: "",
-      }
+      };
       if (treeViewItem.type === TreeItemTypesEnum.Measure) {
         iconDesc.name = "MeasureIcon";
-      }
-      else if (treeViewItem.type === TreeItemTypesEnum.SetsFolder || treeViewItem.type === TreeItemTypesEnum.Folder) {
+      } else if (
+        treeViewItem.type === TreeItemTypesEnum.SetsFolder ||
+        treeViewItem.type === TreeItemTypesEnum.Folder
+      ) {
         if (this.expandedNodes.some((e) => e === treeViewItem.id)) {
           iconDesc.name = "mdi-folder_open";
         } else {
           iconDesc.name = "mdi-folder";
         }
-      }
-      else if (treeViewItem.type === TreeItemTypesEnum.Set) {
+      } else if (treeViewItem.type === TreeItemTypesEnum.Set) {
         iconDesc.name = "SetIcon";
-      }
-      else if (treeViewItem.type === TreeItemTypesEnum.Dimension) {
+      } else if (treeViewItem.type === TreeItemTypesEnum.Dimension) {
         if (treeViewItem.isMeasureDimension) {
           iconDesc.name = "MeasureIcon";
         } else {
-            iconDesc.name = "DimesionIcon";
+          iconDesc.name = "DimesionIcon";
         }
       } else if (treeViewItem.type === TreeItemTypesEnum.MeasureGroup) {
         if (this.expandedNodes.some((e) => e === treeViewItem.id)) {
@@ -116,13 +131,13 @@ export default {
         }
       }
       return iconDesc;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <template>
-  <div v-if="store.metadataLoaded" style="height: 100%">
+  <div v-if="treeViewData" style="height: 100%">
     <div class="tree-container">
       <div class="tree-header mb-2">
         <h3 class="ma-2">Cube: {{ appSettings.selectedCube }}</h3>
@@ -134,7 +149,7 @@ export default {
         />
       </div>
       <va-tree-view
-        :nodes="store.treeViewNodes"
+        :nodes="treeViewData"
         class="tree-view"
         :filter="filter"
         :text-by="'caption'"
@@ -149,7 +164,14 @@ export default {
           >
             <template #item="{ element }">
               <div class="d-flex align-center">
-                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
+                <XMLAIconVue
+                  :icon="getTreeViewItemIcon(node).name"
+                  :primary-color="getTreeViewItemIcon(node).primaryColor"
+                  :secondary-color="getTreeViewItemIcon(node).secondaryColor"
+                  :height="24"
+                  :width="24"
+                  class="mr-1"
+                ></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -162,7 +184,14 @@ export default {
           >
             <template #item="{ element }">
               <div class="d-flex align-center">
-                <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
+                <XMLAIconVue
+                  :icon="getTreeViewItemIcon(node).name"
+                  :primary-color="getTreeViewItemIcon(node).primaryColor"
+                  :secondary-color="getTreeViewItemIcon(node).secondaryColor"
+                  :height="24"
+                  :width="24"
+                  class="mr-1"
+                ></XMLAIconVue>
                 {{ element.caption }}
               </div>
             </template>
@@ -174,13 +203,20 @@ export default {
             <va-progress-circle indeterminate size="small" />
           </div>
           <div
-            v-else-if="node.type === TreeItemTypesEnum.LoadMore" 
+            v-else-if="node.type === TreeItemTypesEnum.LoadMore"
             class="d-flex align-center"
           >
-            <va-button @click="node.onClick()">Load more</va-button>
+            <va-button @click="loadMore(node.parentId)">Load more</va-button>
           </div>
           <div v-else class="d-flex align-center">
-            <XMLAIconVue :icon="getTreeViewItemIcon(node).name" :primary-color="getTreeViewItemIcon(node).primaryColor" :secondary-color="getTreeViewItemIcon(node).secondaryColor" :height="24" :width="24" class="mr-1"></XMLAIconVue>
+            <XMLAIconVue
+              :icon="getTreeViewItemIcon(node).name"
+              :primary-color="getTreeViewItemIcon(node).primaryColor"
+              :secondary-color="getTreeViewItemIcon(node).secondaryColor"
+              :height="24"
+              :width="24"
+              class="mr-1"
+            ></XMLAIconVue>
             {{ node.caption }}
           </div>
         </template>

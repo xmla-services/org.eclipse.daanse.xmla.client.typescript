@@ -9,7 +9,15 @@
 
 */
 import { defineStore } from "pinia";
-import type { HierarchyTreeItem, MeasureTreeItem } from "./TreeViewItems";
+import {
+  getHierarchyDesc,
+  type HierarchyTreeItem,
+  type MeasureTreeItem,
+} from "./TreeViewItems";
+import { computed, ref, watch } from "vue";
+import { useLocationManager } from "@/composables/locationManager";
+import { getMeasureDesc } from "./TreeViewItems";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 
 export interface ValuesItem {
   id: "Values";
@@ -22,33 +30,100 @@ export interface ValuesItem {
   children: [];
 }
 
-export const useQueryDesignerStore = defineStore("queryDesignerStore", {
-  state: () => {
-    return {
-      filters: <HierarchyTreeItem[]>[],
-      rows: <HierarchyTreeItem[]>[],
-      columns: <(HierarchyTreeItem | ValuesItem)[]>[],
-      measures: <MeasureTreeItem[]>[],
-      manualUpdate: false,
-    };
-  },
-  getters: {
-    queryModel(): any {
-      return {
-        filters: this.filters.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-        rows: this.rows.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-        columns: this.columns.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-        measures: this.measures.map((e) => e.originalItem.MEASURE_UNIQUE_NAME),
-      };
-    },
-    hierarchyUniqueNames(): string[] {
-      const uniqueNames = [
-        ...this.filters.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-        ...this.rows.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-        ...this.columns.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
-      ];
+export const useQueryDesignerStore = defineStore("queryDesignerStore", () => {
+  const locationManager = useLocationManager();
 
-      return uniqueNames;
+  const filters = ref(<HierarchyTreeItem[]>[]);
+  const rows = ref(<HierarchyTreeItem[]>[]);
+  const columns = ref(<(HierarchyTreeItem | ValuesItem)[]>[]);
+  const measures = ref(<MeasureTreeItem[]>[]);
+  const manualUpdate = ref(false);
+
+  const queryModel = computed(() => {
+    return {
+      filters: filters.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+      rows: rows.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+      columns: columns.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+      measures: measures.value.map((e) => e.originalItem.MEASURE_UNIQUE_NAME),
+    };
+  });
+
+  const hierarchyUniqueNames = computed(() => {
+    const uniqueNames = [
+      ...filters.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+      ...rows.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+      ...columns.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME),
+    ];
+
+    return uniqueNames;
+  });
+
+  const restoreState = async () => {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
+
+    console.log(metadata);
+
+    const restoredRows = metadata.hierarchies.filter((e) => {
+      return locationManager.queryState.value.rows.some(
+        (uname) => uname === e.HIERARCHY_UNIQUE_NAME
+      );
+    });
+    const restoredColumns = metadata.hierarchies.filter((e) => {
+      return locationManager.queryState.value.columns.some(
+        (uname) => uname === e.HIERARCHY_UNIQUE_NAME
+      );
+    });
+    const restoredMeasures = metadata.measures.filter((e) => {
+      return locationManager.queryState.value.measures.some(
+        (uname) => uname === e.MEASURE_UNIQUE_NAME
+      );
+    });
+
+    rows.value.push(...restoredRows.map((e) => getHierarchyDesc(e)));
+    columns.value.push(...restoredColumns.map((e) => getHierarchyDesc(e)));
+    measures.value.push(...restoredMeasures.map((e) => getMeasureDesc(e)));
+  };
+
+  restoreState();
+
+  watch(
+    () => rows.value,
+    () => {
+      locationManager.setRowsDescription(
+        rows.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME)
+      );
     },
-  },
+    { deep: true }
+  );
+
+  watch(
+    () => columns.value,
+    () => {
+      locationManager.setColumnsDescription(
+        columns.value.map((e) => e.originalItem.HIERARCHY_UNIQUE_NAME)
+      );
+    },
+    { deep: true }
+  );
+
+  watch(
+    () => measures.value,
+    () => {
+      locationManager.setMeasuresDescription(
+        measures.value.map((e) => e.originalItem.MEASURE_UNIQUE_NAME)
+      );
+    },
+    { deep: true }
+  );
+
+  return {
+    filters,
+    rows,
+    columns,
+    measures,
+    manualUpdate,
+    queryModel,
+    hierarchyUniqueNames,
+  };
 });
