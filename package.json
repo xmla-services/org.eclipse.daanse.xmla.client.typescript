@@ -15,7 +15,7 @@
   "dependencies": {
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
-    "@vueuse/core": "^10.1.2",
+    "@vueuse/core": "^10.2.0",
     "axios": "^1.4.0",
     "browser-soap": "^1.0.4",
     "chart.js": "^4.3.0",
