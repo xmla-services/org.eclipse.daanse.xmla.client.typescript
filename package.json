@@ -65,7 +65,7 @@
     "mocha-multi-reporters": "^1.5.1",
     "mocha-simple-html-reporter": "^2.0.0",
     "nightwatch": "^3.0.1",
-    "nightwatch-axe-verbose": "^2.2.0",
+    "nightwatch-axe-verbose": "^2.2.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.8",
     "sass": "^1.63.6",
