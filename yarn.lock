@@ -1312,10 +1312,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-axe-core@^4.6.3:
-  version "4.7.0"
-  resolved "https://registry.npmjs.org/axe-core/-/axe-core-4.7.0.tgz"
-  integrity sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==
+axe-core@^4.7.2:
+  version "4.7.2"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
+  integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
 axe-html-reporter@^2.2.3:
   version "2.2.3"
@@ -3950,12 +3950,12 @@ nice-try@^1.0.4:
   resolved "https://registry.npmjs.org/nice-try/-/nice-try-1.0.5.tgz"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nightwatch-axe-verbose@^2.1.0, nightwatch-axe-verbose@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/nightwatch-axe-verbose/-/nightwatch-axe-verbose-2.2.0.tgz"
-  integrity sha512-Dh2ctNE0aDCzE1H3T7PWINcx+Tz/bJUMKmwmyFLKeoo9Y0FYk/pKxs43Povyh+0RrXWx8bYyF1FZHSAQT+0jEw==
+nightwatch-axe-verbose@^2.1.0, nightwatch-axe-verbose@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/nightwatch-axe-verbose/-/nightwatch-axe-verbose-2.2.2.tgz#a5fc5791475083e64486ab5421ee5ae543acbab3"
+  integrity sha512-MvCrQb9D/ixtGtyN5fh7YCkelXuPup3X9D2Zhhk1PWyALtkdYCFadnIGif1irpQ1BLNSlqC+FDNnsNald7KHYA==
   dependencies:
-    axe-core "^4.6.3"
+    axe-core "^4.7.2"
 
 nightwatch@^3.0.1:
   version "3.0.1"
