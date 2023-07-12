@@ -23,7 +23,7 @@
     "chartjs-plugin-hierarchical": "^4.3.1",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
-    "pinia": "^2.0.36",
+    "pinia": "^2.1.4",
     "process": "^0.11.10",
     "query-string": "^8.1.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
