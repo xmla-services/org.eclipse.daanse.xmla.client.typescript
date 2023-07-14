@@ -11,9 +11,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
       - name: npm install, build, and test
         run: |
-          npm install
+          yarn install
           npm run build-only --if-present
 
       - name: Extract metadata (tags, labels)
