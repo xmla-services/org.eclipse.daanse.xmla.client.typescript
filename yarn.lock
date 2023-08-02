@@ -5559,10 +5559,10 @@ vuedraggable@^4.1.0:
   dependencies:
     sortablejs "1.14.0"
 
-vuestic-ui@^1.7.2:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/vuestic-ui/-/vuestic-ui-1.7.2.tgz#8d52e6feea0892c4e8ab1cc22c24f577f66a93e9"
-  integrity sha512-JL4xLX8yHTCBaUbq130B0VaHZRCN2SO8SF3vPtRSiC92x8X1RzuHMXnUZSkZ5W0Svy9t00caDvwTfZhTk4ou9Q==
+vuestic-ui@^1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/vuestic-ui/-/vuestic-ui-1.7.3.tgz#6d6880d7790681fc8304cfa9caa160a9a1fc8b69"
+  integrity sha512-on3L9Z0wADQuTmIJk1BZeuOuuttgSmI5tqWWaBdneFh7wK7AJaTyN2aCnkIU7g1iazyG4DyLw022Bor9gL7/+A==
   dependencies:
     "@floating-ui/vue" "^1.0.1"
     "@types/lodash" "^4.14.161"
