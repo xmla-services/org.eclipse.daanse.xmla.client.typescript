@@ -38,6 +38,7 @@ export default {
     v-if="pivotTableStore.state.inited"
     icon="settings"
     color="secondary"
+    preset="secondary"
     @click="openPivotTableSettings"
   />
   <Teleport to="body">
