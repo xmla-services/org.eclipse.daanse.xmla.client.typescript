@@ -10,8 +10,8 @@ Contributors: Smart City Jena
 -->
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
-import { optionalArrayToArray } from "@/utils/helpers";
-import { onMounted, provide, ref, watch, type Ref } from "vue";
+import {findMaxinArrayByField, optionalArrayToArray} from "@/utils/helpers";
+import {onMounted, provide, ref, watch, type Ref, h} from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -24,6 +24,8 @@ import { useElementSize } from "@vueuse/core";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { debounce } from "lodash";
 import { useMetadataStorage } from "@/composables/metadataStorage";
+import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
+import {useToast} from "vuestic-ui";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -437,8 +439,68 @@ export default {
         columns: this.columns[cell.i],
       });
     },
+    downloadCSV() {
+      const { init, close, closeAll } = useToast()
+      try {
+        const rowMaxLevel = findMaxinArrayByField(['0', 'LNum'], this.rows);
+        const colMaxLevel = findMaxinArrayByField(['0', 'LNum'], this.columns);
+
+        let csv = [];
+        for (let row = 0; row <= colMaxLevel; row++) {
+          csv.push([]);
+          for (let col = 0; col <= rowMaxLevel; col++) {
+            csv[row].push('');
+          }
+          let fill = ''
+          for (let scol = 0; scol < this.columns.length; scol++) {
+
+            let level = parseInt(this.columns[scol][0]['LNum']);
+            if (level == row) {
+              csv[row].push(this.columns[scol][0]['Caption'])
+              fill = this.columns[scol][0]['Caption']
+            }
+            else if(level<row){
+              csv[row].push('');
+            }
+            else {
+              csv[row].push(fill);
+            }
+          }
+        }
+        for (let srow = 0; srow < this.rows.length; srow++) {
+          let rowl = csv.push([]) - 1;
+          let row = csv[rowl];
+          let prev = (rowl-1 > 0)?csv[rowl-1]:null;
+          for (let ecol = 0; ecol <= rowMaxLevel; ecol++) {
+            let level = parseInt(this.rows[srow][0]['LNum']);
+            if(prev && prev[ecol] && level>ecol){
+              row.push(prev[ecol])
+            }else if (level == ecol) {
+              row.push(this.rows[srow][0]['Caption'])
+            }
+            else {
+              row.push('');
+            }
+          }
+          for (let celln = 0; celln < this.cells[srow].length; celln++) {
+            row.push(this.cells[srow][celln]['Value'] || '');
+          }
+        }
+        let csvContent = "data:text/csv;charset=utf-8,"
+            + csv.map(e => e.join(";")).join("\n");
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "export.csv");
+        document.body.appendChild(link);
+        link.click();
+
+      } catch (e) {
+         init({message:'Fehler beim Erstellen der CSV-Datein!',closeable:false,color: 'warning' ,duration:2000,position: 'bottom-right',customClass:'error'} )
+      }
+    },
   },
-  components: { RowsArea, ColumnsArea, CellsArea, DrillthroughModal },
+  components: { RowsArea, ColumnsArea, CellsArea, DrillthroughModal,PivotTableSettingsButton },
 };
 </script>
 
@@ -449,6 +511,22 @@ export default {
     @mouseup="onStopResize"
     @mouseleave="onStopResize"
   >
+    <div class="placeholder">
+      <div class="bar">
+
+      <va-button
+          v-if="pivotTableStore.state.inited"
+          icon="download"
+          preset="secondary"
+          color="secondary"
+          @click="downloadCSV"
+      />
+
+          <PivotTableSettingsButton />
+
+
+      </div>
+    </div>
     <DrillthroughModal ref="drillthroughModal" />
     <div class="pivotTable">
       <ColumnsArea
@@ -481,6 +559,21 @@ export default {
 .pivotTable_container {
   padding: v-bind(DEFAULT_ROW_HEIGHT_CSS);
   height: 100%;
+
+  .bar{
+    position: absolute;
+    margin-top: -29px;
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-end;
+  }
+  .placeholder{
+    height:8px
+  }
 }
 .pivotTable {
   overflow: hidden;
@@ -491,4 +584,5 @@ export default {
 .vertical-scroll {
   height: 100%;
 }
+
 </style>
