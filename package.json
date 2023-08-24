@@ -18,7 +18,7 @@
     "@vueuse/core": "^10.3.0",
     "axios": "^1.4.0",
     "browser-soap": "^1.0.4",
-    "chart.js": "^4.3.2",
+    "chart.js": "^4.4.0",
     "chartjs-plugin-autocolors": "^0.2.2",
     "chartjs-plugin-hierarchical": "^4.3.2",
     "leaflet": "^1.9.4",
