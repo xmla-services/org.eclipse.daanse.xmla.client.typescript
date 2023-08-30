@@ -18,7 +18,7 @@ describe("Axe Test on Main page", function () {
             .navigateTo("http://localhost:5173/")
             .click("#app > div > header > div.va-navbar__right > div:nth-child(1) > button > span")
             .click("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__content > div > div > div")
-            .setValue("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__content > div > div > div > div > input", "https://ssemenkoff.dev/emondrian/xmla")
+            .setValue("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__content > div > div > div > div > input", "https://datacube-stage.nomad-dmz.jena.de/cube/xmla")
             .click("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__actions > button > span")
             .click("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__content > div.va-message-list-wrapper.mt-2 > ul > li:nth-child(2) > label > span.va-radio__text")
             .click("body > div.va-modal.server-url-modal > div.va-modal__container > div > div > div > div.va-card__actions > button > span")
