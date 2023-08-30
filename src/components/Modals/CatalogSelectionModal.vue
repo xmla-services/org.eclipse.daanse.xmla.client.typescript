@@ -114,7 +114,7 @@ export default {
 };
 </script>
 <template>
-  <va-modal :modelValue="isOpened" no-padding class="server-url-modal" @ok="ok">
+  <va-modal :modelValue="isOpened" no-padding class="catalog-selection-modal" @ok="ok">
     <template #content="{ ok }">
       <va-card-title class="va-h6">Select catalog and cube:</va-card-title>
       <va-card-content>
@@ -144,7 +144,7 @@ export default {
   </va-modal>
 </template>
 <style lang="scss">
-.server-url-modal {
+.catalog-selection-modal {
   .va-modal__container {
     width: 100%;
   }
