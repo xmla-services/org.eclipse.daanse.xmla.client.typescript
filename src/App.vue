@@ -14,7 +14,7 @@ import MainLayout from "./components/MainLayout.vue";
 import QuertyDesignerLayout from "./components/QuertyDesignerLayout.vue";
 import QuertyDesigner from "./components/QueryDesigner/QueryDesigner.vue";
 import PivotTable from "./components/PivotTable/PivotTable.vue";
-import Chart from "./components/Charts/ChartModule.vue";
+import Chart from "./components/3dCharts/ChartModule.vue";
 import { onMounted, ref } from "vue";
 import axios from "axios";
 import InfoBox from "./components/Modals/InfoBox.vue";
