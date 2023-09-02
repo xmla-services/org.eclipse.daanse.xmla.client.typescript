@@ -12,7 +12,6 @@ Contributors: Smart City Jena
 import {OptionalSelects, useAppSettingsStore, ViewOptions} from "@/stores/AppSettings";
 import ServerSelectionModal from "@/components/Modals/ServerSelectionModal.vue";
 import CatalogSelectionModal from "@/components/Modals/CatalogSelectionModal.vue";
-import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
 import { useLocationManager } from "@/composables/locationManager";
 import {ref} from "vue";
 
@@ -113,8 +112,7 @@ export default {
   },
   components: {
     ServerSelectionModal,
-    CatalogSelectionModal,
-    PivotTableSettingsButton,
+    CatalogSelectionModal
   },
   mounted() {
     if (this.uri) {
@@ -148,9 +146,7 @@ export default {
             :options="optionsSwitchoptions"
         />
       </va-navbar-item>
-      <va-navbar-item>
-        <PivotTableSettingsButton />
-      </va-navbar-item>
+
 
     </template>
 

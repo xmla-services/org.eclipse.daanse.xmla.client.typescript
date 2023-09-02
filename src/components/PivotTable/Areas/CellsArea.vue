@@ -74,6 +74,15 @@ const getCellValue = (cell: any) => {
   if (typeof cell.FmtValue === "string") return cell.FmtValue;
   return cell.Value;
 };
+const toLocalString = (value:number|string)=>{
+  try{
+    if(typeof value == "string") value = Number(value)
+    return value.toLocaleString("de-DE");
+  }catch (e){
+    return value
+  }
+
+}
 
 const computedContainerStyles = computed(() => {
   return {
@@ -216,7 +225,7 @@ function getFontStyles(fontStyle) {
         >
           <template v-slot="{}">
             <div>
-              {{ getCellValue(cell) }}
+              {{ toLocalString(getCellValue(cell)) }}
             </div>
           </template>
         </CellDropdown>

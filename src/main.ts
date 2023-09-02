@@ -42,12 +42,15 @@ import {
   VaButtonGroup,
   VaDivider,
   VaDataTable,
+    VaToast
 } from "vuestic-ui";
+
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/grid.css";
 import "vuestic-ui/styles/reset.css";
 import "vuestic-ui/styles/typography.css";
 import './scss/main.scss';
+
 
 const app = createApp(App);
 
@@ -91,6 +94,7 @@ app.use(
       VaButtonGroup,
       VaDivider,
       VaDataTable,
+      VaToast
     },
     config: {
       colors: {

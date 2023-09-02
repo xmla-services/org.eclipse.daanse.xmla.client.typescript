@@ -48,6 +48,11 @@ Logos
 -------------------------------- */
 @import "logo.scss";
 
+//Scrollbars
+@import "scrollbars.scss";
+//Toasts
+@import "toast.scss";
+
 html {
   font-size: 14px;
 }
