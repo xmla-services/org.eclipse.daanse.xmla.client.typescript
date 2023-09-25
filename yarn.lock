@@ -688,10 +688,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.6.2.tgz#a065925409f59657022e9063275cd0b9bd7e1b12"
   integrity sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==
 
-"@types/sax@^1.2.4":
-  version "1.2.4"
-  resolved "https://registry.npmjs.org/@types/sax/-/sax-1.2.4.tgz"
-  integrity sha512-pSAff4IAxJjfAXUG6tFkO7dsSbTmf8CtUpfhhZ5VhkRpC4628tJhh3+V6H1E+/Gs9piSzYKT5yzHO5M4GG9jkw==
+"@types/sax@^1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@types/sax/-/sax-1.2.5.tgz#4392799e1770d24b6dc8d0c66c8882f8e1c38b3d"
+  integrity sha512-9jWta97bBVC027/MShr3gLab8gPhKy4l6qpb+UJLF5pDm3501NvA7uvqVCW+REFtx00oTi6Cq9JzLwgq6evVgw==
   dependencies:
     "@types/node" "*"
 
