@@ -10,8 +10,8 @@ Contributors: Smart City Jena
 -->
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
-import {findMaxinArrayByField, optionalArrayToArray} from "@/utils/helpers";
-import {onMounted, provide, ref, watch, type Ref, h} from "vue";
+import { findMaxinArrayByField, optionalArrayToArray } from "@/utils/helpers";
+import { onMounted, provide, ref, watch, type Ref, h } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -20,12 +20,13 @@ import DrillthroughModal from "../Modals/DrillthroughModal.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { storeToRefs } from "pinia";
 import { useChartStore } from "@/stores/Chart";
+import { use3dChartStore } from "@/stores/3dChart";
 import { useElementSize } from "@vueuse/core";
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { debounce } from "lodash";
 import { useMetadataStorage } from "@/composables/metadataStorage";
 import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
-import {useToast} from "vuestic-ui";
+import { useToast } from "vuestic-ui";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -41,6 +42,7 @@ export default {
     const metadataStorage = useMetadataStorage();
     const queryDesignerState = useQueryDesignerStore();
     const chartStore = useChartStore();
+    const threeDimensionChartStore = use3dChartStore();
     const rowsContainer = ref(null) as Ref<any>;
     const { width: rowsWidth } = useElementSize(rowsContainer);
 
@@ -71,9 +73,11 @@ export default {
       if (area === "rows") {
         pivotTableStore.drilldownOnRows(member);
         chartStore.drilldownOnRows(member);
+        threeDimensionChartStore.drilldownOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.drilldownOnColumns(member);
         chartStore.drilldownOnColumns(member);
+        threeDimensionChartStore.drilldownOnColumns(member);
       }
     });
     provide("drillup", async (member: any, area: "columns" | "rows") => {
@@ -90,7 +94,7 @@ export default {
         const loadingId = appSettings.setLoadingState();
         const parentMember = await api.getMember(
           parentLevel,
-          member.PARENT_UNIQUE_NAME
+          member.PARENT_UNIQUE_NAME,
         );
         appSettings.removeLoadingState(loadingId);
 
@@ -111,9 +115,11 @@ export default {
           if (area === "rows") {
             pivotTableStore.drilldownOnRows(createdMember);
             chartStore.drilldownOnRows(createdMember);
+            threeDimensionChartStore.drilldownOnRows(createdMember);
           } else if (area === "columns") {
             pivotTableStore.drilldownOnColumns(createdMember);
             chartStore.drilldownOnColumns(createdMember);
+            threeDimensionChartStore.drilldownOnColumns(createdMember);
           }
         }
       }
@@ -122,18 +128,22 @@ export default {
       if (area === "rows") {
         pivotTableStore.expandOnRows(member);
         chartStore.expandOnRows(member);
+        threeDimensionChartStore.expandOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.expandOnColumns(member);
         chartStore.expandOnColumns(member);
+        threeDimensionChartStore.expandOnColumns(member);
       }
     });
     provide("collapse", (member: any, area: "columns" | "rows") => {
       if (area === "rows") {
         pivotTableStore.collapseOnRows(member);
         chartStore.collapseOnRows(member);
+        threeDimensionChartStore.collapseOnRows(member);
       } else if (area === "columns") {
         pivotTableStore.collapseOnColumns(member);
         chartStore.collapseOnColumns(member);
+        threeDimensionChartStore.collapseOnColumns(member);
       }
     });
 
@@ -142,11 +152,12 @@ export default {
       const mdx = pivotTableStore.mdx;
 
       const mdxResponce = await api.getMDX(mdx);
-      const properties = (await metadataStorage.getMetadataStorage()).properties;
+      const properties = (await metadataStorage.getMetadataStorage())
+        .properties;
       const axis0 = optionalArrayToArray(
         optionalArrayToArray(
-          mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis
-        )?.[0]?.Tuples?.Tuple
+          mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis,
+        )?.[0]?.Tuples?.Tuple,
       );
       let axis1 = [] as any[];
       if (
@@ -155,11 +166,11 @@ export default {
       ) {
         axis1 = optionalArrayToArray(
           mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-            ?.Tuple
+            ?.Tuple,
         );
       }
       const cellsArray = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
+        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
       );
 
       if (!queryDesignerState.columns.length) {
@@ -185,24 +196,24 @@ export default {
 
       columns.value[0]?.forEach((col) => {
         const colPropsShown = pivotTableStore.state.membersWithProps.includes(
-          col.HIERARCHY_UNIQUE_NAME
+          col.HIERARCHY_UNIQUE_NAME,
         );
         if (!colPropsShown) return;
 
         const colProps: any[] = properties.filter(
-          (prop) => prop.HIERARCHY_UNIQUE_NAME === col.HIERARCHY_UNIQUE_NAME
+          (prop) => prop.HIERARCHY_UNIQUE_NAME === col.HIERARCHY_UNIQUE_NAME,
         );
         columnProperties.push(...colProps);
       });
 
       rows.value[0]?.forEach((row) => {
         const rowPropsShown = pivotTableStore.state.membersWithProps.includes(
-          row.HIERARCHY_UNIQUE_NAME
+          row.HIERARCHY_UNIQUE_NAME,
         );
         if (!rowPropsShown) return;
 
         const rowProps: any[] = properties.filter(
-          (prop) => prop.HIERARCHY_UNIQUE_NAME === row.HIERARCHY_UNIQUE_NAME
+          (prop) => prop.HIERARCHY_UNIQUE_NAME === row.HIERARCHY_UNIQUE_NAME,
         );
         rowsProperties.push(...rowProps);
       });
@@ -210,8 +221,8 @@ export default {
       const colPropertiesDescription = optionalArrayToArray(
         optionalArrayToArray(
           mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-            .AxisInfo
-        )[0]?.HierarchyInfo
+            .AxisInfo,
+        )[0]?.HierarchyInfo,
       );
 
       let rowPropertiesDescription = [] as any[];
@@ -219,15 +230,15 @@ export default {
         rowPropertiesDescription = optionalArrayToArray(
           optionalArrayToArray(
             mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-              .AxisInfo
-          )[0]?.HierarchyInfo
+              .AxisInfo,
+          )[0]?.HierarchyInfo,
         );
       } else {
         rowPropertiesDescription = optionalArrayToArray(
           optionalArrayToArray(
             mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-              .AxisInfo
-          )[1]?.HierarchyInfo
+              .AxisInfo,
+          )[1]?.HierarchyInfo,
         );
       }
 
@@ -244,22 +255,21 @@ export default {
       const propertiesCells = propertiesRows.value.map((prop) => {
         return columns.value.map((col) => {
           const propsOrigin = col.find(
-            (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME
+            (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME,
           );
 
           const colHierarchyIndex = col.indexOf(propsOrigin);
           const desc = colPropertiesDescription[colHierarchyIndex];
           const propName = `${prop.HIERARCHY_UNIQUE_NAME}.[${prop.PROPERTY_NAME}]`;
           const objPropName = Object.entries(desc).find((keyValue: any) => {
-            if(Array.isArray(keyValue[1])){
-                const att = keyValue[1].find(entry=>{
+            if (Array.isArray(keyValue[1])) {
+              const att = keyValue[1].find((entry) => {
                 return entry.__attrs?.name === propName;
-              })
-              if(att) return att;
-            }else {
+              });
+              if (att) return att;
+            } else {
               return keyValue[1]?.__attrs?.name === propName;
             }
-
           });
 
           if (objPropName) {
@@ -281,7 +291,7 @@ export default {
           const rowDesc = rows.value[i];
 
           const propsOrigin = rowDesc.find(
-            (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME
+            (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME,
           );
 
           const rowHierarchyIndex = rowDesc.indexOf(propsOrigin);
@@ -341,14 +351,14 @@ export default {
       () => queryDesignerState.rows,
       async () => {
         await getPivotTableData();
-      }
+      },
     );
 
     watch(
       () => queryDesignerState.columns,
       async () => {
         await getPivotTableData();
-      }
+      },
     );
 
     return {
@@ -383,7 +393,7 @@ export default {
             totalWidth: number;
           },
           _: any,
-          i: number
+          i: number,
         ) => {
           acc.items[i] = {
             start: acc.totalWidth,
@@ -393,7 +403,7 @@ export default {
             acc.totalWidth + (this.colStyles[i] || DEFAULT_COLUMN_WIDTH);
           return acc;
         },
-        { items: [], totalWidth: 0 }
+        { items: [], totalWidth: 0 },
       );
 
       const rows = [
@@ -407,7 +417,7 @@ export default {
             totalWidth: number;
           },
           _: any,
-          i: number
+          i: number,
         ) => {
           acc.items[i] = {
             start: acc.totalWidth,
@@ -417,7 +427,7 @@ export default {
             acc.totalWidth + (this.rowsStyles[i] || DEFAULT_ROW_HEIGHT);
           return acc;
         },
-        { items: [], totalWidth: 0 }
+        { items: [], totalWidth: 0 },
       );
 
       return {
@@ -440,29 +450,26 @@ export default {
       });
     },
     downloadCSV() {
-      const { init, close, closeAll } = useToast()
+      const { init, close, closeAll } = useToast();
       try {
-        const rowMaxLevel = findMaxinArrayByField(['0', 'LNum'], this.rows);
-        const colMaxLevel = findMaxinArrayByField(['0', 'LNum'], this.columns);
+        const rowMaxLevel = findMaxinArrayByField(["0", "LNum"], this.rows);
+        const colMaxLevel = findMaxinArrayByField(["0", "LNum"], this.columns);
 
         let csv = [];
         for (let row = 0; row <= colMaxLevel; row++) {
           csv.push([]);
           for (let col = 0; col <= rowMaxLevel; col++) {
-            csv[row].push('');
+            csv[row].push("");
           }
-          let fill = ''
+          let fill = "";
           for (let scol = 0; scol < this.columns.length; scol++) {
-
-            let level = parseInt(this.columns[scol][0]['LNum']);
+            let level = parseInt(this.columns[scol][0]["LNum"]);
             if (level == row) {
-              csv[row].push(this.columns[scol][0]['Caption'])
-              fill = this.columns[scol][0]['Caption']
-            }
-            else if(level<row){
-              csv[row].push('');
-            }
-            else {
+              csv[row].push(this.columns[scol][0]["Caption"]);
+              fill = this.columns[scol][0]["Caption"];
+            } else if (level < row) {
+              csv[row].push("");
+            } else {
               csv[row].push(fill);
             }
           }
@@ -470,37 +477,49 @@ export default {
         for (let srow = 0; srow < this.rows.length; srow++) {
           let rowl = csv.push([]) - 1;
           let row = csv[rowl];
-          let prev = (rowl-1 > 0)?csv[rowl-1]:null;
+          let prev = rowl - 1 > 0 ? csv[rowl - 1] : null;
           for (let ecol = 0; ecol <= rowMaxLevel; ecol++) {
-            let level = parseInt(this.rows[srow][0]['LNum']);
-            if(prev && prev[ecol] && level>ecol){
-              row.push(prev[ecol])
-            }else if (level == ecol) {
-              row.push(this.rows[srow][0]['Caption'])
-            }
-            else {
-              row.push('');
+            let level = parseInt(this.rows[srow][0]["LNum"]);
+            if (prev && prev[ecol] && level > ecol) {
+              row.push(prev[ecol]);
+            } else if (level == ecol) {
+              row.push(this.rows[srow][0]["Caption"]);
+            } else {
+              row.push("");
             }
           }
           for (let celln = 0; celln < this.cells[srow].length; celln++) {
-            row.push(this.cells[srow][celln]['Value'] || '');
+            row.push(this.cells[srow][celln]["Value"] || "");
           }
         }
-        let csvContent = "data:text/csv;charset=utf-8,"
-            + csv.map(e => e.join(";")).join("\n");
+        let csvContent =
+          "data:text/csv;charset=utf-8," +
+          csv.map((e) => e.join(";")).join("\n");
         let encodedUri = encodeURI(csvContent);
         let link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", "export.csv");
         document.body.appendChild(link);
         link.click();
-
       } catch (e) {
-         init({message:'Fehler beim Erstellen der CSV-Datein!',closeable:false,color: 'warning' ,duration:2000,position: 'bottom-right',customClass:'error'} )
+        init({
+          message: "Fehler beim Erstellen der CSV-Datein!",
+          closeable: false,
+          color: "warning",
+          duration: 2000,
+          position: "bottom-right",
+          customClass: "error",
+        });
       }
     },
   },
-  components: { RowsArea, ColumnsArea, CellsArea, DrillthroughModal,PivotTableSettingsButton },
+  components: {
+    RowsArea,
+    ColumnsArea,
+    CellsArea,
+    DrillthroughModal,
+    PivotTableSettingsButton,
+  },
 };
 </script>
 
@@ -513,18 +532,15 @@ export default {
   >
     <div class="placeholder">
       <div class="bar">
-
-      <va-button
+        <va-button
           v-if="pivotTableStore.state.inited"
           icon="download"
           preset="secondary"
           color="secondary"
           @click="downloadCSV"
-      />
+        />
 
-          <PivotTableSettingsButton />
-
-
+        <PivotTableSettingsButton />
       </div>
     </div>
     <DrillthroughModal ref="drillthroughModal" />
@@ -560,7 +576,7 @@ export default {
   padding: v-bind(DEFAULT_ROW_HEIGHT_CSS);
   height: 100%;
 
-  .bar{
+  .bar {
     position: absolute;
     margin-top: -29px;
     width: 100%;
@@ -571,8 +587,8 @@ export default {
     align-content: center;
     justify-content: flex-end;
   }
-  .placeholder{
-    height:8px
+  .placeholder {
+    height: 8px;
   }
 }
 .pivotTable {
@@ -584,5 +600,4 @@ export default {
 .vertical-scroll {
   height: 100%;
 }
-
 </style>

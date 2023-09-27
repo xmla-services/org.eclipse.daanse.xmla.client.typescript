@@ -14,12 +14,13 @@ import { watch, ref, onMounted, computed } from "vue";
 //@ts-ignore
 import { storeToRefs } from "pinia";
 import { useAppSettingsStore } from "@/stores/AppSettings";
-import { useChartStore } from "@/stores/Chart";
-import PointCluster from './PointCluster/PointCluster.vue'
-import { debounce } from "lodash";
+import { use3dChartStore } from "@/stores/3dChart";
+import PointCluster from "./PointCluster/PointCluster.vue";
+import { debounce, chunk } from "lodash";
+import PointClusterSettingsModal from "./PointCluster/PointClusterSettingsModal.vue";
 
 // const queryDesignerStore = useQueryDesignerStore();
-const chartStore = useChartStore();
+const chartStore = use3dChartStore();
 const { mdx } = storeToRefs(chartStore);
 const appSettings = useAppSettingsStore();
 const api = appSettings.getApi();
@@ -33,7 +34,6 @@ let notExpandableIndexes = [] as number[];
 let expandedIndexes = [] as number[];
 let shouldBeHidden = [] as string[];
 
-
 const getData = debounce(async () => {
   shouldBeHidden = [];
   expandedIndexes = [];
@@ -44,32 +44,36 @@ const getData = debounce(async () => {
   const mdxResponce = await api.getMDX(mdx);
 
   const axis0 = optionalArrayToArray(
-    mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-      ?.Tuple
+    mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples?.Tuple,
   );
   const axis1 = optionalArrayToArray(
-    mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-      ?.Tuple
+    mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples?.Tuple,
   );
-  const cellsArray = optionalArrayToArray(
-    mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
+  const cellsArray = chunk(
+    optionalArrayToArray(
+      mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
+    ),
+    3,
   );
 
-  columns.value = axis0.map((e: { Member: any }) => {
-    const parsedCols = optionalArrayToArray(e.Member);
+  columns.value = chunk(axis0, 3).map((e) => {
+    console.log(axis0);
+    const parsedCols = optionalArrayToArray(e[0].Member);
     return parsedCols;
   });
+
+  console.log("columns", columns.value);
 
   columns.value.forEach((column) => {
     const firstHierarchy = column[0];
 
     const childMembers = columns.value.filter(
-      (member) => firstHierarchy.UName === member[0].PARENT_UNIQUE_NAME
+      (member) => firstHierarchy.UName === member[0].PARENT_UNIQUE_NAME,
     );
 
     if (childMembers.length) {
       const index = columns.value.findIndex(
-        (e) => e[0].UName === firstHierarchy.UName
+        (e) => e[0].UName === firstHierarchy.UName,
       );
 
       const expanded = chartStore.$state.state.columnsExpandedMembers;
@@ -87,15 +91,28 @@ const getData = debounce(async () => {
   cells.value = parseCells(cellsArray, columns.value, rows.value);
 
   const labelsCaptions = rows.value.map((row) =>
-    row.map((e) => e.Caption).join(" / ")
+    row.map((e) => e.Caption).join(" / "),
   );
+
+  console.log("cellsValue", cells.value);
 
   datasets.value = rows.value.map((col, ind) => {
     const data = columns.value.map((e, i) => {
-      const formatedValue =
-        cells.value[ind][i].FmtValue || cells.value[ind][i].Value || "";
-      if (formatedValue === "object") return 0;
-      return parseFloat(formatedValue.replaceAll(",", ""));
+      console.log(ind, i);
+      const xValue =
+        cells.value[ind][i][0].FmtValue || cells.value[ind][i][0].Value || "";
+      const yValue =
+        cells.value[ind][i][1].FmtValue || cells.value[ind][i][1].Value || "";
+      const zValue =
+        cells.value[ind][i][2].FmtValue || cells.value[ind][i][2].Value || "";
+
+      console.log(xValue);
+
+      return {
+        x: xValue === "object" ? 0 : parseFloat(xValue.replaceAll(",", "")),
+        y: yValue === "object" ? 0 : parseFloat(yValue.replaceAll(",", "")),
+        z: zValue === "object" ? 0 : parseFloat(zValue.replaceAll(",", "")),
+      };
     });
 
     return {
@@ -110,7 +127,7 @@ const getData = debounce(async () => {
       member: item[0],
     };
     const childItems = columns.value.filter(
-      (c) => c[0].PARENT_UNIQUE_NAME === item[0].UName
+      (c) => c[0].PARENT_UNIQUE_NAME === item[0].UName,
     );
 
     result.expand = true;
@@ -196,15 +213,33 @@ watch(mdx, async () => {
 onMounted(async () => {
   await getData();
 });
+
+const pointClusterSettingsModal = ref(null);
+
+const openSettings = async () => {
+  const res = await pointClusterSettingsModal.value.run();
+  console.log(chartStore);
+  chartStore.setMeasures(res);
+  console.log(res);
+};
 </script>
 
 <template>
-  <div class="chart_container" ref="chart_holder">
-    <point-cluster
-      :labels="labels"
-      :data="datasets"
-      :width=1200
-    />
+  <div>
+    <div>
+      <va-button
+        icon="settings"
+        color="secondary"
+        preset="secondary"
+        @click="openSettings"
+      />
+      <Teleport to="body">
+        <PointClusterSettingsModal ref="pointClusterSettingsModal" />
+      </Teleport>
+    </div>
+    <div class="chart_container" ref="chart_holder">
+      <point-cluster :labels="labels" :data="datasets" :width="1200" />
+    </div>
   </div>
 </template>
 
