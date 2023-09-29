@@ -159,15 +159,15 @@ export default {
             ?.Tuple,
         );
       }
-      else if (
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.__attrs
-          .name === "SlicerAxis"
-      ) {
-        axis1 = optionalArrayToArray(
-          mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-            ?.Tuple,
-        );
-      }
+      // else if (
+      //   mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.__attrs
+      //     .name === "SlicerAxis"
+      // ) {
+      //   axis1 = optionalArrayToArray(
+      //     mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
+      //       ?.Tuple,
+      //   );
+      // }
 
       console.log(axis1);
 
@@ -176,7 +176,7 @@ export default {
         const mes = queryDesignerState.measures[0];
         if (axis1.length === 0) {
           axis1.push({
-            member: {
+            Member: {
               Caption: mes.originalItem.MEASURE_CAPTION,
               UName: mes.originalItem.MEASURE_UNIQUE_NAME,
             },
@@ -184,7 +184,7 @@ export default {
         }
         if (axis0.length === 0) {
           axis0.push({
-            member: {
+            Member: {
               Caption: mes.originalItem.MEASURE_CAPTION,
               UName: mes.originalItem.MEASURE_UNIQUE_NAME,
             },
