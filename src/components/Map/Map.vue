@@ -44,7 +44,7 @@ export default {
 
   setup() {
     const pivotTableStore = usePivotTableStore();
-    const chartStore = useChartStore();
+    const chartStore = useChartStore('Chart')();
     const { mdx } = storeToRefs(pivotTableStore);
     const appSettings = useAppSettingsStore();
     const api = appSettings.getApi();

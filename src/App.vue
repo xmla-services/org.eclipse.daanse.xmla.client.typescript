@@ -9,68 +9,52 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
-import TreeView from "./components/Tree/TreeView.vue";
-import MainLayout from "./components/MainLayout.vue";
-import QuertyDesignerLayout from "./components/QuertyDesignerLayout.vue";
-import QuertyDesigner from "./components/QueryDesigner/QueryDesigner.vue";
-import PivotTable from "./components/PivotTable/PivotTable.vue";
-import Chart from "./components/Charts/ChartModule.vue";
-import { onMounted, ref } from "vue";
-import axios from "axios";
-import InfoBox from "./components/Modals/InfoBox.vue";
-import Map from "./components/Map/Map.vue"
-import {OptionalSelects, useAppSettingsStore, ViewOptions} from "@/stores/AppSettings";
 
-console.log("https://ssemenkoff.dev/emondrian/xmla");
-
-const showInfoBox = ref(false);
-const infoUri = ref(null);
-const appSettings = useAppSettingsStore();
-const viewOptionEnum = ViewOptions;
-const optionalSelectsEnum = OptionalSelects;
-
-onMounted(async () => {
-  try {
-    const base = window.location.protocol + "//" + window.location.host;
-    const config = (await axios.get(`config/config.json`)).data;
-    if (config && config.INFO_CHECK_URI && config.INFO_CHECK_URI) {
-      infoUri.value = config.INFO_BASE_URI;
-      showInfoBox.value =
-        (await axios.get(config.INFO_CHECK_URI)).status == 200;
-    }
-  } catch (e) {
-    console.log(e);
-  }
-});
 </script>
 
 <template>
-  <InfoBox v-if="showInfoBox" :infoUri="infoUri || ''"></InfoBox>
-  <MainLayout>
-    <template #left_container>
-      <QuertyDesignerLayout layout="vertical">
-        <template #left_container>
-          <TreeView />
-        </template>
-        <template #right_container> <QuertyDesigner /> </template>
-      </QuertyDesignerLayout>
-    </template>
-    <template #right_container>
-      <QuertyDesignerLayout layout="vertical" :max="appSettings.viewOption === viewOptionEnum.TABLE" :min="appSettings.viewOption === viewOptionEnum.OPTIONAL">
-        <template #left_container>
-          <PivotTable />
-        </template>
-        <template #right_container>
-          <Chart v-if="(appSettings.viewOption === viewOptionEnum.SPLIT || appSettings.viewOption === viewOptionEnum.OPTIONAL)
-                        && appSettings.optionalSelect === optionalSelectsEnum.CHART
-                      "/>
-          <Map v-if="(appSettings.viewOption === viewOptionEnum.SPLIT || appSettings.viewOption === viewOptionEnum.OPTIONAL)
-                        && appSettings.optionalSelect === optionalSelectsEnum.MAP
-                      "/>
-        </template>
-      </QuertyDesignerLayout>
-    </template>
-  </MainLayout>
+  <div class="sidebar">
+    <va-sidebar
+        hoverable
+        minimized-width="55px"
+        color="#fefefe"
+        class="colored-sidebar"
+    >
+      <va-sidebar-item :active="$route.name==='designer'" @click="$router.push('/')" class="pointer">
+        <va-sidebar-item-content  >
+          <va-icon name="draw" :color="($route.name==='designer')?'#ffffff':'primary'"/>
+          <va-sidebar-item-title>
+            Designer
+          </va-sidebar-item-title>
+        </va-sidebar-item-content>
+      </va-sidebar-item>
+      <va-sidebar-item :active="$route.name==='dashboard'" @click="$router.push('/dashboard')" class="pointer">
+      <va-sidebar-item-content >
+        <va-icon name="dashboard" :color="($route.name==='dashboard')?'#ffffff':'primary'"/>
+        <va-sidebar-item-title >
+          Dashboard
+        </va-sidebar-item-title>
+      </va-sidebar-item-content>
+      </va-sidebar-item>
+    </va-sidebar>
+  </div>
+
+  <router-view>
+
+  </router-view>
 </template>
 
-<style scoped></style>
+<style scoped>
+.sidebar{
+  position: absolute;
+  left: 0;
+  top: 63px;
+  bottom: 0;
+  z-index: 5;
+  box-shadow: 0px -1px 6px 1px #00000014;
+}
+.pointer{
+  cursor:pointer;
+}
+
+</style>

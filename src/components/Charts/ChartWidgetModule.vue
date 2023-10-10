@@ -29,7 +29,6 @@ import { storeToRefs } from "pinia";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { HierarchicalScale } from "chartjs-plugin-hierarchical";
 import { useChartStore } from "@/stores/Chart";
-import { usePivotTableStore } from "@/stores/PivotTable";
 import { debounce } from "lodash";
 
 ChartJS.register(
@@ -57,7 +56,6 @@ export default defineComponent({
   },
   setup(props) {
     let chartStore = null;
-    let pivotTableStore = null;
 
     let chartStoreUse = toRef(props, 'chartStore')
     let _mdx = toRef(props, 'mdx')
@@ -69,16 +67,11 @@ export default defineComponent({
        chartStore = useChartStore('Chart')();
     }
 
-    /*if(tableStoreUse.value){
-      pivotTableStore = tableStoreUse.value()
-    }else{
-      pivotTableStore = usePivotTableStore();
-    }*/
+
 
 
     const { mdx } = storeToRefs(chartStore);
     const appSettings = useAppSettingsStore();
-    //const pivotTableStore = usePivotTableStore();
     const api = appSettings.getApi();
 
     const rows = ref([] as any[]);
@@ -165,8 +158,10 @@ export default defineComponent({
       });
       cells.value = parseCells(cellsArray, columns.value, rows.value);
 
-      const labelsCaptions = rows.value.map((row) =>
-        row.map((e) => e.Caption).join(" / ")
+      const labelsCaptions = rows.value.map((row) => {
+            console.log(row);
+            return row.map((e) => e.Caption).join(" / ")
+          }
       );
 
       datasets.value = rows.value.map((col, ind) => {
@@ -279,40 +274,15 @@ export default defineComponent({
 
     const chartRef = ref(null) as Ref<any>;
 
-    const onClick = () => {
-      const { chart } = chartRef.value;
-      let cachedLabelItems = chart.scales.x.ticks.map((e) => e.label);
-      setTimeout(() => {
-        const normalizedLabels = chart.scales.x.ticks.map((e) => e.label);
-        const loader = normalizedLabels.find((e) => e.loader);
 
-        if (loader) {
-          pivotTableStore.expandOnColumns(loader.member);
-          chartStore.expandOnColumns(loader.member);
-        } else {
-          if (!cachedLabelItems.length) return;
-
-          normalizedLabels.forEach((label) => {
-            if (
-              cachedLabelItems.every((cached: any) => {
-                return cached.member.UName !== label.member.UName;
-              })
-            ) {
-              pivotTableStore.collapseOnColumns(label.member);
-              chartStore.collapseOnColumns(label.member);
-            }
-          });
-        }
-      }, 100);
-    };
 
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: true,
-          position: "right",
+          display: false,
+          position: "bottom",
           labels: {
             usePointStyle: true,
             font: {
@@ -323,12 +293,27 @@ export default defineComponent({
       },
       scales: {
         x: {
-          type: "hierarchical",
-          padding: 5,
-        },
+          ticks:{
+            // Include a dollar sign in the ticks
+            callback: function(value, index, ticks) {
+              //console.log(labels.value[index].label)
+              let lbl = labels.value[index].label
+              if (typeof lbl === 'string' && lbl.length > 10) {
+                lbl = lbl.substring(0, 10); // cutting
+                lbl+= '...'
+              }
+              return lbl;
+            }
+          }
+        }
       },
       layout: {
-        padding: 50,
+        padding: {
+          left: 25,
+          right: 25,
+          top: 45,
+          bottom:15
+        },
       },
     };
 
@@ -338,7 +323,6 @@ export default defineComponent({
       chartOptions,
       plugins,
       chartRef,
-      onClick,
       chartTimestamp,
     };
   },
@@ -351,10 +335,14 @@ export default defineComponent({
       };
     },
     myStyles() {
-      const height = (this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      const height = 100//(this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      const width = (this.$refs.chart_holder as HTMLDivElement)?.offsetWidth;
+      console.log(height)
+      console.log(width)
       return {
-        height: `${height}px`,
-        position: "relative",
+        height: `${height}%`,
+        width: `${width}px`,
+        position: "absolute",
       };
     },
   },
@@ -364,26 +352,33 @@ export default defineComponent({
 <template>
   <div class="chart_container" ref="chart_holder">
     <Bar
-      id="chart"
+      id="chartWidget"
       ref="chartRef"
       :key="chartTimestamp"
       :options="chartOptions"
       :data="chartData"
       :plugins="plugins"
       :style="myStyles"
-      @click="onClick"
+
     />
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .chart_container {
-  padding: 30px;
-  height: 100%;
+  padding: 0px;
+  position: absolute;
+  margin: auto;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  /*height: 53vh;
+  width: 24vw;*/
 }
 
 #chart {
-  width: 100%;
-  height: 100%;
+  /*width: 100%;
+  height: 100%;*/
 }
 </style>

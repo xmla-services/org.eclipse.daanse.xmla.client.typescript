@@ -15,7 +15,7 @@ import { ref, watch } from "vue";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
 import { useMetadataStorage } from "@/composables/metadataStorage";
 
-export const useChartStore = defineStore("Chart", () => {
+export const useChartStore = (name,_mdx='')=> defineStore(name, () => {
   const queryDesignerStore = useQueryDesignerStore();
   const appSettings = useAppSettingsStore();
 
@@ -31,33 +31,36 @@ export const useChartStore = defineStore("Chart", () => {
     inited: false,
   });
 
-  const mdx = ref("");
+  const mdx = ref(_mdx||'');
+  const fixed = (_mdx!='')?true:false;
 
   async function getMDX() {
-    const metadataStorage = useMetadataStorage();
-    const metadata = await metadataStorage.getMetadataStorage();
+    if(!fixed){
+      const metadataStorage = useMetadataStorage();
+      const metadata = await metadataStorage.getMetadataStorage();
 
-    const rows = queryDesignerStore.rows;
-    const columns = queryDesignerStore.columns;
-    const measures = queryDesignerStore.measures;
-    const settings = state.value.settings;
-    const filters = queryDesignerStore.filters;
+      const rows = queryDesignerStore.rows;
+      const columns = queryDesignerStore.columns;
+      const measures = queryDesignerStore.measures;
+      const settings = state.value.settings;
+      const filters = queryDesignerStore.filters;
 
-    const mdxRequest = await getMdxRequest(
-      appSettings.selectedCube,
-      state.value.rowsDrilldownMembers,
-      state.value.columnsDrilldownMembers,
-      state.value.rowsExpandedMembers,
-      state.value.columnsExpandedMembers,
-      rows,
-      columns,
-      measures,
-      settings,
-      metadata.properties,
-      filters
-    );
-
-    mdx.value = mdxRequest;
+      const mdxRequest = await getMdxRequest(
+        appSettings.selectedCube,
+        state.value.rowsDrilldownMembers,
+        state.value.columnsDrilldownMembers,
+        state.value.rowsExpandedMembers,
+        state.value.columnsExpandedMembers,
+        rows,
+        columns,
+        measures,
+        settings,
+        metadata.properties,
+        filters
+      );
+      console.log(mdxRequest)
+      mdx.value = mdxRequest;
+    }
   }
 
   const fetchPivotTableData = () => {

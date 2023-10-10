@@ -23,7 +23,7 @@ const getLeftWidth = () => {
 <template>
   <div class="app-layout-container bg grey overflow-hidden">
     <navbar></navbar>
-    <div v-if="appSettings.cubeOpened" class="split-container">
+    <div v-if="appSettings.cubeOpened" class="split-container marginLeft">
       <va-split
         class="split"
         :model-value="0"
@@ -89,5 +89,8 @@ const getLeftWidth = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.marginLeft{
+  margin-left:70px;
 }
 </style>

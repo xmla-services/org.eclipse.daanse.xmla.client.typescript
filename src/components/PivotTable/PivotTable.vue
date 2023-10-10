@@ -40,7 +40,7 @@ export default {
     const api = appSettings.getApi();
     const metadataStorage = useMetadataStorage();
     const queryDesignerState = useQueryDesignerStore();
-    const chartStore = useChartStore();
+    const chartStore = useChartStore('Chart')();
     const rowsContainer = ref(null) as Ref<any>;
     const { width: rowsWidth } = useElementSize(rowsContainer);
 

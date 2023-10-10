@@ -10,7 +10,9 @@
     "dev": "vite",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
-    "test.axe": "npx nightwatch test/E2E/axe.js --env chrome"
+    "test.axe": "npx nightwatch test/E2E/axe.js --env chrome",
+    "gitea_api:get": "curl https://try.gitea.io/swagger.v1.json --output ./src/generated/gitea/definition/swagger.json",
+    "gitea_api:build": "npx @openapitools/openapi-generator-cli generate -i ./src/generated/gitea/definition/swagger.json --type-mappings AnyType=any,UNKNOWN_BASE_TYPE=object,enumPropertyNaming=original  -g typescript-axios -o ./src/generated/gitea --additional-properties=withInterfaces=true,enumPropertyNaming=original"
   },
   "dependencies": {
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
@@ -33,6 +35,7 @@
     "vue-chartjs": "^5.2.0",
     "vue-component-create": "^0.0.4",
     "vue-router": "^4.2.4",
+    "vue-smart-widget": "^1.0.0-alpha.1",
     "vuedraggable": "^4.1.0",
     "vuestic-ui": "^1.7.6"
   },
