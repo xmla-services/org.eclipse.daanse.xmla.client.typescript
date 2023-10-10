@@ -12,7 +12,9 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "test.axe": "npx nightwatch test/E2E/axe.js --env chrome",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "gitea_api:get": "curl https://try.gitea.io/swagger.v1.json --output ./src/generated/gitea/definition/swagger.json",
+    "gitea_api:build": "npx @openapitools/openapi-generator-cli generate -i ./src/generated/gitea/definition/swagger.json --type-mappings AnyType=any,UNKNOWN_BASE_TYPE=object,enumPropertyNaming=original  -g typescript-axios -o ./src/generated/gitea --additional-properties=withInterfaces=true,enumPropertyNaming=original"
   },
   "dependencies": {
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
@@ -95,6 +97,6 @@
     "vue-tsc": "^1.8.25"
   },
   "volta": {
-    "node": "21.0.0"
+    "node": "16.20.1"
   }
 }
