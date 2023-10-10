@@ -12,7 +12,7 @@ Contributors: Markus Hochstein
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { optionalArrayToArray } from "@/utils/helpers";
 import {defineComponent, watch, ref, onMounted, type Ref, toRef} from "vue";
-import { Bar } from "vue-chartjs";
+import { PolarArea } from "vue-chartjs";
 //@ts-ignore
 import autocolors from "chartjs-plugin-autocolors";
 import {
@@ -22,15 +22,16 @@ import {
   Legend,
   BarElement,
   CategoryScale,
+  RadialLinearScale,
   LinearScale,
   Colors,
+  ArcElement, Chart
 } from "chart.js";
 import { storeToRefs } from "pinia";
 import { useAppSettingsStore } from "@/stores/AppSettings";
-import { HierarchicalScale } from "chartjs-plugin-hierarchical";
 import { useChartStore } from "@/stores/Chart";
-import { usePivotTableStore } from "@/stores/PivotTable";
 import { debounce } from "lodash";
+
 
 ChartJS.register(
   Title,
@@ -39,8 +40,9 @@ ChartJS.register(
   BarElement,
   CategoryScale,
   LinearScale,
-  autocolors,
-  HierarchicalScale
+    ArcElement,
+    RadialLinearScale,
+    autocolors
 );
 
 export default defineComponent({
@@ -57,7 +59,6 @@ export default defineComponent({
   },
   setup(props) {
     let chartStore = null;
-    let pivotTableStore = null;
 
     let chartStoreUse = toRef(props, 'chartStore')
     let _mdx = toRef(props, 'mdx')
@@ -69,16 +70,11 @@ export default defineComponent({
        chartStore = useChartStore('Chart')();
     }
 
-    /*if(tableStoreUse.value){
-      pivotTableStore = tableStoreUse.value()
-    }else{
-      pivotTableStore = usePivotTableStore();
-    }*/
+
 
 
     const { mdx } = storeToRefs(chartStore);
     const appSettings = useAppSettingsStore();
-    //const pivotTableStore = usePivotTableStore();
     const api = appSettings.getApi();
 
     const rows = ref([] as any[]);
@@ -165,8 +161,10 @@ export default defineComponent({
       });
       cells.value = parseCells(cellsArray, columns.value, rows.value);
 
-      const labelsCaptions = rows.value.map((row) =>
-        row.map((e) => e.Caption).join(" / ")
+      const labelsCaptions = rows.value.map((row) => {
+            console.log(row);
+            return row.map((e) => e.Caption).join(" / ")
+          }
       );
 
       datasets.value = rows.value.map((col, ind) => {
@@ -221,31 +219,9 @@ export default defineComponent({
 
       labels.value = columns.value
         .map((e, idx) => {
-          const result: any = {
-            label: e.map((f) => f.Caption).join("/"),
-            member: e[0],
-          };
-
-          if (expandedIndexes.some((i) => i === idx)) {
-            return getItemWithChilds(e);
-          } else if (!notExpandableIndexes.some((i) => i === idx)) {
-            result.children = [
-              {
-                label: "Loading",
-                loader: true,
-                member: e[0],
-              },
-            ];
-          }
-
+          const result: any = e.map((f) => f.Caption).join("/");
           return result;
         })
-        .filter((e) => {
-          if (shouldBeHidden.some((hidden) => hidden === e.member.UName)) {
-            return false;
-          }
-          return true;
-        });
 
       updateChartData();
       appSettings.removeLoadingState(loadingId);
@@ -279,40 +255,14 @@ export default defineComponent({
 
     const chartRef = ref(null) as Ref<any>;
 
-    const onClick = () => {
-      const { chart } = chartRef.value;
-      let cachedLabelItems = chart.scales.x.ticks.map((e) => e.label);
-      setTimeout(() => {
-        const normalizedLabels = chart.scales.x.ticks.map((e) => e.label);
-        const loader = normalizedLabels.find((e) => e.loader);
-
-        if (loader) {
-          pivotTableStore.expandOnColumns(loader.member);
-          chartStore.expandOnColumns(loader.member);
-        } else {
-          if (!cachedLabelItems.length) return;
-
-          normalizedLabels.forEach((label) => {
-            if (
-              cachedLabelItems.every((cached: any) => {
-                return cached.member.UName !== label.member.UName;
-              })
-            ) {
-              pivotTableStore.collapseOnColumns(label.member);
-              chartStore.collapseOnColumns(label.member);
-            }
-          });
-        }
-      }, 100);
-    };
 
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: true,
-          position: "right",
+          display: false,
+          position: "bottom",
           labels: {
             usePointStyle: true,
             font: {
@@ -320,15 +270,20 @@ export default defineComponent({
             },
           },
         },
+          autocolors: {
+            mode: 'data',
+            offset: 5,
+          }
       },
       scales: {
-        x: {
-          type: "hierarchical",
-          padding: 5,
-        },
       },
       layout: {
-        padding: 50,
+        padding: {
+          left: 25,
+          right: 25,
+          top: 45,
+          bottom:15
+        },
       },
     };
 
@@ -338,11 +293,10 @@ export default defineComponent({
       chartOptions,
       plugins,
       chartRef,
-      onClick,
       chartTimestamp,
     };
   },
-  components: { Bar },
+  components: { PolarArea },
   computed: {
     chartData() {
       return {
@@ -351,10 +305,14 @@ export default defineComponent({
       };
     },
     myStyles() {
-      const height = (this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      const height = 100//(this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      const width = (this.$refs.chart_holder as HTMLDivElement)?.offsetWidth;
+      console.log(height)
+      console.log(width)
       return {
-        height: `${height}px`,
-        position: "relative",
+        height: `${height}%`,
+        width: `${width}px`,
+        position: "absolute",
       };
     },
   },
@@ -363,27 +321,34 @@ export default defineComponent({
 
 <template>
   <div class="chart_container" ref="chart_holder">
-    <Bar
-      id="chart"
+    <PolarArea
+      id="chartPolarWidget"
       ref="chartRef"
       :key="chartTimestamp"
       :options="chartOptions"
       :data="chartData"
       :plugins="plugins"
       :style="myStyles"
-      @click="onClick"
+
     />
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .chart_container {
-  padding: 30px;
-  height: 100%;
+  padding: 0px;
+  position: absolute;
+  margin: auto;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  /*height: 53vh;
+  width: 24vw;*/
 }
 
 #chart {
-  width: 100%;
-  height: 100%;
+  /*width: 100%;
+  height: 100%;*/
 }
 </style>

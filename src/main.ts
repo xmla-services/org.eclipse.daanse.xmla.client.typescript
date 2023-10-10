@@ -41,8 +41,11 @@ import {
   VaDropdownContent,
   VaButtonGroup,
   VaDivider,
+  VaButtonDropdown,
   VaDataTable,
-    VaToast
+  VaToast,
+  VaSidebar,
+  VaSidebarItem, VaSidebarItemContent, VaSidebarItemTitle, VaScrollContainer
 } from "vuestic-ui";
 
 import "vuestic-ui/styles/essential.css";
@@ -50,6 +53,9 @@ import "vuestic-ui/styles/grid.css";
 import "vuestic-ui/styles/reset.css";
 import "vuestic-ui/styles/typography.css";
 import './scss/main.scss';
+import {router} from "@/router/router";
+
+import VueSmartWidget from 'vue-smart-widget'
 
 
 const app = createApp(App);
@@ -57,8 +63,9 @@ const app = createApp(App);
 const pinia = createPinia();
 pinia.use(SOAPClient);
 app.use(pinia);
-// app.use(router)
-
+console.log(router)
+app.use(router);
+app.use(VueSmartWidget);
 const fonts = [{
   name: 'mdi-{icon}',
   resolve: ({ icon }) => ({
@@ -94,7 +101,13 @@ app.use(
       VaButtonGroup,
       VaDivider,
       VaDataTable,
-      VaToast
+      VaToast,
+      VaButtonDropdown,
+      VaSidebar,
+      VaSidebarItem,
+      VaSidebarItemContent,
+      VaSidebarItemTitle,
+      VaScrollContainer
     },
     config: {
       colors: {
