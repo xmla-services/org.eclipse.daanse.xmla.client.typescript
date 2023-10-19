@@ -1665,10 +1665,10 @@ chartjs-plugin-autocolors@^0.2.2:
   resolved "https://registry.npmjs.org/chartjs-plugin-autocolors/-/chartjs-plugin-autocolors-0.2.2.tgz"
   integrity sha512-zKSivIHRL3yB6a47bcxOfIEOEByL+AMXTtcnscb7I3Vu4PGNCyPe4C+4XxLGvR52lMYgFYcMcYmaXksi1bbA+A==
 
-chartjs-plugin-hierarchical@^4.3.3:
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/chartjs-plugin-hierarchical/-/chartjs-plugin-hierarchical-4.3.3.tgz#f7a0efd7b7b1fa5b5f2700c4654d2b31c87942ac"
-  integrity sha512-feMhYZDMV+9b+wtf4aM/hu1p9n/R3jEnbGcJD0EOoJWh+B7P8qvw75rs3xyYcKgGbzQVArJYpdJyKYNBHZLBUg==
+chartjs-plugin-hierarchical@^4.3.4:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/chartjs-plugin-hierarchical/-/chartjs-plugin-hierarchical-4.3.4.tgz#61a05eee225e17d843ddd0bd2baceca65662b04f"
+  integrity sha512-Yv9cDuG+bhaRARWAyusIibQYhzThdISc8AdGHMhs3X1NE0zOGqqvjdg3sV3OLtqwP5fD+vrauHqGKp4yOUPvEA==
 
 check-error@1.0.2, check-error@^1.0.2:
   version "1.0.2"
