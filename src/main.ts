@@ -45,35 +45,41 @@ import {
   VaDataTable,
   VaToast,
   VaSidebar,
-  VaSidebarItem, VaSidebarItemContent, VaSidebarItemTitle, VaScrollContainer
+  VaList,
+  VaListLabel,
+  VaListItem,
+  VaListItemSection,
+  VaSidebarItem,
+  VaSidebarItemContent,
+  VaSidebarItemTitle,
+  VaScrollContainer,
+  VaListItemLabel,
 } from "vuestic-ui";
+import "vuestic-ui/css";
 
-import "vuestic-ui/styles/essential.css";
-import "vuestic-ui/styles/grid.css";
-import "vuestic-ui/styles/reset.css";
-import "vuestic-ui/styles/typography.css";
-import './scss/main.scss';
-import {router} from "@/router/router";
+import "./scss/main.scss";
+import { router } from "@/router/router";
 
-import VueSmartWidget from 'vue-smart-widget'
-
+import VueSmartWidget from "vue-smart-widget";
 
 const app = createApp(App);
 
 const pinia = createPinia();
 pinia.use(SOAPClient);
 app.use(pinia);
-console.log(router)
+console.log(router);
 app.use(router);
 app.use(VueSmartWidget);
-const fonts = [{
-  name: 'mdi-{icon}',
-  resolve: ({ icon }) => ({
-    class: 'material-icons-outlined',
-    content: icon,
-    tag: 'span',
-  })
-}]
+const fonts = [
+  {
+    name: "mdi-{icon}",
+    resolve: ({ icon }) => ({
+      class: "material-icons-outlined",
+      content: icon,
+      tag: "span",
+    }),
+  },
+];
 
 app.use(
   createVuesticEssential({
@@ -107,17 +113,22 @@ app.use(
       VaSidebarItem,
       VaSidebarItemContent,
       VaSidebarItemTitle,
-      VaScrollContainer
+      VaScrollContainer,
+      VaList,
+      VaListLabel,
+      VaListItem,
+      VaListItemSection,
+      VaListItemLabel,
     },
     config: {
       colors: {
         variables: {
-          primary: "#133370"
+          primary: "#133370",
         },
       },
       icons: createIconsConfig({ fonts }),
     },
-  })
+  }),
 );
 
 app.mount("#app");

@@ -57,7 +57,7 @@ export default defineComponent({
     },
     //tableStore: String
   },
-  setup(props) {
+  async setup(props) {
     let chartStore = null;
 
     let chartStoreUse = toRef(props, 'chartStore')
@@ -75,6 +75,8 @@ export default defineComponent({
 
     const { mdx } = storeToRefs(chartStore);
     const appSettings = useAppSettingsStore();
+    await appSettings.initXmlaApi('https://datacube-stage.nomad-dmz.jena.de/cube/xmla');
+
     const api = appSettings.getApi();
 
     const rows = ref([] as any[]);
@@ -329,7 +331,6 @@ export default defineComponent({
       :data="chartData"
       :plugins="plugins"
       :style="myStyles"
-
     />
   </div>
 </template>
