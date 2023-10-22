@@ -19,9 +19,9 @@
       "name": "MIT",
       "url": "http://opensource.org/licenses/MIT"
     },
-    "version": "1.22.0+dev-106-gfe68bbeea"
+    "version": "1.22.0+dev-191-g0271114e6"
   },
-  "basePath": "localhost:3001/api/v1",
+  "basePath": "/api/v1",
   "paths": {
     "/activitypub/user-id/{user-id}": {
       "get": {
@@ -5239,6 +5239,18 @@
             "name": "sha",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "include verification for every commit (disable for speedup, default 'true')",
+            "name": "verification",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "include a list of affected files for every commit (disable for speedup, default 'true')",
+            "name": "files",
+            "in": "query"
           }
         ],
         "responses": {
@@ -10520,6 +10532,18 @@
             "type": "integer",
             "description": "page size of results",
             "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "include verification for every commit (disable for speedup, default 'true')",
+            "name": "verification",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "include a list of affected files for every commit (disable for speedup, default 'true')",
+            "name": "files",
             "in": "query"
           }
         ],

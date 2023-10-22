@@ -11,7 +11,7 @@ Contributors: Markus Hochstein
 <script lang="ts">
 import { useQueryDesignerStore } from "@/stores/QueryDesigner";
 import { optionalArrayToArray } from "@/utils/helpers";
-import {defineComponent, watch, ref, onMounted, type Ref, toRef} from "vue";
+import { defineComponent, watch, ref, onMounted, type Ref, toRef } from "vue";
 import { Bar } from "vue-chartjs";
 //@ts-ignore
 import autocolors from "chartjs-plugin-autocolors";
@@ -39,40 +39,33 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   autocolors,
-  HierarchicalScale
+  HierarchicalScale,
 );
 
 export default defineComponent({
   props: {
     chartStore: {
-      type:String,
-      default:null
+      type: String,
+      default: null,
     },
-    mdx:{
-      type:String,
-      default:''
+    mdx: {
+      type: String,
+      default: "",
     },
     //tableStore: String
   },
-  setup(props) {
+  async setup(props) {
     let chartStore = null;
 
-    let chartStoreUse = toRef(props, 'chartStore')
-    let _mdx = toRef(props, 'mdx')
+    let chartStoreUse = toRef(props, "chartStore");
+    let _mdx = toRef(props, "mdx");
     //let tableStoreUse = toRef(props, 'tableStore')
     // const queryDesignerStore = useQueryDesignerStore();
-    if(chartStoreUse.value){
-       chartStore = useChartStore(chartStoreUse.value,_mdx.value)();
-    }else{
-       chartStore = useChartStore('Chart')();
+    if (chartStoreUse.value) {
+      chartStore = useChartStore(chartStoreUse.value, _mdx.value)();
+    } else {
+      chartStore = useChartStore("Chart")();
     }
-
-
-
-
-    const { mdx } = storeToRefs(chartStore);
-    const appSettings = useAppSettingsStore();
-    const api = appSettings.getApi();
 
     const rows = ref([] as any[]);
     const columns = ref([] as any[]);
@@ -117,14 +110,14 @@ export default defineComponent({
 
       const axis0 = optionalArrayToArray(
         mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-          ?.Tuple
+          ?.Tuple,
       );
       const axis1 = optionalArrayToArray(
         mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-          ?.Tuple
+          ?.Tuple,
       );
       const cellsArray = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
+        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
       );
 
       columns.value = axis0.map((e: { Member: any }) => {
@@ -136,12 +129,12 @@ export default defineComponent({
         const firstHierarchy = column[0];
 
         const childMembers = columns.value.filter(
-          (member) => firstHierarchy.UName === member[0].PARENT_UNIQUE_NAME
+          (member) => firstHierarchy.UName === member[0].PARENT_UNIQUE_NAME,
         );
 
         if (childMembers.length) {
           const index = columns.value.findIndex(
-            (e) => e[0].UName === firstHierarchy.UName
+            (e) => e[0].UName === firstHierarchy.UName,
           );
 
           const expanded = chartStore.$state.state.columnsExpandedMembers;
@@ -159,10 +152,9 @@ export default defineComponent({
       cells.value = parseCells(cellsArray, columns.value, rows.value);
 
       const labelsCaptions = rows.value.map((row) => {
-            console.log(row);
-            return row.map((e) => e.Caption).join(" / ")
-          }
-      );
+        console.log(row);
+        return row.map((e) => e.Caption).join(" / ");
+      });
 
       datasets.value = rows.value.map((col, ind) => {
         const data = columns.value.map((e, i) => {
@@ -184,7 +176,7 @@ export default defineComponent({
           member: item[0],
         };
         const childItems = columns.value.filter(
-          (c) => c[0].PARENT_UNIQUE_NAME === item[0].UName
+          (c) => c[0].PARENT_UNIQUE_NAME === item[0].UName,
         );
 
         result.expand = true;
@@ -264,17 +256,11 @@ export default defineComponent({
       return columnsArray;
     }
 
-    watch(mdx, async () => {
-      await getData();
-    });
-
     onMounted(async () => {
       await getData();
     });
 
     const chartRef = ref(null) as Ref<any>;
-
-
 
     const chartOptions = {
       responsive: true,
@@ -293,29 +279,39 @@ export default defineComponent({
       },
       scales: {
         x: {
-          ticks:{
+          ticks: {
             // Include a dollar sign in the ticks
-            callback: function(value, index, ticks) {
+            callback: function (value, index, ticks) {
               //console.log(labels.value[index].label)
-              let lbl = labels.value[index].label
-              if (typeof lbl === 'string' && lbl.length > 10) {
+              let lbl = labels.value[index].label;
+              if (typeof lbl === "string" && lbl.length > 10) {
                 lbl = lbl.substring(0, 10); // cutting
-                lbl+= '...'
+                lbl += "...";
               }
               return lbl;
-            }
-          }
-        }
+            },
+          },
+        },
       },
       layout: {
         padding: {
           left: 25,
           right: 25,
           top: 45,
-          bottom:15
+          bottom: 15,
         },
       },
     };
+
+    const { mdx } = storeToRefs(chartStore);
+    const appSettings = useAppSettingsStore();
+    await appSettings.initXmlaApi('https://datacube-stage.nomad-dmz.jena.de/cube/xmla')
+
+    const api = appSettings.getApi();
+
+    watch(mdx, async () => {
+      await getData();
+    });
 
     return {
       labels,
@@ -335,10 +331,10 @@ export default defineComponent({
       };
     },
     myStyles() {
-      const height = 100//(this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
+      const height = 100; //(this.$refs.chart_holder as HTMLDivElement)?.offsetHeight;
       const width = (this.$refs.chart_holder as HTMLDivElement)?.offsetWidth;
-      console.log(height)
-      console.log(width)
+      console.log(height);
+      console.log(width);
       return {
         height: `${height}%`,
         width: `${width}px`,
@@ -359,7 +355,6 @@ export default defineComponent({
       :data="chartData"
       :plugins="plugins"
       :style="myStyles"
-
     />
   </div>
 </template>
@@ -369,10 +364,10 @@ export default defineComponent({
   padding: 0px;
   position: absolute;
   margin: auto;
-  left:0;
-  right:0;
-  top:0;
-  bottom:0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   /*height: 53vh;
   width: 24vw;*/
 }

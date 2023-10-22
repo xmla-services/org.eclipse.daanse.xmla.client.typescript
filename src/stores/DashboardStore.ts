@@ -14,8 +14,8 @@ export const useDashboardStore = defineStore("DashboardStore", () => {
     });
 
     const fetchDashboardAllCategories = async ()=> {
-            let repos = (await new GiteaWrapper().getRepos())
-        repos[0].getDashboards()
+        //     let repos = (await new GiteaWrapper().getRepos())
+        // repos[0].getDashboards()
     }
     return {
         state,
