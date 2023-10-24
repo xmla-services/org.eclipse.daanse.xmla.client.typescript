@@ -888,10 +888,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.200.tgz#435b6035c7eba9cdf1e039af8212c9e9281e7149"
   integrity sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==
 
-"@types/nightwatch@^2.3.23", "@types/nightwatch@^2.3.25":
-  version "2.3.25"
-  resolved "https://registry.yarnpkg.com/@types/nightwatch/-/nightwatch-2.3.25.tgz#7fb52e673048a8fb06392796af3c0eb5411580da"
-  integrity sha512-TI7fyhHoMEknqfrapDIcNJDTt7aeJb+Sa+8IBUNeH4Nz9NKE644VcDZwalmCNfct00LHgPZJPbVZP34iBM91Mw==
+"@types/nightwatch@^2.3.23", "@types/nightwatch@^2.3.27":
+  version "2.3.27"
+  resolved "https://registry.yarnpkg.com/@types/nightwatch/-/nightwatch-2.3.27.tgz#952f9d04c5e626349b5fdcd8414f1f64ba54cc5b"
+  integrity sha512-hCC1kHiedyv09TLptjEuZqH5luLaygWWroHQ17w3Pe+4k7TfZ1DT9Ev7qkCBPQbSK7x+TzNn3PPGxoLVGOCQrA==
   dependencies:
     "@types/chai" "*"
     "@types/selenium-webdriver" "*"
