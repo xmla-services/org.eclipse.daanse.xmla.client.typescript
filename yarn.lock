@@ -4522,10 +4522,10 @@ nightwatch-axe-verbose@^2.2.2:
   dependencies:
     axe-core "^4.7.2"
 
-nightwatch@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/nightwatch/-/nightwatch-3.2.1.tgz#9f7ae2e92b75d82bff27f35b1063530913c77239"
-  integrity sha512-94IdpTPxuKK8HIT5M3fNClC7MgsAzsFQEOAGzXFQNTRpBSCBGBDvowNCv/ItZscMi4byV8Mj25wPz7m/d17e+g==
+nightwatch@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/nightwatch/-/nightwatch-3.3.0.tgz#49641d9dfb9f63d8fe2b6c32f2f7504aff5125b5"
+  integrity sha512-9RzpEe6Y12tm26hzzbimU9WtoHmRjitWH23BdIb5rstuhyJe5d61vO74g/yhaNGdbgFYZla2Hy7YRJjGCeGeyg==
   dependencies:
     "@cucumber/cucumber" "^8.2.1"
     "@nightwatch/chai" "5.0.2"
@@ -4562,7 +4562,7 @@ nightwatch@^3.2.1:
     open "8.4.0"
     ora "5.4.1"
     piscina "^3.2.0"
-    selenium-webdriver "~4.13.0"
+    selenium-webdriver "~4.14.0"
     semver "7.5.2"
     stacktrace-parser "0.1.10"
     strip-ansi "6.0.1"
@@ -5411,14 +5411,14 @@ seed-random@~2.2.0:
   resolved "https://registry.yarnpkg.com/seed-random/-/seed-random-2.2.0.tgz#2a9b19e250a817099231a5b99a4daf80b7fbed54"
   integrity sha512-34EQV6AAHQGhoc0tn/96a9Fsi6v2xdqe/dMUwljGRaFOzR3EgRmECvD0O8vi8X+/uQ50LGHfkNu/Eue5TPKZkQ==
 
-selenium-webdriver@~4.13.0:
-  version "4.13.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.13.0.tgz#1e06bab7adedb308e3635131bc75bd32038261d5"
-  integrity sha512-8JS0h5E0Sq7gNfbGg8LVaQ+Eqek97tvOONn3Jmy+NiWfb12WYpftz4VTC4D2JT4wakdG6VUzGKpA8cFGg0IjkA==
+selenium-webdriver@~4.14.0:
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.14.0.tgz#d39917cd7c1bb30f753c1f668158f37d1905fafc"
+  integrity sha512-637rs8anqMKHbWxcBZpyG3Gcs+rBUtAUiqk0O/knUqH4Paj3MFUZrz88/pVGOLNryEVy2z92fZomT8p1ENl1gA==
   dependencies:
     jszip "^3.10.1"
     tmp "^0.2.1"
-    ws ">=8.13.0"
+    ws ">=8.14.2"
 
 "semver@2 || 3 || 4 || 5", semver@^5.5.0:
   version "5.7.2"
@@ -6481,7 +6481,12 @@ wrappy@1:
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
 
-ws@>=8.13.0, ws@^8.13.0:
+ws@>=8.14.2:
+  version "8.14.2"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.14.2.tgz#6c249a806eb2db7a20d26d51e7709eab7b2e6c7f"
+  integrity sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==
+
+ws@^8.13.0:
   version "8.13.0"
   resolved "https://registry.npmjs.org/ws/-/ws-8.13.0.tgz"
   integrity sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==
