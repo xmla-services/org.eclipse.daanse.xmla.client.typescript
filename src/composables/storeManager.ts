@@ -19,9 +19,10 @@ import { Store } from "@/stores/Widgets/Store";
 const availableStores = ref(new Map<string, any>());
 
 export function useStoreManager() {
-  const initStore = (caption = "NO CAPTION"): string => {
+  const initStore = (caption = "NO CAPTION", eventBus): string => {
+    console.log(eventBus);
     const id = v4();
-    const store = reactive(new Store(id, caption));
+    const store = reactive(new Store(id, caption, eventBus));
     console.log("inited");
 
     // store.addDatasource("REST", "https://dummyjson.com");
@@ -43,9 +44,20 @@ export function useStoreManager() {
     return availableStores;
   };
 
+  const getSerializedState = () => {
+    const state = {};
+
+    availableStores.value.forEach((store) => {
+      state[store.id] = store.getState();
+    });
+
+    return JSON.stringify(state);
+  };
+
   return {
     initStore,
     getStore,
     getStoreList,
+    getSerializedState,
   };
 }

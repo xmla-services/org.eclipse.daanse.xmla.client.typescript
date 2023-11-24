@@ -9,42 +9,23 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts">
-
-
 export default {
-  setup() {
-
-  },
-  computed:{
-
-  },
-  watch:{
-
-  },
-  methods: {
-
-  },
-  components: {
-
-  },
-  mounted() {
-
-  },
+  setup() {},
+  computed: {},
+  watch: {},
+  methods: {},
+  components: {},
+  mounted() {},
 };
 </script>
 <template>
-  <va-navbar color="primary" class="mb-3 high_index h-24" >
+  <va-navbar color="primary" class="high_index h-24">
     <template #left>
       <va-navbar-item class="logo">
         <div class="white triangle"></div>
         <div class="small logo daanse" id="logo"></div>
         <div class="small logo daanse" id="claim"></div>
       </va-navbar-item>
-    </template>
-
-
-    <template>
-
     </template>
   </va-navbar>
 </template>

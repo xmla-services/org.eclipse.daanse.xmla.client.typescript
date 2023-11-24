@@ -63,6 +63,9 @@
               </Suspense>
             </smart-widget>
           </template>
+          <template #6>
+            <ButtonControl />
+          </template>
           <template
             v-for="widget in customWidgets"
             :key="widget.id"
@@ -127,6 +130,7 @@ import {
   nextTick,
   type ComponentInternalInstance,
 } from "vue";
+import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
 import { useDashboardStore } from "@/stores/DashboardStore";
 import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue";
 import PlainTextWidgetSettings from "@/components/Widgets/PlainText/PlainTextWidgetSettings.vue";
@@ -146,6 +150,7 @@ const layout = ref([
   { x: 8, y: 0, w: 4, h: 6, i: "2" },
   { x: 2, y: 0, w: 2, h: 3, i: "3" },
   { x: 0, y: 3, w: 2, h: 6, i: "4" },
+  { x: 0, y: 5, w: 1, h: 1, i: "6", isResizable: false },
 ]);
 const mdx = ref(`SELECT
 Hierarchize(AddCalculatedMembers({[Geschlecht.Geschlecht (m/w/d)].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,

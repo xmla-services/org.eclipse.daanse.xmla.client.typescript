@@ -11,6 +11,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import SOAPClient from "./plugins/SOAPClient";
+import EventBus from "./plugins/EventBus";
 
 import App from "./App.vue";
 // import router from './router'
@@ -54,6 +55,7 @@ import {
   VaSidebarItemTitle,
   VaScrollContainer,
   VaListItemLabel,
+  VaRadio,
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -70,6 +72,8 @@ app.use(pinia);
 console.log(router);
 app.use(router);
 app.use(VueSmartWidget);
+
+app.use(EventBus);
 const fonts = [
   {
     name: "mdi-{icon}",
@@ -119,6 +123,7 @@ app.use(
       VaListItem,
       VaListItemSection,
       VaListItemLabel,
+      VaRadio,
     },
     config: {
       colors: {

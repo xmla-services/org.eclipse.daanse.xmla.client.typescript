@@ -4,7 +4,7 @@ import { createClientAsync } from "@/XMLAClient";
 
 export default class RESTDatasource {
   public url = "";
-  public id = null;
+  public id = null as unknown as string;
   public caption = null;
   public type = "XMLA";
   public client: any;
@@ -39,5 +39,14 @@ export default class RESTDatasource {
     console.log(mdx);
     const mdxResponce = await this.api?.getMDX(mdx);
     return mdxResponce;
+  }
+
+  getState() {
+    return {
+      id: this.id,
+      url: this.url,
+      caption: this.caption,
+      type: this.type,
+    };
   }
 }

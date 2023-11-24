@@ -20,7 +20,7 @@ const availableDatasources = ref(
 );
 
 export function useDatasourceManager() {
-  const initStore = (type: string, url: string, caption: string) => {
+  const initDatasource = (type: string, url: string, caption: string) => {
     const id = v4();
 
     console.log("Datasource should be inited");
@@ -38,7 +38,7 @@ export function useDatasourceManager() {
     return id;
   };
 
-  const getStore = (key) => {
+  const getDatasource = (key) => {
     return availableDatasources.value.get(key);
   };
 
@@ -46,9 +46,34 @@ export function useDatasourceManager() {
     return availableDatasources;
   };
 
+  const updateDatasource = (key, type, caption, url) => {
+    if (type === "REST") {
+      const datasource = new RESTDatasource(key, url, caption);
+
+      availableDatasources.value.set(key, datasource);
+    }
+    if (type === "XMLA") {
+      const datasource = new XmlaDatasource(key, undefined, caption);
+
+      availableDatasources.value.set(key, datasource);
+    }
+  };
+
+  const getSerializedState = () => {
+    const state = {};
+
+    availableDatasources.value.forEach((ds) => {
+      state[ds.id] = ds.getState();
+    });
+
+    return JSON.stringify(state);
+  };
+
   return {
-    initStore,
-    getStore,
+    initDatasource,
+    getDatasource,
     getDatasourceList,
+    updateDatasource,
+    getSerializedState,
   };
 }
