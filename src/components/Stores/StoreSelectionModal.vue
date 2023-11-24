@@ -10,9 +10,9 @@ Contributors: Smart City Jena
 -->
 
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
-<script lang="ts" setup>
+<script setup lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
-import { ref, watch, markRaw } from "vue";
+import { ref, watch, markRaw, inject } from "vue";
 import DatasourceList from "@/components/Datasources/DatasourceList.vue";
 import { useStoreManager } from "@/composables/storeManager";
 
@@ -24,6 +24,8 @@ const requestResult = ref("");
 const map = storeManager.getStoreList();
 const availableStores = ref([]);
 const selectedStore = ref("");
+const EventBus = inject("customEventBus") as any;
+console.log(EventBus);
 
 watch(
   map,
@@ -61,7 +63,7 @@ watch(isOpened, () => {
 });
 
 const createNew = () => {
-  const storeId = storeManager.initStore();
+  const storeId = storeManager.initStore(null, EventBus);
   close({
     type: "new",
     storeId,

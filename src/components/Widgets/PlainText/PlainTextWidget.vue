@@ -1,39 +1,59 @@
 <script lang="ts" setup>
 import { useStoreManager } from "@/composables/storeManager";
-import { ref, watch } from "vue";
+import { ref, inject, onMounted, watch } from "vue";
+import PlainTextWidgetSettings from "./PlainTextWidgetSettings.vue";
+import type { Store } from "@/stores/Widgets/Store";
 
+const EventBus = inject("customEventBus") as any;
 const storeManager = useStoreManager();
+const settings = PlainTextWidgetSettings;
 
-const props = defineProps({
-  storeId: {
-    type: String,
-    required: true,
-  },
-});
-
-const objectField = ref("");
+const storeId = ref("");
+const objectField = ref("description");
 const text = ref("");
-const url = ref("");
-const store = storeManager.getStore(props.storeId);
+
+let store = null as unknown as Store;
 
 const setSettings = (settings) => {
-  objectField.value = settings.field;
-  url.value = settings.url;
+  if (settings.field) {
+    objectField.value = settings.field;
+  }
+
+  if (settings.store) {
+    storeId.value = settings.store;
+  }
 };
 
-const getValue = () => {
-  return text.value;
+watch(storeId, (newVal, oldVal) => {
+  console.log("store changed", storeId);
+  store = storeManager.getStore(storeId.value);
+
+  console.log(oldVal, newVal);
+
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
+
+const updateFn = async () => {
+  text.value = (await store?.getData()) as string;
 };
 
 defineExpose({
   setSettings,
-  getValue,
+  settings,
+  objectField,
+  storeId,
 });
 
-watch(url, async () => {
-  if (url.value) {
-    text.value = (await store?.getData(url.value)) as string;
-  }
+const getData = async () => {
+  if (!store) return;
+  updateFn();
+};
+
+onMounted(async () => {
+  await getData();
 });
 </script>
 
