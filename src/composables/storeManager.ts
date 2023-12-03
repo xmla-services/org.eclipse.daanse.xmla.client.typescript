@@ -54,10 +54,23 @@ export function useStoreManager() {
     return JSON.stringify(state);
   };
 
+  const loadSerializedState = (state, eventBus) => {
+    availableStores.value.clear();
+
+    const parsedState = JSON.parse(state);
+    Object.keys(parsedState).forEach((key) => {
+      const store = new Store(key, parsedState[key].caption, eventBus);
+      store.loadState(parsedState[key]);
+      availableStores.value.set(key, store);
+    });
+    console.log(availableStores.value);
+  };
+
   return {
     initStore,
     getStore,
     getStoreList,
     getSerializedState,
+    loadSerializedState,
   };
 }

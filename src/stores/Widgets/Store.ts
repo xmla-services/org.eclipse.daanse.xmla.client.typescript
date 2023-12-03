@@ -142,4 +142,15 @@ export class Store {
       params: this.params,
     };
   }
+
+  loadState(state) {
+    this.caption = state.caption;
+    this.id = state.id;
+    this.requestTemplate = state.requestTemplate;
+    this.events = state.events;
+    this.datasourceIds = state.datasourceIds;
+    this.params = state.params;
+    this.calculateParams();
+    this.updateEvents(this.events);
+  }
 }
