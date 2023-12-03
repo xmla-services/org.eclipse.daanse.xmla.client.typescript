@@ -2805,7 +2805,7 @@
     "@vitest/utils" "^0.34.6"
     util "^0.12.4"
 
-"@storybook/manager-api@7.6.3":
+"@storybook/manager-api@7.6.3", "@storybook/manager-api@^7.6.3":
   version "7.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/manager-api/-/manager-api-7.6.3.tgz#b3b6e5f4b248f724ba8351dcb2ef485e034a5436"
   integrity sha512-soDH7GZuukkhYRGzlw4jhCm5EzjfkuIAtb37/DFplqxuVbvlyJEVzkMUM2KQO7kq0/8GlWPiZ5mn56wagYyhKQ==
@@ -2917,7 +2917,7 @@
     chai "^4.3.7"
     util "^0.12.4"
 
-"@storybook/theming@7.6.3":
+"@storybook/theming@7.6.3", "@storybook/theming@^7.6.3":
   version "7.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-7.6.3.tgz#69adc0c7c2e6cad67cf327834fe57ab4ae698575"
   integrity sha512-9ToNU2LM6a2kVBjOXitXEeEOuMurVLhn+uaZO1dJjv8NGnJVYiLwNPwrLsImiUD8/XXNuil972aanBR6+Aj9jw==
