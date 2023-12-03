@@ -12,10 +12,15 @@ const getState = () => {
   };
 };
 
+const setState = (state) => {
+  text.value = state.text;
+};
+
 defineExpose({
   text,
   settings,
   getState,
+  setState,
 });
 </script>
 

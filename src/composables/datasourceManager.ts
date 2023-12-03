@@ -69,11 +69,33 @@ export function useDatasourceManager() {
     return JSON.stringify(state);
   };
 
+  const loadSerializedState = (state) => {
+    const parsedState = JSON.parse(state);
+
+    Object.keys(parsedState).forEach((key) => {
+      const ds = parsedState[key];
+
+      if (ds.type === "REST") {
+        const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
+
+        availableDatasources.value.set(key, datasource);
+      }
+      if (ds.type === "XMLA") {
+        const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
+
+        availableDatasources.value.set(key, datasource);
+      }
+    });
+
+    console.log(availableDatasources.value);
+  };
+
   return {
     initDatasource,
     getDatasource,
     getDatasourceList,
     updateDatasource,
     getSerializedState,
+    loadSerializedState,
   };
 }

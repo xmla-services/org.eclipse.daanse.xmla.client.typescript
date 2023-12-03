@@ -32,7 +32,7 @@
         </va-button>
       </div>
       <div class="main-section">
-        <div class="dashboard-container">
+        <!-- <div class="dashboard-container">
           <div
             class="d_1 dashboard-item-container"
             :style="getInitialStyle('d_1')"
@@ -349,7 +349,7 @@
             :style="getMovableControlStyles('d_6')"
           >
           </Moveable>
-        </div>
+        </div> -->
         <template v-for="widget in customWidgets" :key="widget.id">
           <div
             :class="`${widget.id} dashboard-item-container`"
@@ -421,7 +421,7 @@
           </Moveable>
         </template>
 
-        <div
+        <!-- <div
           class="d_7 dashboard-item-container"
           :style="getInitialStyle('d_7')"
           ref="d_7"
@@ -468,7 +468,7 @@
           ref="d_7_control"
           :style="getMovableControlStyles('d_7')"
         >
-        </Moveable>
+        </Moveable> -->
       </div>
     </div>
     <SidebarSettings
@@ -483,7 +483,7 @@ import NavBarDash from "./NavBarDash.vue";
 import ChartWidget from "@/components/Charts/ChartWidgetModule.vue";
 import ChartPolarWidget from "@/components/Charts/ChartPolarWidgetModule.vue";
 import DashboardControls from "@/components/Dashboard/DashboardControls.vue";
-import { ref, markRaw, getCurrentInstance, onMounted } from "vue";
+import { ref, markRaw, getCurrentInstance, onMounted, inject, nextTick } from "vue";
 import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
 import InputControl from "@/components/Controls/Input/InputControl.vue";
 import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue";
@@ -536,6 +536,8 @@ const showSidebar = ref(false);
 const settingsSection = ref(null as any);
 const test = ref(null);
 const test1 = ref(null);
+
+const EventBus = inject("customEventBus") as any;
 
 const enabledWidgets = {
   ImageWidget,
@@ -769,6 +771,10 @@ const saveLayout = () => {
     };
   });
 
+  localStorage.setItem("dsState", dsState);
+  localStorage.setItem("storeState", storeState);
+  localStorage.setItem("widgetsState", JSON.stringify(widgetsState));
+
   console.log(layout);
   console.log(widgetsState);
 
@@ -778,12 +784,45 @@ const saveLayout = () => {
   console.log(JSON.parse(dsState));
 };
 
-const loadLayout = () => {
+const loadLayout = async () => {
   const retrievedObject =
     localStorage.getItem("testLayout") || JSON.stringify(layout);
   layout = JSON.parse(retrievedObject);
 
   manuallyUpdateLayout();
+  console.log(layout);
+
+  const dsState = localStorage.getItem("dsState");
+  const storeState = localStorage.getItem("storeState");
+  const widgetsState = localStorage.getItem("widgetsState");
+
+  console.log(retrievedObject.length + dsState.length + storeState.length + widgetsState.length);
+
+  const widgetsStateObj = JSON.parse(widgetsState);
+
+  Object.keys(widgetsStateObj).forEach((key) => {
+    const e = widgetsStateObj[key];
+    customWidgets.value.push({
+      id: key,
+      component: e.component,
+      caption: e.caption,
+      // state: e.state,
+    });
+  });
+  console.log(customWidgets.value);
+
+  dsManager.loadSerializedState(dsState);
+  storeManager.loadSerializedState(storeState, EventBus);
+
+  await nextTick();
+
+  customWidgets.value.forEach(e => {
+    const refArr = refs.ctx.$refs[`${e.id}_component`];
+    const ref = Array.isArray(refArr) ? refArr[0] : refArr;
+
+    ref.setState(widgetsStateObj[e.id].state);
+    console.log(ref);
+  });
 };
 
 const openStoreList = () => {

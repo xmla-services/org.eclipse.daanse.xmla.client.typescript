@@ -40,11 +40,25 @@ const updateFn = async () => {
   text.value = (await store?.getData()) as string;
 };
 
+const getState = () => ({
+  storeId: storeId.value,
+  objectField: objectField.value,
+});
+
+const setState = (state) => {
+  storeId.value = state.storeId;
+  objectField.value = state.objectField;
+
+  getData();
+};
+
 defineExpose({
   setSettings,
   settings,
   objectField,
   storeId,
+  getState,
+  setState,
 });
 
 const getData = async () => {

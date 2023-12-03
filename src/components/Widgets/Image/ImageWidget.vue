@@ -12,10 +12,15 @@ const getState = () => {
   };
 };
 
+const setState = (state) => {
+  imgSrc.value = state.imgSrc;
+};
+
 defineExpose({
   imgSrc,
   settings,
   getState,
+  setState,
 });
 </script>
 
