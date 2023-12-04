@@ -104,7 +104,7 @@ setup(async (app) => {
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
 const meta = {
-    title: 'BaseWidget',
+    title: 'Widget/DisplayWidgets/BaseWidget',
     component: BaseWidget,
     render: (args: any) => ({
         components:  {BaseWidget} ,
