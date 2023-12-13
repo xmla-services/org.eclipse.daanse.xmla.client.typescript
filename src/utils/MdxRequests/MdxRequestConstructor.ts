@@ -526,14 +526,16 @@ async function getAxisFilterRequest(e) {
   });
 
   const deseclectedFiltersLevels = [] as any[][];
-  filter.deselectedItems.forEach((e) => {
-    const levelNum = e.LNum;
-    if (deseclectedFiltersLevels[levelNum]) {
-      deseclectedFiltersLevels[levelNum].push(e);
-    } else {
-      deseclectedFiltersLevels[levelNum] = [e];
-    }
-  });
+  if (filter.deselectedItems) {
+    filter.deselectedItems.forEach((e) => {
+      const levelNum = e.LNum;
+      if (deseclectedFiltersLevels[levelNum]) {
+        deseclectedFiltersLevels[levelNum].push(e);
+      } else {
+        deseclectedFiltersLevels[levelNum] = [e];
+      }
+    });
+  }
 
   const filtersDepth = Math.max(
     filtersLevels.length,

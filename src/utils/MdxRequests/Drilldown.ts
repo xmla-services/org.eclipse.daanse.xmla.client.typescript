@@ -100,7 +100,16 @@ export async function getRowsDrilldownRequestString(
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (i === 0) {
-          hierarchizeString = `DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
+          if (expandedMembers[i].LNum === "0") {
+            hierarchizeString = `
+              DrilldownMember({{
+                ${rowsRootLevel?.LEVEL_UNIQUE_NAME}.members
+              }}, {${expandedMembers[i].UName}})
+            `;
+          } else {
+            // hierarchizeString = `DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
+            hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
+          }
           // hierarchizeString = `DrilldownMember({{DrilldownLevel({${rowsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
         } else {
           hierarchizeString = `
@@ -354,8 +363,16 @@ export async function getColsDrilldownRequestString(
 
       for (let i = 0; i < expandedMembers.length; i++) {
         if (i === 0) {
-          hierarchizeString = `DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
-          //hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
+          if (expandedMembers[i].LNum === "0") {
+            hierarchizeString = `
+              DrilldownMember({{
+                ${colsRootLevel?.LEVEL_UNIQUE_NAME}.members
+              }}, {${expandedMembers[i].UName}})
+            `;
+          } else {
+            // hierarchizeString = `DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)`;
+            hierarchizeString = `DrilldownMember({{DrilldownLevel({${colsRootLevel?.LEVEL_UNIQUE_NAME}})}}, {${expandedMembers[i].UName}})`;
+          }
         } else {
           hierarchizeString = `
             DrilldownMember({{
