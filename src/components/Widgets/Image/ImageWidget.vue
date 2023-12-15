@@ -1,23 +1,40 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import ImageWidgetSettings from "./ImageWidgetSettings.vue";
 const settings = ImageWidgetSettings;
 
-const { initialState } = defineProps(["initialState"]) as any;
-const imgSrc = ref(initialState?.imgSrc || "");
+
+const props = defineProps({ 
+  initialState: {
+    type: Object,
+    required: false,
+  },
+  imgSrc: {
+    type: String,
+    required: false,
+    default: "",
+  }
+});
+const { initialState, imgSrc } = props;
+
+const innerImgSrc = ref(initialState?.imgSrc || imgSrc || "");
 
 const getState = () => {
   return {
-    imgSrc: imgSrc.value,
+    imgSrc: innerImgSrc.value,
   };
 };
 
+watch(() => props.imgSrc, (newVal) => {
+  innerImgSrc.value = newVal;
+});
+
 const setState = (state) => {
-  imgSrc.value = state.imgSrc;
+  innerImgSrc.value = state.imgSrc;
 };
 
 defineExpose({
-  imgSrc,
+  imgSrc: innerImgSrc,
   settings,
   getState,
   setState,
@@ -25,7 +42,7 @@ defineExpose({
 </script>
 
 <template>
-  <img class="image" :src="imgSrc" />
+  <img class="image" :src="innerImgSrc" />
 </template>
 
 <style scoped>

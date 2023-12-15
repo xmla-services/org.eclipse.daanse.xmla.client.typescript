@@ -69,11 +69,10 @@ export function useDatasourceManager() {
     return JSON.stringify(state);
   };
 
-  const loadSerializedState = (state) => {
-    const parsedState = JSON.parse(state);
+  const loadState = (state) => {
 
-    Object.keys(parsedState).forEach((key) => {
-      const ds = parsedState[key];
+    Object.keys(state).forEach((key) => {
+      const ds = state[key];
 
       if (ds.type === "REST") {
         const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
@@ -96,6 +95,6 @@ export function useDatasourceManager() {
     getDatasourceList,
     updateDatasource,
     getSerializedState,
-    loadSerializedState,
+    loadState,
   };
 }

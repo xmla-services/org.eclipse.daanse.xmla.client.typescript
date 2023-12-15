@@ -78,6 +78,10 @@ onMounted(() => {
     />
     <pre class="response">{{ requestResult }}</pre>
   </div>
+  <va-input v-model="props.component.fontSize" label="Font Size" />
+  <va-input v-model="props.component.fontColor" label="Font Color" />
+  <va-input v-model="props.component.textAlign" label="Text Align" />
+  <va-input v-model="props.component.fontWeight" label="Font Weight" />
 </template>
 <style>
 .response {
