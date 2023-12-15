@@ -54,13 +54,12 @@ export function useStoreManager() {
     return JSON.stringify(state);
   };
 
-  const loadSerializedState = (state, eventBus) => {
+  const loadState = (state, eventBus) => {
     availableStores.value.clear();
 
-    const parsedState = JSON.parse(state);
-    Object.keys(parsedState).forEach((key) => {
-      const store = new Store(key, parsedState[key].caption, eventBus);
-      store.loadState(parsedState[key]);
+    Object.keys(state).forEach((key) => {
+      const store = new Store(key, state[key].caption, eventBus);
+      store.loadState(state[key]);
       availableStores.value.set(key, store);
     });
     console.log(availableStores.value);
@@ -71,6 +70,6 @@ export function useStoreManager() {
     getStore,
     getStoreList,
     getSerializedState,
-    loadSerializedState,
+    loadState,
   };
 }

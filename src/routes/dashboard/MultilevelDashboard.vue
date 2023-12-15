@@ -30,6 +30,9 @@
         <va-button preset="primary" class="ml-2" @click="addTextWidget">
           Add text
         </va-button>
+        <va-button preset="primary" class="ml-2" @click="loadDemo">
+          Load demo
+        </va-button>
       </div>
       <div class="main-section">
         <!-- <div class="dashboard-container">
@@ -421,6 +424,55 @@
           </Moveable>
         </template>
 
+        <div
+            class="d_3 dashboard-item-container"
+            :style="getInitialStyle('d_3')"
+            ref="d_3"
+          >
+            <va-dropdown
+              :trigger="editEnabled ? 'right-click' : 'none'"
+              :auto-placement="false"
+              placement="right-start"
+              cursor
+            >
+              <template #anchor>
+                <div class="dashboard-item">
+                  <DashboardControls
+                    @openSettings="openSettings('test')"
+                    v-if="editEnabled"
+                  />
+                  <ButtonControl class="widget-content" ref="test" />
+                </div>
+              </template>
+
+              <va-dropdown-content>
+                <div class="dropdown-buttons-container">
+                  <va-button @click="moveUp('d_3')">Move up</va-button>
+                  <va-button @click="moveDown('d_3')">Move down</va-button>
+                  <va-button @click="moveToTop('d_3')">Move to top</va-button>
+                  <va-button @click="moveToBottom('d_3')">
+                    Move to bottom
+                  </va-button>
+                </div>
+              </va-dropdown-content>
+            </va-dropdown>
+          </div>
+          <Moveable
+            v-bind:target="['.d_3']"
+            v-bind:draggable="editEnabled"
+            v-bind:resizable="editEnabled"
+            v-bind:useResizeObserver="true"
+            v-bind:useMutationObserver="true"
+            @drag="drag('d_3', $event)"
+            @resize="resize('d_3', $event)"
+            :snappable="true"
+            :snapGridWidth="20"
+            :snapGridHeight="20"
+            ref="d_3_control"
+            :style="getMovableControlStyles('d_3')"
+          >
+          </Moveable>
+
         <!-- <div
           class="d_7 dashboard-item-container"
           :style="getInitialStyle('d_7')"
@@ -474,6 +526,7 @@
     <SidebarSettings
       v-model="showSidebar"
       :settingsSection="settingsSection"
+      class="sidebar"
     ></SidebarSettings>
   </div>
 </template>
@@ -775,13 +828,47 @@ const saveLayout = () => {
   localStorage.setItem("storeState", storeState);
   localStorage.setItem("widgetsState", JSON.stringify(widgetsState));
 
-  console.log(layout);
-  console.log(widgetsState);
+  const tempJson = {
+    layout,
+    storeState: JSON.parse(storeState),
+    dsState: JSON.parse(dsState),
+    widgetsState,
+  };
 
-  console.log(storeState);
-  console.log(JSON.parse(storeState));
-  console.log(dsState);
-  console.log(JSON.parse(dsState));
+  console.log(JSON.stringify(tempJson));
+};
+
+const loadDemo = async () => {
+  const layoutReq = await fetch('/demo/layout.json');
+  const layoutJson = await layoutReq.json();
+  console.log(layout);
+
+  layout = layoutJson.layout;
+
+  manuallyUpdateLayout();
+
+  Object.keys(layoutJson.widgetsState).forEach((key) => {
+    const e = layoutJson.widgetsState[key];
+    customWidgets.value.push({
+      id: key,
+      component: e.component,
+      caption: e.caption,
+      // state: e.state,
+    });
+  });
+
+  dsManager.loadState(layoutJson.dsState);
+  storeManager.loadState(layoutJson.storeState, EventBus);
+
+  await nextTick();
+
+  customWidgets.value.forEach(e => {
+    const refArr = refs.ctx.$refs[`${e.id}_component`];
+    const ref = Array.isArray(refArr) ? refArr[0] : refArr;
+
+    ref.setState(layoutJson.widgetsState[e.id].state);
+    console.log(ref);
+  });
 };
 
 const loadLayout = async () => {
@@ -796,8 +883,6 @@ const loadLayout = async () => {
   const storeState = localStorage.getItem("storeState");
   const widgetsState = localStorage.getItem("widgetsState");
 
-  console.log(retrievedObject.length + dsState.length + storeState.length + widgetsState.length);
-
   const widgetsStateObj = JSON.parse(widgetsState);
 
   Object.keys(widgetsStateObj).forEach((key) => {
@@ -811,8 +896,8 @@ const loadLayout = async () => {
   });
   console.log(customWidgets.value);
 
-  dsManager.loadSerializedState(dsState);
-  storeManager.loadSerializedState(storeState, EventBus);
+  dsManager.loadState(JSON.parse(dsState));
+  storeManager.loadState(JSON.parse(storeState), EventBus);
 
   await nextTick();
 
@@ -1163,6 +1248,10 @@ body.no-overflow[data-v-059e0ffc] {
 .app-layout-container.editDisabled .moveable-line {
   display: none;
 }
+
+.va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper {
+  z-index: 20000000;
+}
 </style>
 <style scoped lang="scss">
 .padd {
@@ -1181,6 +1270,7 @@ body.no-overflow[data-v-059e0ffc] {
   flex-direction: row;
   flex-grow: 1;
   gap: 1rem;
+  overflow: auto;
 }
 
 .dashboard-container {
@@ -1235,5 +1325,12 @@ body.no-overflow[data-v-059e0ffc] {
   display: flex;
   flex-direction: row;
   height: 100%;
+  overflow: hidden;
 }
+
+.sidebar {
+  z-index: 1000000;
+}
+
+
 </style>

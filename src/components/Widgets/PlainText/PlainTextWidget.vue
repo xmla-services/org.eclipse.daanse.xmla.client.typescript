@@ -24,6 +24,40 @@ const setSettings = (settings) => {
   }
 };
 
+const props = defineProps({
+  initialState: {
+    type: Object,
+    required: false,
+  },
+  fontSize: {
+    type: Number,
+    required: false,
+    default: 12,
+  },
+  fontColor: {
+    type: String,
+    required: false,
+    default: "#000",
+  },
+  textAlign: {
+    type: String,
+    required: false,
+    default: "left",
+  },
+  fontWeight: {
+    type: String,
+    required: false,
+    default: "normal",
+  },
+});
+
+const { initialState } = props;
+
+const innerFontSize = ref(initialState?.fontSize || props.fontSize || 12);
+const innerFontColor = ref(initialState?.fontColor || props.fontColor || "#000");
+const innerTextAlign = ref(initialState?.textAlign || props.textAlign || "left");
+const innerFontWeight = ref(initialState?.fontWeight || props.fontWeight || "normal");
+
 watch(storeId, (newVal, oldVal) => {
   console.log("store changed", storeId);
   store = storeManager.getStore(storeId.value);
@@ -43,11 +77,19 @@ const updateFn = async () => {
 const getState = () => ({
   storeId: storeId.value,
   objectField: objectField.value,
+  fontSize: innerFontSize.value,
+  fontColor: innerFontColor.value,
+  textAlign: innerTextAlign.value,
+  fontWeight: innerFontWeight.value,
 });
 
 const setState = (state) => {
   storeId.value = state.storeId;
   objectField.value = state.objectField;
+  innerFontSize.value = state.fontSize;
+  innerFontColor.value = state.fontColor;
+  innerTextAlign.value = state.textAlign;
+  innerFontWeight.value = state.fontWeight;
 
   getData();
 };
@@ -59,6 +101,10 @@ defineExpose({
   storeId,
   getState,
   setState,
+  fontSize: innerFontSize,
+  fontColor: innerFontColor,
+  textAlign: innerTextAlign,
+  fontWeight: innerFontWeight,
 });
 
 const getData = async () => {
@@ -72,5 +118,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="objectField">{{ text[objectField] }}</div>
+  <div v-if="objectField" class="component">{{ text[objectField] }}</div>
 </template>
+
+<style scoped>
+.component {
+  font-size: v-bind(innerFontSize + "px");
+  color: v-bind(innerFontColor);
+  text-align: v-bind(innerTextAlign);
+  font-weight: v-bind(innerFontWeight);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+</style>
