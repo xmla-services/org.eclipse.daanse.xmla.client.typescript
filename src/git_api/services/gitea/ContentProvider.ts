@@ -1,6 +1,16 @@
+/*
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+                   This program and the accompanying materials are made
+                   available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+*/
 import type  {FilehashPathType} from "@/git_api/api/ContentProvider";
 import type ContentProviderI from "@/git_api/api/ContentProvider";
-import {RepositoryApi} from "@/generated/gitea";
+import {RepositoryApi} from "@/git_api/generated/gitea";
 
 
 export default class ContentProvider implements ContentProviderI{

@@ -1,16 +1,17 @@
+/*
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+                   This program and the accompanying materials are made
+                   available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
 
-import FileProvider from "@/git_api/services/gitea/FileProvider";
-import CommitProvider from "@/git_api/services/gitea/CommitProvider";
-import BranchProvider from "@/git_api/services/gitea/BranchProvider";
+Contributors: Smart City Jena
 
+*/
 import config from "@/git_api/conf/gitea.json";
-import ContentProvider from "@/git_api/services/gitea/ContentProvider";
 import type {CommitI} from "@/git_api/api/Commit";
 import type {FileI} from "@/git_api/api/File";
 import type {FolderI} from "@/git_api/api/Folder";
-import Folder from "@/git_api/services/common/Folder";
-import File from "@/git_api/services/common/File";
-import GitteaFile from "@/git_api/services/gitea/File";
 import ProviderFactory from "@/git_api/services/gitea/ProviderFactory";
 import { expect, test } from 'vitest'
 

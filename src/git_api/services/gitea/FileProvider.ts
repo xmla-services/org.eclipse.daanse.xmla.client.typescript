@@ -1,12 +1,22 @@
 
+/*
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+                   This program and the accompanying materials are made
+                   available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
 
-import { RepositoryApi} from "@/generated/gitea";
+Contributors: Smart City Jena
+
+*/
+
 import type {FileProviderI} from "@/git_api/api/FileProvider";
 import type {FileI} from "@/git_api/api/File";
 import type ContentProviderI from "@/git_api/api/ContentProvider";
 import type {FolderI} from "@/git_api/api/Folder";
 import Folder from "@/git_api/services/common/Folder";
 import GitteaFile from "@/git_api/services/gitea/File";
+import {RepositoryApi} from "@/git_api/generated/gitea";
 
 export default class FileProvider implements FileProviderI{
     readonly owner:string;

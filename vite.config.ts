@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
-
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { viteRequire } from "vite-require";
@@ -22,4 +22,7 @@ export default defineConfig({
   define: {
     "process.env": {},
   },
+  test:{
+    testTimeout:30000
+  }
 });
