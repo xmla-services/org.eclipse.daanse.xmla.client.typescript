@@ -70,5 +70,7 @@ header:
     - 'nightwatch/**'
     - 'nightwatch.conf.js'
     - 'src/git_api/generated/**'
+    - '.yarnrc.yml'
+    - '.storybook/**'
 
   comment: always

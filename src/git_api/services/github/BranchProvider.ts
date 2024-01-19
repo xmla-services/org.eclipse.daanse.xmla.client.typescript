@@ -54,7 +54,7 @@ export default class BranchProvider implements BranchProviderI{
     async addBranch(name:string, sourceBranch:BranchI) {
         try {
 
-        const oc = new Octokit({auth:'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'})
+        const oc = new Octokit(this.options);
         const sourcefef = await oc.rest.git.getRef({
             owner:this.owner,
             repo: this.repo,
@@ -65,7 +65,7 @@ export default class BranchProvider implements BranchProviderI{
             owner:this.owner,
             repo:this.repo,
             ref: 'refs/heads/'+name,
-            sha: 'd54b43d46f23aa4b93c901d0ff4d44cc0d849e2c'//sourcefef.data.object.sha
+            sha: sourcefef.data.object.sha
 
         })
             console.log(createResult)

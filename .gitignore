@@ -32,3 +32,6 @@ artifacts/**
 
 src/git_api/generated/**
 !src/git_api/generated/gitea/definition/swagger.json
+
+src/git_api/conf/**
+!src/git_api/conf/example.json
