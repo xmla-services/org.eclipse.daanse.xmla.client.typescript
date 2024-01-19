@@ -69,5 +69,6 @@ header:
     - 'public/def/**'
     - 'nightwatch/**'
     - 'nightwatch.conf.js'
+    - 'src/git_api/generated/**'
 
   comment: always

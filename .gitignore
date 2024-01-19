@@ -30,3 +30,5 @@ coverage
 tests_output/**
 artifacts/**
 
+src/git_api/generated/**
+!src/git_api/generated/gitea/definition/swagger.json
