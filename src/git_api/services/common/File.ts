@@ -1,0 +1,64 @@
+
+import {FileParseError} from "@/git_api/services/common/FileParseError";
+import type {FileI} from "@/git_api/api/File";
+import {FileState} from "@/git_api/api/FileState";
+import type ContentProviderI from "@/git_api/api/ContentProvider";
+
+
+export default class File implements FileI{
+    constructor(name,path,hash,contentProvider:ContentProviderI,exsists=false) {
+        console.log(hash);
+        this.name = name;
+        this.path = path;
+        this.hash = hash;
+        this.contentProvider = contentProvider;
+        if(!exsists){
+            this.file_state = FileState.NEW;
+        }
+    }
+
+    content: any;
+    name: string;
+    path:string;
+    hash:string|null;
+    contentProvider:ContentProviderI;
+    file_state:FileState = FileState.UNLOADED;
+
+    async fetchContent() {
+
+        if (!this.hash)new Error('File not synced yet, commit first');
+        try{
+            this.content = (await this.contentProvider.getContent({filehash:this.hash!}))
+            this.file_state = FileState.UNTOUCHED;
+            return this.content;
+        }catch (e){
+            console.log(e)
+            throw new FileParseError('File not get parsed')
+        }
+
+    }
+    getContent(): any {
+        try{
+            const content_as_string = atob(this.content);
+            return JSON.parse(content_as_string);
+        }catch (e){
+            //throw new FileParseError('File not get parsed')
+            return {};
+        }
+    }
+
+    setContent(content:any){
+        try{
+            const content_as_String = JSON.stringify(content)
+            const content_as_base = btoa(content_as_String);
+            this.content = content_as_base;
+            if(this.file_state!=FileState.NEW)this.file_state = FileState.MODIFIED
+        }catch (e){
+            throw new FileParseError('File not get parsed')
+        }
+    }
+    delete(){
+        this.file_state = FileState.DELETED
+    }
+
+}
