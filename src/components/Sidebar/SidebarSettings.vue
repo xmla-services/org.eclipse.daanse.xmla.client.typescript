@@ -24,6 +24,7 @@ defineEmits(["update:modelValue"]);
         <template v-if="props.settingsSection?.type === 'Widget'">
           <SidebarWidget
             :component="props.settingsSection.component"
+            :wrapper="props.settingsSection.wrapper"
             :key="props.settingsSection.id"
           />
         </template>

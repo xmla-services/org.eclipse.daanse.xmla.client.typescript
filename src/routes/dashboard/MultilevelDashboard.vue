@@ -377,17 +377,23 @@
                       <div>Loading...</div>
                     </template>
                     <!-- :storeId="widget.storeId" -->
-                    <component
-                      :is="enabledWidgets[widget.component]"
-                      :ref="`${widget.id}_component`"
-                      :initialState="widget.state"
-                    ></component>
+                    <WidgetWrapper :ref="`${widget.id}_wrapper`">
+                      <component
+                        :is="enabledWidgets[widget.component]"
+                        :ref="`${widget.id}_component`"
+                        :initialState="widget.state"
+                      ></component>
+                    </WidgetWrapper>
                   </Suspense>
                   <!-- </smart-widget> -->
                   <DashboardControls
                     v-if="editEnabled"
                     @openSettings="
-                      openSettings(`${widget.id}_component`, 'Widget')
+                      openSettings(
+                        `${widget.id}_component`,
+                        `${widget.id}_wrapper`,
+                        'Widget',
+                      )
                     "
                   />
                 </div>
@@ -425,53 +431,53 @@
         </template>
 
         <div
-            class="d_3 dashboard-item-container"
-            :style="getInitialStyle('d_3')"
-            ref="d_3"
+          class="d_3 dashboard-item-container"
+          :style="getInitialStyle('d_3')"
+          ref="d_3"
+        >
+          <va-dropdown
+            :trigger="editEnabled ? 'right-click' : 'none'"
+            :auto-placement="false"
+            placement="right-start"
+            cursor
           >
-            <va-dropdown
-              :trigger="editEnabled ? 'right-click' : 'none'"
-              :auto-placement="false"
-              placement="right-start"
-              cursor
-            >
-              <template #anchor>
-                <div class="dashboard-item">
-                  <DashboardControls
-                    @openSettings="openSettings('test')"
-                    v-if="editEnabled"
-                  />
-                  <ButtonControl class="widget-content" ref="test" />
-                </div>
-              </template>
+            <template #anchor>
+              <div class="dashboard-item">
+                <DashboardControls
+                  @openSettings="openSettings('test', null)"
+                  v-if="editEnabled"
+                />
+                <ButtonControl class="widget-content" ref="test" />
+              </div>
+            </template>
 
-              <va-dropdown-content>
-                <div class="dropdown-buttons-container">
-                  <va-button @click="moveUp('d_3')">Move up</va-button>
-                  <va-button @click="moveDown('d_3')">Move down</va-button>
-                  <va-button @click="moveToTop('d_3')">Move to top</va-button>
-                  <va-button @click="moveToBottom('d_3')">
-                    Move to bottom
-                  </va-button>
-                </div>
-              </va-dropdown-content>
-            </va-dropdown>
-          </div>
-          <Moveable
-            v-bind:target="['.d_3']"
-            v-bind:draggable="editEnabled"
-            v-bind:resizable="editEnabled"
-            v-bind:useResizeObserver="true"
-            v-bind:useMutationObserver="true"
-            @drag="drag('d_3', $event)"
-            @resize="resize('d_3', $event)"
-            :snappable="true"
-            :snapGridWidth="20"
-            :snapGridHeight="20"
-            ref="d_3_control"
-            :style="getMovableControlStyles('d_3')"
-          >
-          </Moveable>
+            <va-dropdown-content>
+              <div class="dropdown-buttons-container">
+                <va-button @click="moveUp('d_3')">Move up</va-button>
+                <va-button @click="moveDown('d_3')">Move down</va-button>
+                <va-button @click="moveToTop('d_3')">Move to top</va-button>
+                <va-button @click="moveToBottom('d_3')">
+                  Move to bottom
+                </va-button>
+              </div>
+            </va-dropdown-content>
+          </va-dropdown>
+        </div>
+        <Moveable
+          v-bind:target="['.d_3']"
+          v-bind:draggable="editEnabled"
+          v-bind:resizable="editEnabled"
+          v-bind:useResizeObserver="true"
+          v-bind:useMutationObserver="true"
+          @drag="drag('d_3', $event)"
+          @resize="resize('d_3', $event)"
+          :snappable="true"
+          :snapGridWidth="20"
+          :snapGridHeight="20"
+          ref="d_3_control"
+          :style="getMovableControlStyles('d_3')"
+        >
+        </Moveable>
 
         <!-- <div
           class="d_7 dashboard-item-container"
@@ -536,7 +542,14 @@ import NavBarDash from "./NavBarDash.vue";
 import ChartWidget from "@/components/Charts/ChartWidgetModule.vue";
 import ChartPolarWidget from "@/components/Charts/ChartPolarWidgetModule.vue";
 import DashboardControls from "@/components/Dashboard/DashboardControls.vue";
-import { ref, markRaw, getCurrentInstance, onMounted, inject, nextTick } from "vue";
+import {
+  ref,
+  markRaw,
+  getCurrentInstance,
+  onMounted,
+  inject,
+  nextTick,
+} from "vue";
 import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
 import InputControl from "@/components/Controls/Input/InputControl.vue";
 import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue";
@@ -547,6 +560,7 @@ import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
 import { useDatasourceManager } from "@/composables/datasourceManager";
+import WidgetWrapper from "@/components/Widgets/WidgetWrapper/WidgetWrapper.vue";
 
 const storeManager = useStoreManager();
 const dsManager = useDatasourceManager();
@@ -839,7 +853,7 @@ const saveLayout = () => {
 };
 
 const loadDemo = async () => {
-  const layoutReq = await fetch('/demo/layout.json');
+  const layoutReq = await fetch("/demo/layout.json");
   const layoutJson = await layoutReq.json();
   console.log(layout);
 
@@ -862,7 +876,7 @@ const loadDemo = async () => {
 
   await nextTick();
 
-  customWidgets.value.forEach(e => {
+  customWidgets.value.forEach((e) => {
     const refArr = refs.ctx.$refs[`${e.id}_component`];
     const ref = Array.isArray(refArr) ? refArr[0] : refArr;
 
@@ -901,7 +915,7 @@ const loadLayout = async () => {
 
   await nextTick();
 
-  customWidgets.value.forEach(e => {
+  customWidgets.value.forEach((e) => {
     const refArr = refs.ctx.$refs[`${e.id}_component`];
     const ref = Array.isArray(refArr) ? refArr[0] : refArr;
 
@@ -915,13 +929,23 @@ const openStoreList = () => {
   showSidebar.value = true;
 };
 
-const openSettings = (id, type = "Control") => {
+const openSettings = (id, wrapperId, type = "Control") => {
   const refArr = refs.ctx.$refs[id];
   const ref = Array.isArray(refArr) ? refArr[0] : refArr;
+
+  let wrapperRef = null;
+  if (wrapperId) {
+    const wrapperRefArr = refs.ctx.$refs[wrapperId];
+    console.log(wrapperRefArr);
+    wrapperRef = Array.isArray(wrapperRefArr)
+      ? wrapperRefArr[0]
+      : wrapperRefArr;
+  }
 
   settingsSection.value = markRaw({
     type,
     component: ref,
+    wrapper: wrapperRef,
     id,
   });
   showSidebar.value = true;
@@ -968,27 +992,33 @@ const addTextWidget = () => {
   transition: all 0.2s ease;
   transition-property: left, top, right;
 }
+
 .vue-grid-item.no-touch {
   -ms-touch-action: none;
   touch-action: none;
 }
+
 .vue-grid-item.cssTransforms {
   transition-property: transform;
   left: 0;
   right: auto;
 }
+
 .vue-grid-item.cssTransforms.render-rtl {
   left: auto;
   right: 0;
 }
+
 .vue-grid-item.resizing {
   opacity: 0.6;
   z-index: 3;
 }
+
 .vue-grid-item.vue-draggable-dragging {
   transition: none;
   z-index: 3;
 }
+
 .vue-grid-item.vue-grid-placeholder {
   background: red;
   opacity: 0.2;
@@ -1000,6 +1030,7 @@ const addTextWidget = () => {
   -o-user-select: none;
   user-select: none;
 }
+
 .vue-grid-item > .vue-resizable-handle {
   position: absolute;
   width: 20px;
@@ -1014,6 +1045,7 @@ const addTextWidget = () => {
   box-sizing: border-box;
   cursor: se-resize;
 }
+
 .vue-grid-item > .vue-rtl-resizable-handle {
   bottom: 0;
   left: 0;
@@ -1025,24 +1057,30 @@ const addTextWidget = () => {
   cursor: sw-resize;
   right: auto;
 }
+
 .vue-grid-item.disable-userselect {
   user-select: none;
 }
+
 .vue-grid-layout {
   position: relative;
   transition: height 0.2s ease;
 }
+
 .vue-grid-layout {
   background: transparent;
 }
+
 .vue-grid-layout .smartwidget {
   height: inherit;
   width: inherit;
 }
+
 .vue-grid-layout .smartwidget.smartwidget-fullscreen {
   height: 100%;
   width: 100%;
 }
+
 .smart-widget__loading-mask {
   position: absolute;
   z-index: 2000;
@@ -1055,6 +1093,7 @@ const addTextWidget = () => {
   -webkit-transition: opacity 0.3s;
   transition: opacity 0.3s;
 }
+
 .smart-widget__loading-mask .loading-spinner {
   top: 50%;
   margin-top: -21px;
@@ -1062,11 +1101,13 @@ const addTextWidget = () => {
   text-align: center;
   position: absolute;
 }
+
 .smart-widget__loading-mask .circular {
   width: 42px;
   height: 42px;
   animation: loading-rotate 2s linear infinite;
 }
+
 .smart-widget__loading-mask .path {
   animation: loading-dash 1.5s ease-in-out infinite;
   stroke-dasharray: 90, 150;
@@ -1075,35 +1116,42 @@ const addTextWidget = () => {
   stroke: #5282e4;
   stroke-linecap: round;
 }
+
 @keyframes loading-rotate {
   to {
     transform: rotate(360deg);
   }
 }
+
 @keyframes loading-dash {
   0% {
     stroke-dasharray: 1, 200;
     stroke-dashoffset: 0;
   }
+
   50% {
     stroke-dasharray: 90, 150;
     stroke-dashoffset: -40px;
   }
+
   to {
     stroke-dasharray: 90, 150;
     stroke-dashoffset: -120px;
   }
 }
+
 .collapse-transition[data-v-5f8fde58] {
   transition:
     0.3s height ease-in-out,
     0.3s padding-top ease-in-out,
     0.3s padding-bottom ease-in-out;
 }
+
 .vue-grid-item {
   touch-action: none;
   box-sizing: border-box;
 }
+
 .vue-grid-item.vue-grid-placeholder {
   background: #7cbeff;
   opacity: 0.2;
@@ -1111,11 +1159,13 @@ const addTextWidget = () => {
   z-index: 2;
   user-select: none;
 }
+
 body.no-overflow[data-v-059e0ffc] {
   overflow: hidden;
   position: fixed;
   width: 100%;
 }
+
 .smartwidget[data-v-059e0ffc] {
   box-sizing: border-box;
   background: #fff;
@@ -1124,19 +1174,24 @@ body.no-overflow[data-v-059e0ffc] {
   width: 100%;
   transition: 0.3s;
 }
+
 .smartwidget.is-always-shadow[data-v-059e0ffc] {
   box-shadow: 0 0 10px #e9e9e9;
 }
+
 .smartwidget.is-hover-shadow[data-v-059e0ffc]:hover {
   box-shadow: 0 0 10px #e9e9e9;
 }
+
 .smartwidget.is-never-shadow[data-v-059e0ffc] {
   box-shadow: 0 1px 2px #0000000d;
 }
+
 .smartwidget .widget-header[data-v-059e0ffc] {
   display: flex;
   border-bottom: 1px solid #ebeef5;
 }
+
 .smartwidget .widget-header .widget-header__title[data-v-059e0ffc] {
   display: inline-block;
   position: relative;
@@ -1147,22 +1202,26 @@ body.no-overflow[data-v-059e0ffc] {
   align-items: center;
   font-size: 16px;
 }
+
 .smartwidget .widget-header .widget-header__subtitle[data-v-059e0ffc] {
   font-size: 12px;
   color: #777;
   margin-left: 10px;
 }
+
 .smartwidget .widget-header .ellis[data-v-059e0ffc] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .smartwidget .widget-header .widget-header__prefix[data-v-059e0ffc] {
   background: #0076db;
   width: 2px;
   height: 16px;
   margin-left: 10px;
 }
+
 .smartwidget .widget-header .widget-header__toolbar[data-v-059e0ffc] {
   display: flex;
   justify-content: flex-end;
@@ -1171,6 +1230,7 @@ body.no-overflow[data-v-059e0ffc] {
   padding: 0;
   margin: 0;
 }
+
 .smartwidget .widget-header .widget-header__toolbar a[data-v-059e0ffc] {
   display: inline-block;
   text-decoration: none;
@@ -1185,15 +1245,18 @@ body.no-overflow[data-v-059e0ffc] {
   font-family: Arial, Helvetica, sans-serif;
   border-left: 1px solid rgba(0, 0, 0, 0.09);
 }
+
 .smartwidget .widget-body-simple[data-v-059e0ffc] {
   display: flex;
   height: inherit;
   width: inherit;
 }
+
 .smartwidget .widget-body-simple .widget-body__content {
   width: 100%;
   height: 100%;
 }
+
 .smartwidget .widget-body[data-v-059e0ffc] {
   display: flex;
   flex-direction: column;
@@ -1201,26 +1264,32 @@ body.no-overflow[data-v-059e0ffc] {
   position: relative;
   overflow: hidden;
 }
+
 .smartwidget .widget-body .widget-body__content {
   flex: 1;
 }
+
 .smartwidget .widget-body .widget-body__content.fixed-height[data-v-059e0ffc] {
   overflow-y: scroll;
 }
+
 .smartwidget .widget-body .widget-body__footer[data-v-059e0ffc] {
   position: relative;
 }
+
 .smartwidget .widget-body .widget-body__footer.has-group[data-v-059e0ffc] {
   left: 0;
   bottom: 0;
   width: 100%;
 }
+
 .smartwidget .widget-body.is-collapse[data-v-059e0ffc] {
   transition:
     0.3s height ease-in-out,
     0.3s padding-top ease-in-out,
     0.3s padding-bottom ease-in-out;
 }
+
 .smartwidget.smartwidget-fullscreen[data-v-059e0ffc] {
   position: fixed;
   height: 100%;
@@ -1229,9 +1298,11 @@ body.no-overflow[data-v-059e0ffc] {
   left: 0;
   z-index: 6666;
 }
+
 .smartwidget.smartwidget-fullscreen .widget-header[data-v-059e0ffc] {
   cursor: default;
 }
+
 .smartwidget svg.sw-loading[data-v-059e0ffc] {
   animation: rotating 2s linear infinite;
   cursor: not-allowed;
@@ -1257,6 +1328,7 @@ body.no-overflow[data-v-059e0ffc] {
 .padd {
   padding: 15px;
 }
+
 .app-layout-container {
   display: flex;
   flex-direction: column;
@@ -1331,6 +1403,4 @@ body.no-overflow[data-v-059e0ffc] {
 .sidebar {
   z-index: 1000000;
 }
-
-
 </style>
