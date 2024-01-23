@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-const props = defineProps(["component"]);
+import WidgetWrapperSettings from '../Widgets/WidgetWrapper/WidgetWrapperSettings.vue';
+
+const props = defineProps(["component", "wrapper"]);
 </script>
 
 <template>
@@ -8,6 +10,7 @@ const props = defineProps(["component"]);
       <h2 class="mb-2">Widget settings</h2>
     </div>
     <div class="sidebar-settings-content">
+      <WidgetWrapperSettings :wrapper="props.wrapper"></WidgetWrapperSettings>
       <component
         :is="props.component.settings"
         :component="props.component"
@@ -39,5 +42,9 @@ const props = defineProps(["component"]);
 .sidebar-settings-content {
   width: 100%;
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
 }
 </style>

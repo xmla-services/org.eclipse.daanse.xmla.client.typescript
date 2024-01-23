@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStoreManager } from "@/composables/storeManager";
-import { ref, inject, onMounted, watch } from "vue";
+import { ref, inject, onMounted, watch, computed } from "vue";
 import PlainTextWidgetSettings from "./PlainTextWidgetSettings.vue";
 import type { Store } from "@/stores/Widgets/Store";
 
@@ -54,9 +54,16 @@ const props = defineProps({
 const { initialState } = props;
 
 const innerFontSize = ref(initialState?.fontSize || props.fontSize || 12);
-const innerFontColor = ref(initialState?.fontColor || props.fontColor || "#000");
-const innerTextAlign = ref(initialState?.textAlign || props.textAlign || "left");
-const innerFontWeight = ref(initialState?.fontWeight || props.fontWeight || "normal");
+const innerFontColor = ref(
+  initialState?.fontColor || props.fontColor || "#000",
+);
+const innerTextAlign = ref(
+  initialState?.textAlign || props.textAlign || "left",
+);
+const innerFontWeight = ref(
+  initialState?.fontWeight || props.fontWeight || "normal",
+);
+const innerTextDecoration = ref("None");
 
 watch(storeId, (newVal, oldVal) => {
   console.log("store changed", storeId);
@@ -94,6 +101,23 @@ const setState = (state) => {
   getData();
 };
 
+const textDecorationStyle = computed(() => {
+  switch (innerTextDecoration.value) {
+    case "Underline solid":
+      return "underline solid";
+    case "Underline dashed":
+      return "underline dashed";
+    case "Underline wavy":
+      return "underline wavy";
+    case "Line-through":
+      return "line-through";
+    case "Overline":
+      return "overline";
+    default:
+      return "none";
+  }
+});
+
 defineExpose({
   setSettings,
   settings,
@@ -105,6 +129,7 @@ defineExpose({
   fontColor: innerFontColor,
   textAlign: innerTextAlign,
   fontWeight: innerFontWeight,
+  textDecoration: innerTextDecoration,
 });
 
 const getData = async () => {
@@ -127,6 +152,7 @@ onMounted(async () => {
   color: v-bind(innerFontColor);
   text-align: v-bind(innerTextAlign);
   font-weight: v-bind(innerFontWeight);
+  text-decoration: v-bind(textDecorationStyle);
   width: 100%;
   height: 100%;
   overflow: hidden;

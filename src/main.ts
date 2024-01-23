@@ -56,6 +56,7 @@ import {
   VaScrollContainer,
   VaListItemLabel,
   VaRadio,
+  VaCollapse,
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -124,6 +125,7 @@ app.use(
       VaListItemSection,
       VaListItemLabel,
       VaRadio,
+      VaCollapse,
     },
     config: {
       colors: {

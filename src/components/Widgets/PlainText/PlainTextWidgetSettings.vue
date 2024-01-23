@@ -82,11 +82,26 @@ onMounted(() => {
   <va-input v-model="props.component.fontColor" label="Font Color" />
   <va-input v-model="props.component.textAlign" label="Text Align" />
   <va-input v-model="props.component.fontWeight" label="Font Weight" />
+  <va-select
+    v-model="props.component.textDecoration"
+    label="Text decoration"
+    :options="[
+      'Underline solid',
+      'Underline dashed',
+      'Underline wavy',
+      'Line-through',
+      'Overline',
+      'None',
+    ]"
+  >
+  </va-select>
 </template>
 <style>
 .response {
   background-color: lightgrey;
   padding: 0.5rem;
   border-radius: 4px;
+  max-height: 400px;
+  overflow: auto;
 }
 </style>
