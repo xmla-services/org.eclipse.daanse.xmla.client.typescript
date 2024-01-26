@@ -34,11 +34,18 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     columnsExpandedMembers: [] as any,
     membersWithProps: [] as any[],
     inited: false,
+    isStatic: false,
+    staticMdx: "",
   });
 
-  const mdx = ref("");
+  const mdx = ref(state.value.isStatic ? state.value.staticMdx : "");
 
   async function getMDX() {
+    if (state.value.isStatic) {
+      mdx.value = state.value.staticMdx;
+      return;
+    }
+
     const rows = queryDesignerStore.rows;
     const columns = queryDesignerStore.columns;
     const measures = queryDesignerStore.measures;
@@ -60,7 +67,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       measures,
       pivotTableSettings,
       metadata.properties,
-      filters
+      filters,
     );
 
     mdx.value = mdxRequest;
@@ -72,7 +79,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
 
   const drilldownOnRows = (member: any) => {
     const expandedIndex = state.value.rowsExpandedMembers.findIndex(
-      (e: any) => e.UName === member.UName
+      (e: any) => e.UName === member.UName,
     );
     if (expandedIndex >= 0)
       state.value.rowsExpandedMembers.splice(expandedIndex, 1);
@@ -80,7 +87,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     const sameHierarchyIndex = state.value.rowsDrilldownMembers.findIndex(
       (e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-      }
+      },
     );
     if (member.LNum === "0") {
       state.value.rowsDrilldownMembers.splice(sameHierarchyIndex, 1);
@@ -94,7 +101,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
   };
   const drilldownOnColumns = (member: any) => {
     const expandedIndex = state.value.columnsExpandedMembers.findIndex(
-      (e: any) => e.UName === member.UName
+      (e: any) => e.UName === member.UName,
     );
     if (expandedIndex >= 0)
       state.value.columnsExpandedMembers.splice(expandedIndex, 1);
@@ -102,7 +109,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     const sameHierarchyIndex = state.value.columnsDrilldownMembers.findIndex(
       (e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-      }
+      },
     );
     if (member.LNum === "0") {
       state.value.columnsDrilldownMembers.splice(sameHierarchyIndex, 1);
@@ -111,7 +118,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
         state.value.columnsDrilldownMembers.splice(
           sameHierarchyIndex,
           1,
-          member
+          member,
         );
       } else {
         state.value.columnsDrilldownMembers.push(member);
@@ -135,7 +142,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       const itemIndex = state.value.columnsDrilldownMembers.findIndex(
         (e: any) => {
           return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-        }
+        },
       );
 
       state.value.columnsDrilldownMembers.splice(itemIndex, 1);
@@ -168,13 +175,13 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       });
     currentMemberHierarchyItems.push(member);
     currentMemberHierarchyItems.sort(
-      (a, b) => parseInt(a.LNum) - parseInt(b.LNum)
+      (a, b) => parseInt(a.LNum) - parseInt(b.LNum),
     );
     const indexInSorted = currentMemberHierarchyItems.indexOf(member);
     if (indexInSorted === 0) {
       if (currentMemberHierarchyItems.length > 1) {
         const nextItemIndex = state.value.rowsExpandedMembers.findIndex(
-          (e) => e.UName === currentMemberHierarchyItems[1].UName
+          (e) => e.UName === currentMemberHierarchyItems[1].UName,
         );
         state.value.rowsExpandedMembers.splice(nextItemIndex, 0, member);
       } else {
@@ -182,7 +189,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       }
     } else {
       const prevItemIndex = state.value.rowsExpandedMembers.findIndex(
-        (e) => e.UName === currentMemberHierarchyItems[indexInSorted - 1].UName
+        (e) => e.UName === currentMemberHierarchyItems[indexInSorted - 1].UName,
       );
       state.value.rowsExpandedMembers.splice(prevItemIndex + 1, 0, member);
     }
@@ -202,13 +209,13 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       });
     currentMemberHierarchyItems.push(member);
     currentMemberHierarchyItems.sort(
-      (a, b) => parseInt(a.LNum) - parseInt(b.LNum)
+      (a, b) => parseInt(a.LNum) - parseInt(b.LNum),
     );
     const indexInSorted = currentMemberHierarchyItems.indexOf(member);
     if (indexInSorted === 0) {
       if (currentMemberHierarchyItems.length > 1) {
         const nextItemIndex = state.value.columnsExpandedMembers.findIndex(
-          (e) => e.UName === currentMemberHierarchyItems[1].UName
+          (e) => e.UName === currentMemberHierarchyItems[1].UName,
         );
         state.value.columnsExpandedMembers.splice(nextItemIndex, 0, member);
       } else {
@@ -216,7 +223,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       }
     } else {
       const prevItemIndex = state.value.columnsExpandedMembers.findIndex(
-        (e) => e.UName === currentMemberHierarchyItems[indexInSorted - 1].UName
+        (e) => e.UName === currentMemberHierarchyItems[indexInSorted - 1].UName,
       );
       state.value.columnsExpandedMembers.splice(prevItemIndex + 1, 0, member);
     }
@@ -245,7 +252,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       const itemIndex = state.value.columnsExpandedMembers.findIndex(
         (e: any) => {
           return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
-        }
+        },
       );
 
       state.value.columnsExpandedMembers.splice(itemIndex, 1);
@@ -277,7 +284,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       flushExpands();
       fetchPivotTableData();
     },
-    { detached: true, immediate: false }
+    { detached: true, immediate: false },
   );
 
   watch(
@@ -285,7 +292,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     () => {
       fetchPivotTableData();
     },
-    { deep: true }
+    { deep: true },
   );
 
   watch(
@@ -293,28 +300,34 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
     () => {
       fetchPivotTableData();
     },
-    { deep: true }
+    { deep: true },
   );
   watch(
     state.value.columnsDrilldownMembers,
     () => {
       fetchPivotTableData();
     },
-    { deep: true }
+    { deep: true },
   );
   watch(
     state.value.rowsExpandedMembers,
     () => {
       fetchPivotTableData();
     },
-    { deep: true }
+    { deep: true },
   );
   watch(
     state.value.columnsExpandedMembers,
     () => {
       fetchPivotTableData();
     },
-    { deep: true }
+    { deep: true },
+  );
+  watch(
+    () => state.value.isStatic,
+    () => {
+      fetchPivotTableData();
+    },
   );
 
   return {

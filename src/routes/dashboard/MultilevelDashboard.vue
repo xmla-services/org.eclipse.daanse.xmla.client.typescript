@@ -33,6 +33,9 @@
         <va-button preset="primary" class="ml-2" @click="loadDemo">
           Load demo
         </va-button>
+        <va-button preset="primary" class="ml-2" @click="addPivotTable">
+          Add pivot table
+        </va-button>
       </div>
       <div class="main-section">
         <!-- <div class="dashboard-container">
@@ -553,6 +556,7 @@ import {
 import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
 import InputControl from "@/components/Controls/Input/InputControl.vue";
 import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue";
+import PivotTableWidget from "@/components/Widgets/PivotTable/PivotTableWidget.vue";
 import ImageWidget from "@/components/Widgets/Image/ImageWidget.vue";
 import TextWidget from "@/components/Widgets/Text/TextWidget.vue";
 import ListWidget from "@/components/Widgets/List/ListWidget.vue";
@@ -610,6 +614,7 @@ const enabledWidgets = {
   ImageWidget,
   TextWidget,
   PlainTextWidget,
+  PivotTableWidget,
 };
 
 let layout = {
@@ -982,6 +987,23 @@ const addTextWidget = () => {
   customWidgets.value.push({
     id: id,
     component: "TextWidget",
+    caption: "Test",
+  });
+};
+
+const addPivotTable = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 800,
+    height: 450,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "PivotTableWidget",
     caption: "Test",
   });
 };
