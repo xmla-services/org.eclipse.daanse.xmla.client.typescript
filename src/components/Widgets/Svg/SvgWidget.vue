@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import { computed, getCurrentInstance, onMounted, ref } from "vue";
+import SvgWidgetSettings from "./SvgWidgetSettings.vue";
+const settings = SvgWidgetSettings;
 
 const svgSource = ref("");
 const props = defineProps({
+  initialState: {
+    type: Object,
+    required: false,
+  },
   src: {
     type: String,
     required: false,
-    default: "",
+    default: "/demo/test.svg",
   },
   classesConfig: {
     type: Object,
@@ -15,18 +21,21 @@ const props = defineProps({
   },
 });
 
+const innerClassesConfig = ref(props.classesConfig || null);
+
 const styles = computed(() => {
   let string = "";
 
   const inst = getCurrentInstance();
   const scope = inst?.type.__scopeId;
-  if (props.classesConfig) {
+  if (innerClassesConfig.value) {
     string += "<style>";
-    for (const [key, value] of Object.entries(props.classesConfig)) {
+    for (const [key, value] of Object.entries(innerClassesConfig.value)) {
       string += `
         [${scope}] .${key} {
           stroke: ${value.stroke};
           fill: ${value.fill};
+          stroke-width: ${value.strokeWidth};
         }
       `;
     }
@@ -37,13 +46,16 @@ const styles = computed(() => {
 });
 
 onMounted(async () => {
+  if(!props.src) return;
   const req = await fetch(props.src);
   const svgObject = await req.text();
   svgSource.value = svgObject;
 });
 
 defineExpose({
-  // settings,
+  src: svgSource,
+  classesConfig: innerClassesConfig,
+  settings,
 });
 </script>
 

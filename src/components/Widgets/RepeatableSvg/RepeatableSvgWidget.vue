@@ -1,34 +1,39 @@
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import RepeatableSvgWidgetSettings from "./RepeatableSvgWidgetSettings.vue";
 
-const svgSource = ref("");
+const settings = RepeatableSvgWidgetSettings;
 
 const props = defineProps({
+  initialState: {
+    type: Object,
+    required: false,
+  },
   src: {
     type: String,
     required: false,
-    default: "",
+    default: "/demo/human.svg",
   },
   activeItemStyles: {
     type: Object,
     required: false,
     default: () => ({
-      fill: "red",
-      stroke: "yellow",
+      fill: "#ff0000",
+      stroke: "#FFFF00",
     }),
   },
   defaultItemStyles: {
     type: Object,
     required: false,
     default: () => ({
-      fill: "#777",
-      stroke: "#777",
+      fill: "#777777",
+      stroke: "#777777",
     }),
   },
   repeations: {
     type: Number,
     required: false,
-    default: 1,
+    default: 4,
   },
   progress: {
     type: Number,
@@ -37,14 +42,35 @@ const props = defineProps({
   },
 });
 
+const { src, activeItemStyles, defaultItemStyles, repeations, progress } = props;
+
+const svgSource = ref(src || "");
+const innerActiveItemStyles = ref({ 
+  fill: activeItemStyles.fill || '#ff0000',
+  stroke: activeItemStyles.stroke || '#FFFF00',
+});
+const innerDefaultItemStyles = ref({
+  fill: defaultItemStyles.fill || '#777777',
+  stroke: defaultItemStyles.stroke || '#777777',
+});
+const innerRepeations = ref(repeations || 4);
+const innerProgress = ref(progress || 0.5);
+
+
 onMounted(async () => {
+  if(!props.src) return;
   const req = await fetch(props.src);
   const svgObject = await req.text();
   svgSource.value = svgObject;
 });
 
 defineExpose({
-  // settings,
+  src: svgSource,
+  activeItemStyles: innerActiveItemStyles,
+  defaultItemStyles: innerDefaultItemStyles,
+  progress: innerProgress,
+  repeations: innerRepeations,
+  settings,
 });
 </script>
 
@@ -56,7 +82,7 @@ defineExpose({
       id="Layer_1"
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      :viewBox="`0 0 ${100 * props.repeations} 100`"
+      :viewBox="`0 0 ${100 * Number(innerRepeations)} 100`"
       enable-background="new 0 0 100 100"
       xml:space="preserve"
     >
@@ -66,30 +92,30 @@ defineExpose({
             x="0"
             y="0"
             style="fill: #adadad"
-            :width="100 * props.repeations * props.progress"
+            :width="100 * Number(innerRepeations) * innerProgress"  
             height="100"
           />
         </mask>
       </defs>
       <g
-        :fill="props.defaultItemStyles.fill"
-        :stroke="props.defaultItemStyles.stroke"
+        :fill="innerDefaultItemStyles.fill"
+        :stroke="innerDefaultItemStyles.stroke"
       >
         <g
           v-html="svgSource"
-          v-for="index in props.repeations"
+          v-for="index in Number(innerRepeations)"
           :transform="`translate(${100 * (index - 1)}, 0)`"
           :key="index"
         ></g>
       </g>
       <g
         mask="url(#bubbleKenseo)"
-        :fill="props.activeItemStyles.fill"
-        :stroke="props.activeItemStyles.stroke"
+        :fill="innerActiveItemStyles.fill"
+        :stroke="innerActiveItemStyles.stroke"
       >
         <g
           v-html="svgSource"
-          v-for="index in props.repeations"
+          v-for="index in Number(innerRepeations)"
           :transform="`translate(${100 * (index - 1)}, 0)`"
           :key="index"
         ></g>
@@ -108,5 +134,6 @@ defineExpose({
 }
 
 .svg {
+
 }
 </style>
