@@ -1,6 +1,7 @@
 <template>
   <div class="controls-container">
     <va-button icon="settings" size="small" @click="$emit('openSettings')" />
+    <va-button icon="clear" color="danger" size="small" @click="$emit('deleteWidget')" />
   </div>
 </template>
 <style>

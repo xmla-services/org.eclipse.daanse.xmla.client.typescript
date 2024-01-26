@@ -30,6 +30,12 @@
         <va-button preset="primary" class="ml-2" @click="addTextWidget">
           Add text
         </va-button>
+        <va-button preset="primary" class="ml-2" @click="addSvgWidget">
+          Add SVG
+        </va-button>
+        <va-button preset="primary" class="ml-2" @click="addRepeatableSvgWidget">
+          Add Repeatable SVG
+        </va-button>
         <va-button preset="primary" class="ml-2" @click="loadDemo">
           Load demo
         </va-button>
@@ -395,6 +401,9 @@
                         'Widget',
                       )
                     "
+                    @deleteWidget="
+                      deleteWidget(widget.id)
+                    "
                   />
                 </div>
               </template>
@@ -556,6 +565,8 @@ import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue"
 import ImageWidget from "@/components/Widgets/Image/ImageWidget.vue";
 import TextWidget from "@/components/Widgets/Text/TextWidget.vue";
 import ListWidget from "@/components/Widgets/List/ListWidget.vue";
+import SvgWidget from "@/components/Widgets/Svg/SvgWidget.vue";
+import RepeatableSvgWidget from "@/components/Widgets/RepeatableSvg/RepeatableSvgWidget.vue";
 import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
@@ -610,6 +621,8 @@ const enabledWidgets = {
   ImageWidget,
   TextWidget,
   PlainTextWidget,
+  SvgWidget,
+  RepeatableSvgWidget,
 };
 
 let layout = {
@@ -951,6 +964,13 @@ const openSettings = (id, wrapperId, type = "Control") => {
   showSidebar.value = true;
 };
 
+const deleteWidget = (id) => {
+  if (settingsSection?.value && `${id}_component` === settingsSection.value.id) {
+    showSidebar.value = false;
+  }
+  customWidgets.value = customWidgets.value.filter(widget => widget.id !== id);
+};
+
 const addImageWidget = () => {
   const id = `id_${Date.now()}`;
   layout[id] = {
@@ -982,6 +1002,40 @@ const addTextWidget = () => {
   customWidgets.value.push({
     id: id,
     component: "TextWidget",
+    caption: "Test",
+  });
+};
+
+const addSvgWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 300,
+    height: 300,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "SvgWidget",
+    caption: "Test",
+  });
+};
+
+const addRepeatableSvgWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 400,
+    height: 400,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "RepeatableSvgWidget",
     caption: "Test",
   });
 };
