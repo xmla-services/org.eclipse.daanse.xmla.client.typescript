@@ -843,12 +843,24 @@ const saveLayout = () => {
     const refArr = refs.ctx.$refs[`${e.id}_component`];
     const ref = Array.isArray(refArr) ? refArr[0] : refArr;
 
+    const refArrWp = refs.ctx.$refs[`${e.id}_wrapper`];
+    const refWp = Array.isArray(refArrWp) ? refArrWp[0] : refArrWp;
+
     const state = ref.getState();
     widgetsState[e.id] = {
       component: e.component,
       caption: e.caption,
       state,
     };
+    if(refWp && refWp.getState){
+      const stateWp = refWp.getState();
+      widgetsState[e.id+'_wrapper'] = {
+        component: e.component,
+        caption: e.caption,
+        stateWp,
+      };
+    }
+
   });
 
   localStorage.setItem("dsState", dsState);
@@ -912,14 +924,21 @@ const loadLayout = async () => {
 
   const widgetsStateObj = JSON.parse(widgetsState);
 
+  let wrappers =[];
+
   Object.keys(widgetsStateObj).forEach((key) => {
     const e = widgetsStateObj[key];
-    customWidgets.value.push({
-      id: key,
-      component: e.component,
-      caption: e.caption,
-      // state: e.state,
-    });
+    if(key.includes('_wrapper')){
+      wrappers.push(key);
+    }else{
+      customWidgets.value.push({
+        id: key,
+        component: e.component,
+        caption: e.caption,
+        // state: e.state,
+      });
+    }
+
   });
   console.log(customWidgets.value);
 
@@ -935,6 +954,14 @@ const loadLayout = async () => {
     ref.setState(widgetsStateObj[e.id].state);
     console.log(ref);
   });
+  wrappers.forEach(key=>{
+    const e = widgetsStateObj[key];
+    const refArr = refs.ctx.$refs[key];
+    const ref = Array.isArray(refArr) ? refArr[0] : refArr;
+    console.log(e)
+    ref.setState(e.stateWp)
+  })
+
 };
 
 const openStoreList = () => {

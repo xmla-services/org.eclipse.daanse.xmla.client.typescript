@@ -40,7 +40,8 @@ const toPrev = () => {
 
 const getState = () => {
   return {
-    imgSrc: innerImgSrc.value,
+    images: images.value,
+    imageSettings:imageSettings.value
   };
 };
 
@@ -54,6 +55,7 @@ watch(
 const setState = (state) => {
   console.log(state)
   images.value = state.images;
+  imageSettings.value = state.imageSettings;
 };
 
 const initInterval = () => {
