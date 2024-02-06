@@ -114,7 +114,7 @@ defineExpose({
             </div>
             <div class="mb-2">
               <va-select
-                :options="['REST', 'XMLA']"
+                :options="['REST', 'XMLA','MQTT']"
                 v-model="datasource_type"
                 label="Datasource type"
               />
@@ -140,7 +140,7 @@ defineExpose({
             </div>
             <div>
               <va-select
-                :options="['REST', 'XMLA']"
+                :options="['REST', 'XMLA','MQTT']"
                 v-model="datasource_type"
                 label="Datasource type"
               />

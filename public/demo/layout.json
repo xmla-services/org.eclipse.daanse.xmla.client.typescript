@@ -1,1 +1,375 @@
-{"layout":{"d_1":{"x":0,"y":0,"width":400,"height":400,"z":3001},"d_2":{"x":410,"y":0,"width":400,"height":400,"z":3000},"d_3":{"x":1580,"y":912,"width":100,"height":40,"z":3000},"d_4":{"x":410,"y":410,"width":400,"height":400,"z":3000},"d_5":{"x":820,"y":0,"width":400,"height":400,"z":3000},"d_6":{"x":820,"y":410,"width":400,"height":400,"z":3002},"d_7":{"x":1230,"y":410,"width":200,"height":50,"z":3000},"id_1701957638142":{"x":80,"y":20,"width":313,"height":173,"z":3005},"id_1701957685120":{"x":1211,"y":60,"width":469,"height":114,"z":3005},"id_1701957694579":{"x":1360,"y":600,"width":320,"height":60,"z":3011},"id_1702548942319":{"x":140,"y":280,"width":320,"height":460,"z":3005},"id_1702549019606":{"x":560,"y":280,"width":320,"height":460,"z":3005},"id_1702549049943":{"x":960,"y":280,"width":320,"height":460,"z":3005},"id_1702549075326":{"x":1360,"y":280,"width":320,"height":460,"z":3005},"id_1702549133666":{"x":160,"y":680,"width":280,"height":60,"z":3007},"id_1702549217328":{"x":588,"y":667,"width":264,"height":60,"z":3008},"id_1702549282115":{"x":994,"y":680,"width":253,"height":60,"z":3009},"id_1702549371547":{"x":1391,"y":680,"width":260,"height":60,"z":3010},"id_1702549490993":{"x":140,"y":560,"width":320,"height":180,"z":3005},"id_1702549614474":{"x":560,"y":560,"width":320,"height":180,"z":3005},"id_1702549660341":{"x":960,"y":560,"width":320,"height":180,"z":3005},"id_1702549746927":{"x":1360,"y":560,"width":320,"height":180,"z":3005},"id_1702555479789":{"x":960,"y":600,"width":320,"height":60,"z":3005},"id_1702555517142":{"x":560,"y":601,"width":320,"height":59,"z":3005},"id_1702555581862":{"x":140,"y":600,"width":320,"height":60,"z":3005}},"storeState":{"c3db5c9b-dfe3-4278-b3c0-2e9329be6863":{"caption":"Test","id":"c3db5c9b-dfe3-4278-b3c0-2e9329be6863","requestTemplate":"/products/{pageNum}","events":[{"name":"Next page","action":"pageNum++"}],"datasourceIds":["8df91c2b-1db4-4bd3-9b13-22429d2c6249"],"params":{"pageNum":"3"}}},"dsState":{"8df91c2b-1db4-4bd3-9b13-22429d2c6249":{"id":"8df91c2b-1db4-4bd3-9b13-22429d2c6249","url":"https://dummyjson.com","caption":"Test","type":"REST"}},"widgetsState":{"id_1701957638142":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/logo.svg"}},"id_1701957685120":{"component":"TextWidget","caption":"Test","state":{"text":"Die Tucken der KI-Bild Generation","fontSize":"45","fontColor":"#888","textAlign":"right","fontWeight":"300"}},"id_1701957694579":{"component":"PlainTextWidget","caption":"Test","state":{"storeId":"c3db5c9b-dfe3-4278-b3c0-2e9329be6863","objectField":"price","fontSize":"50","fontColor":"#fff","textAlign":"center"}},"id_1702548942319":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/pic1.png"}},"id_1702549019606":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/pic2.png"}},"id_1702549049943":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/pic3.png"}},"id_1702549075326":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/pic4.png"}},"id_1702549133666":{"component":"TextWidget","caption":"Test","state":{"text":"Der KI generierten Frauen haben komische Augen","fontSize":"20","fontColor":"#fff","textAlign":"center"}},"id_1702549217328":{"component":"TextWidget","caption":"Test","state":{"text":"Der KI generierten Frauen haben 2 Rocke","fontSize":"20","fontColor":"#fff","textAlign":"center"}},"id_1702549282115":{"component":"TextWidget","caption":"Test","state":{"text":"Der generierten Fuse waren gebalit","fontSize":"20","fontColor":"#fff","textAlign":"center"}},"id_1702549371547":{"component":"TextWidget","caption":"Test","state":{"text":"Der generierten Sorgenfalten waren Finger","fontSize":"20","fontColor":"#fff","textAlign":"center"}},"id_1702549490993":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/bg.png"}},"id_1702549614474":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/bg.png"}},"id_1702549660341":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/bg.png"}},"id_1702549746927":{"component":"ImageWidget","caption":"Test","state":{"imgSrc":"/demo/bg.png"}},"id_1702555479789":{"component":"PlainTextWidget","caption":"Test","state":{"storeId":"c3db5c9b-dfe3-4278-b3c0-2e9329be6863","objectField":"discountPercentage","fontSize":"50","fontColor":"#fff","textAlign":"center","fontWeight":"normal"}},"id_1702555517142":{"component":"PlainTextWidget","caption":"Test","state":{"storeId":"c3db5c9b-dfe3-4278-b3c0-2e9329be6863","objectField":"stock","fontSize":"50","fontColor":"#fff","textAlign":"center","fontWeight":"normal"}},"id_1702555581862":{"component":"PlainTextWidget","caption":"Test","state":{"storeId":"c3db5c9b-dfe3-4278-b3c0-2e9329be6863","objectField":"rating","fontSize":"50","fontColor":"#fff","textAlign":"center","fontWeight":"normal"}}}}
+{
+  "layout": {
+    "d_1": {
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 400,
+      "z": 3001
+    },
+    "d_2": {
+      "x": 410,
+      "y": 0,
+      "width": 400,
+      "height": 400,
+      "z": 3000
+    },
+    "d_3": {
+      "x": 1580,
+      "y": 912,
+      "width": 100,
+      "height": 40,
+      "z": 3000
+    },
+    "d_4": {
+      "x": 410,
+      "y": 410,
+      "width": 400,
+      "height": 400,
+      "z": 3000
+    },
+    "d_5": {
+      "x": 820,
+      "y": 0,
+      "width": 400,
+      "height": 400,
+      "z": 3000
+    },
+    "d_6": {
+      "x": 820,
+      "y": 410,
+      "width": 400,
+      "height": 400,
+      "z": 3002
+    },
+    "d_7": {
+      "x": 1230,
+      "y": 410,
+      "width": 200,
+      "height": 50,
+      "z": 3000
+    },
+    "id_1701957638142": {
+      "x": 80,
+      "y": 20,
+      "width": 313,
+      "height": 173,
+      "z": 3005
+    },
+    "id_1701957685120": {
+      "x": 1211,
+      "y": 60,
+      "width": 469,
+      "height": 114,
+      "z": 3005
+    },
+    "id_1701957694579": {
+      "x": 1360,
+      "y": 600,
+      "width": 320,
+      "height": 60,
+      "z": 3011
+    },
+    "id_1702548942319": {
+      "x": 140,
+      "y": 280,
+      "width": 320,
+      "height": 460,
+      "z": 3005
+    },
+    "id_1702549019606": {
+      "x": 560,
+      "y": 280,
+      "width": 320,
+      "height": 460,
+      "z": 3005
+    },
+    "id_1702549049943": {
+      "x": 960,
+      "y": 280,
+      "width": 320,
+      "height": 460,
+      "z": 3005
+    },
+    "id_1702549075326": {
+      "x": 1360,
+      "y": 280,
+      "width": 320,
+      "height": 460,
+      "z": 3005
+    },
+    "id_1702549133666": {
+      "x": 160,
+      "y": 680,
+      "width": 280,
+      "height": 60,
+      "z": 3007
+    },
+    "id_1702549217328": {
+      "x": 588,
+      "y": 667,
+      "width": 264,
+      "height": 60,
+      "z": 3008
+    },
+    "id_1702549282115": {
+      "x": 994,
+      "y": 680,
+      "width": 253,
+      "height": 60,
+      "z": 3009
+    },
+    "id_1702549371547": {
+      "x": 1391,
+      "y": 680,
+      "width": 260,
+      "height": 60,
+      "z": 3010
+    },
+    "id_1702549490993": {
+      "x": 140,
+      "y": 560,
+      "width": 320,
+      "height": 180,
+      "z": 3005
+    },
+    "id_1702549614474": {
+      "x": 560,
+      "y": 560,
+      "width": 320,
+      "height": 180,
+      "z": 3005
+    },
+    "id_1702549660341": {
+      "x": 960,
+      "y": 560,
+      "width": 320,
+      "height": 180,
+      "z": 3005
+    },
+    "id_1702549746927": {
+      "x": 1360,
+      "y": 560,
+      "width": 320,
+      "height": 180,
+      "z": 3005
+    },
+    "id_1702555479789": {
+      "x": 960,
+      "y": 600,
+      "width": 320,
+      "height": 60,
+      "z": 3005
+    },
+    "id_1702555517142": {
+      "x": 560,
+      "y": 601,
+      "width": 320,
+      "height": 59,
+      "z": 3005
+    },
+    "id_1702555581862": {
+      "x": 140,
+      "y": 600,
+      "width": 320,
+      "height": 60,
+      "z": 3005
+    }
+  },
+  "storeState": {
+    "c3db5c9b-dfe3-4278-b3c0-2e9329be6863": {
+      "caption": "Test",
+      "id": "c3db5c9b-dfe3-4278-b3c0-2e9329be6863",
+      "requestTemplate": "/products/{pageNum}",
+      "events": [
+        {
+          "name": "Next page",
+          "action": "pageNum++"
+        }
+      ],
+      "datasourceIds": [
+        "8df91c2b-1db4-4bd3-9b13-22429d2c6249"
+      ],
+      "params": {
+        "pageNum": "3"
+      }
+    }
+  },
+  "dsState": {
+    "8df91c2b-1db4-4bd3-9b13-22429d2c6249": {
+      "id": "8df91c2b-1db4-4bd3-9b13-22429d2c6249",
+      "url": "https://dummyjson.com",
+      "caption": "Test",
+      "type": "REST"
+    }
+  },
+  "widgetsState": {
+    "id_1701957638142": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/logo.svg"}]
+      }
+    },
+    "id_1701957685120": {
+      "component": "TextWidget",
+      "caption": "Test",
+      "state": {
+        "text": "Die Tucken der KI-Bild Generation",
+        "fontSize": "45",
+        "fontColor": "#888",
+        "textAlign": "right",
+        "fontWeight": "300",
+        "backgroundColor": "#ccc"
+      }
+    },
+    "id_1701957694579": {
+      "component": "PlainTextWidget",
+      "caption": "Test",
+      "state": {
+        "storeId": "c3db5c9b-dfe3-4278-b3c0-2e9329be6863",
+        "objectField": "price",
+        "fontSize": "50",
+        "fontColor": "#fff",
+        "textAlign": "center"
+      }
+    },
+    "id_1702548942319": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/pic1.png"}]
+      }
+    },
+    "id_1702549019606": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/pic2.png"}]
+      }
+    },
+    "id_1702549049943": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{
+          "url":"/demo/pic3.png"}]
+      }
+    },
+    "id_1702549075326": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/pic4.png"}]
+      }
+    },
+    "id_1702549133666": {
+      "component": "TextWidget",
+      "caption": "Test",
+      "state": {
+        "text": "Der KI generierten Frauen haben komische Augen",
+        "fontSize": "20",
+        "fontColor": "#fff",
+        "textAlign": "center"
+      }
+    },
+    "id_1702549217328": {
+      "component": "TextWidget",
+      "caption": "Test",
+      "state": {
+        "text": "Der KI generierten Frauen haben 2 Rocke",
+        "fontSize": "20",
+        "fontColor": "#fff",
+        "textAlign": "center"
+      }
+    },
+    "id_1702549282115": {
+      "component": "TextWidget",
+      "caption": "Test",
+      "state": {
+        "text": "Der generierten Fuse waren gebalit",
+        "fontSize": "20",
+        "fontColor": "#fff",
+        "textAlign": "center"
+      }
+    },
+    "id_1702549371547": {
+      "component": "TextWidget",
+      "caption": "Test",
+      "state": {
+        "text": "Der generierten Sorgenfalten waren Finger",
+        "fontSize": "20",
+        "fontColor": "#fff",
+        "textAlign": "center"
+      }
+    },
+    "id_1702549490993": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/bg.png"}]
+      }
+    },
+    "id_1702549614474": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/bg.png"}]
+      }
+    },
+    "id_1702549660341": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [
+          {
+            "url": "/demo/bg.png"
+          }]
+
+      }
+    },
+    "id_1702549746927": {
+      "component": "ImageWidget",
+      "caption": "Test",
+      "state": {
+        "images": [{"url":"/demo/bg.png"}]
+      }
+    },
+    "id_1702555479789": {
+      "component": "PlainTextWidget",
+      "caption": "Test",
+      "state": {
+        "storeId": "c3db5c9b-dfe3-4278-b3c0-2e9329be6863",
+        "objectField": "discountPercentage",
+        "fontSize": "50",
+        "fontColor": "#fff",
+        "textAlign": "center",
+        "fontWeight": "normal"
+      }
+    },
+    "id_1702555517142": {
+      "component": "PlainTextWidget",
+      "caption": "Test",
+      "state": {
+        "storeId": "c3db5c9b-dfe3-4278-b3c0-2e9329be6863",
+        "objectField": "stock",
+        "fontSize": "50",
+        "fontColor": "#fff",
+        "textAlign": "center",
+        "fontWeight": "normal"
+      }
+    },
+    "id_1702555581862": {
+      "component": "PlainTextWidget",
+      "caption": "Test",
+      "state": {
+        "storeId": "c3db5c9b-dfe3-4278-b3c0-2e9329be6863",
+        "objectField": "rating",
+        "fontSize": "50",
+        "fontColor": "#fff",
+        "textAlign": "center",
+        "fontWeight": "normal"
+      }
+    }
+  }
+}

@@ -14,12 +14,20 @@ import { ref, watch } from "vue";
 import { v4 } from "uuid";
 import RESTDatasource from "@/dataSources/RestDatasource";
 import XmlaDatasource from "@/dataSources/XmlaDatasource";
+import MQTTDatasource from "@/dataSources/MqttDatasource";
+import {inject} from "vue";
+
+
+
 
 const availableDatasources = ref(
-  new Map<string, RESTDatasource | XmlaDatasource>(),
+  new Map<string, RESTDatasource | XmlaDatasource | MQTTDatasource>(),
 );
 
 export function useDatasourceManager() {
+  const EventBus = inject("customEventBus") as any;
+  console.log(EventBus)
+
   const initDatasource = (type: string, url: string, caption: string) => {
     const id = v4();
 
@@ -31,6 +39,12 @@ export function useDatasourceManager() {
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(id, undefined, caption);
+
+      availableDatasources.value.set(id, datasource);
+    }
+    if (type === "MQTT") {
+
+      const datasource = new MQTTDatasource(id, url, caption, EventBus);
 
       availableDatasources.value.set(id, datasource);
     }
@@ -54,6 +68,11 @@ export function useDatasourceManager() {
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(key, undefined, caption);
+
+      availableDatasources.value.set(key, datasource);
+    }
+    if (type === "MQTT") {
+      const datasource = new MQTTDatasource(key, url, caption,EventBus);
 
       availableDatasources.value.set(key, datasource);
     }
