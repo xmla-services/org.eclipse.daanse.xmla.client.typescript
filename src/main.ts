@@ -141,3 +141,4 @@ app.use(
 );
 
 app.mount("#app");
+export default app;

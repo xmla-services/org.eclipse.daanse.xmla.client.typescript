@@ -1,8 +1,17 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import {onMounted, ref, watch, inject, computed, isRef, nextTick, readonly} from "vue";
 import RepeatableSvgWidgetSettings from "./RepeatableSvgWidgetSettings.vue";
+import {useStoreManager} from "@/composables/storeManager";
+import {Store} from "@/stores/Widgets/Store";
 
 const settings = RepeatableSvgWidgetSettings;
+
+const EventBus = inject("customEventBus") as any;
+const storeManager = useStoreManager();
+const storeId = ref("");
+const data = ref(null as unknown);
+
+let store = null as unknown as Store;
 
 const props = defineProps({
   initialState: {
@@ -45,7 +54,7 @@ const props = defineProps({
 const { src, activeItemStyles, defaultItemStyles, repeations, progress } = props;
 
 const svgSource = ref(src || "");
-const innerActiveItemStyles = ref({ 
+const innerActiveItemStyles = ref({
   fill: activeItemStyles.fill || '#ff0000',
   stroke: activeItemStyles.stroke || '#FFFF00',
 });
@@ -54,7 +63,7 @@ const innerDefaultItemStyles = ref({
   stroke: defaultItemStyles.stroke || '#777777',
 });
 const innerRepeations = ref(repeations || 4);
-const innerProgress = ref(progress || 0.5);
+let innerProgress = ref(progress || 0.5);
 
 
 onMounted(async () => {
@@ -62,6 +71,7 @@ onMounted(async () => {
   const req = await fetch(props.src);
   const svgObject = await req.text();
   svgSource.value = svgObject;
+
 });
 
 defineExpose({
@@ -70,8 +80,71 @@ defineExpose({
   defaultItemStyles: innerDefaultItemStyles,
   progress: innerProgress,
   repeations: innerRepeations,
+  storeId,
   settings,
 });
+
+const getData = async () => {
+  if (!store) return;
+  updateFn();
+};
+
+watch(
+    () => props,
+    (newVal) => {
+      console.log('props_changed')
+      setState(newVal);
+      checkforDynamic(props);
+
+    },
+    { deep: true },
+);
+
+watch(storeId, (newVal, oldVal) => {
+  console.log("store changed", storeId);
+  store = storeManager.getStore(storeId.value);
+
+  console.log(oldVal, newVal);
+
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
+
+const updateFn = async () => {
+  data.value = await store?.getData();
+  console.log(data);
+};
+const checkforDynamic = (props)=>{
+  for (let prop in props){
+    console.log(prop);
+  }
+}
+watch(innerProgress,(newVal)=>{
+  const regex = /{(.*?)}/;
+  const parts = newVal.toString().match(regex);
+  console.log(newVal)
+  if (parts) {
+    console.log(data)
+    innerProgress = computed(()=> {
+      try {
+        return data.value[parts[1]]
+      } catch (e) {
+        return  0
+      }
+    });
+  }else {
+   /* if( readonly(innerProgress)){
+      innerProgress = ref(newVal);
+    }else{*/
+      innerProgress.value = newVal;
+
+    /*}
+    nextTick()
+*/
+  }
+})
 </script>
 
 <template>
@@ -92,7 +165,7 @@ defineExpose({
             x="0"
             y="0"
             style="fill: #adadad"
-            :width="100 * Number(innerRepeations) * innerProgress"  
+            :width="100 * Number(innerRepeations) * innerProgress"
             height="100"
           />
         </mask>

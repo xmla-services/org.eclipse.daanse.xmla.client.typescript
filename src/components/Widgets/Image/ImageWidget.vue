@@ -52,7 +52,8 @@ watch(
 );
 
 const setState = (state) => {
-  innerImgSrc.value = state.imgSrc;
+  console.log(state)
+  images.value = state.images;
 };
 
 const initInterval = () => {

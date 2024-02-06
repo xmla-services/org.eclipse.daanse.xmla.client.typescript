@@ -189,8 +189,13 @@ const getSelectedDatasources = (item) => {
                   class="type-input"
                   v-model="dslist[rowIndex].type"
                   @update:modelValue="updateDatasource(rowIndex)"
-                  :options="['REST', 'XMLA']"
-                />
+                  :options="['REST', 'XMLA','MQTT']"
+                >
+
+
+
+                </va-select>
+
               </template>
               <template #cell(url)="{ rowIndex }">
                 <va-input
@@ -211,10 +216,13 @@ const getSelectedDatasources = (item) => {
             >
             <template #cell(value)="{ rowIndex }">
                 <va-input
+                    id="ad"
                   class="url-input"
                   :model-value="getParams(item)[rowIndex].value"
                   @update:model-value="setParamValue(item, rowIndex, $event)"
-                ></va-input>
+
+                />
+
               </template>
             </va-data-table>
           </div>
@@ -306,6 +314,7 @@ const getSelectedDatasources = (item) => {
 
 .type-input {
   width: 80px;
+  z-index: 10000;
 }
 
 .url-input {
@@ -318,5 +327,8 @@ const getSelectedDatasources = (item) => {
 
 .event-action-input {
   width: 230px;
+}
+.va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper{
+  z-index:1000000!important;
 }
 </style>

@@ -30,6 +30,7 @@ export class Store {
     // };
 
     this.calculateParams();
+    this.registerForDataSourceEvents();
   }
 
   calculateParams() {
@@ -58,6 +59,7 @@ export class Store {
   setDatasources(datasourceIds) {
     this.datasourceIds = [...datasourceIds];
     this.eventBus.emit(`UPDATE:${this.id}`);
+    this.registerForDataSourceEvents();
   }
 
   async getData() {
@@ -130,6 +132,15 @@ export class Store {
         cb,
       });
     });
+  }
+
+  registerForDataSourceEvents(){
+    for(let id of this.datasourceIds){
+      this.eventBus.on(`UPDATE:${id}`,()=>{
+        console.log('updt');
+        this.eventBus.emit(`UPDATE:${this.id}`);
+      });
+    }
   }
 
   getState() {
