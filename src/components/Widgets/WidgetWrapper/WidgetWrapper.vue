@@ -55,6 +55,34 @@ const innerBorderColor = ref(props.borderColor);
 const innerBorderRadius = ref(props.borderRadius);
 const innerFullscreen = ref(props.fullscreen);
 
+
+const getState = () => ({
+  title: innerTitle.value,
+  backgroundColor: innerBackgroundColor.value,
+  titleColor: innerTitleColor.value,
+  titleFontSize: innerTitleFontSize.value,
+  borderSize: innerBorderSize.value,
+  borderColor: innerBorderColor.value,
+  borderRadius: innerBorderRadius.value,
+  fullscreen: innerFullscreen.value,
+
+});
+
+const setState = (state) => {
+  innerTitle.value = state.title;
+  innerBackgroundColor.value = state.backgroundColor;
+  innerTitleColor.value = state.titleColor;
+  innerTitleFontSize.value = state.titleFontSize;
+  innerBorderSize.value = state.borderSize;
+  innerBorderColor.value = state.borderColor;
+  innerBorderRadius.value = state.borderRadius;
+  innerFullscreen.value = state.fullscreen;
+
+  getData();
+};
+
+const getData=function(){
+}
 defineExpose({
   title: innerTitle,
   backgroundColor: innerBackgroundColor,
@@ -64,6 +92,8 @@ defineExpose({
   borderColor: innerBorderColor,
   borderRadius: innerBorderRadius,
   fullscreen: innerFullscreen,
+  getState,
+  setState
 });
 </script>
 
