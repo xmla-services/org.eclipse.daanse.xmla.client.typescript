@@ -53,7 +53,6 @@ watch(
 );
 
 const setState = (state) => {
-  console.log(state)
   images.value = state.images;
   imageSettings.value = state.imageSettings;
 };
