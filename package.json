@@ -50,7 +50,7 @@
     "@storybook/manager-api": "^7.6.13",
     "@storybook/test": "^7.6.3",
     "@storybook/theming": "^7.6.3",
-    "@storybook/vue3": "^7.6.3",
+    "@storybook/vue3": "^7.6.13",
     "@storybook/vue3-vite": "^7.6.3",
     "@tsconfig/node18": "^18.2.2",
     "@types/jsdom": "^21.1.5",
