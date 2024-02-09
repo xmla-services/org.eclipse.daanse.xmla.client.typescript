@@ -2806,16 +2806,16 @@
   resolved "https://registry.yarnpkg.com/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
   integrity sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==
 
-"@storybook/instrumenter@7.6.3":
-  version "7.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/instrumenter/-/instrumenter-7.6.3.tgz#471a41ece5169879368cde79fba4e7bc66c900c9"
-  integrity sha512-U1cbF0tewMQtKeLinQqUM5Mpcz1z5tsKhV9xAJKguvYVxllWvCA6cVxDM5fc66ws2mXpwFDcb82Kx05lMdmEoA==
+"@storybook/instrumenter@7.6.13":
+  version "7.6.13"
+  resolved "https://registry.yarnpkg.com/@storybook/instrumenter/-/instrumenter-7.6.13.tgz#2ce3be607a98a3addb3e993c53f1d9d1f305a78b"
+  integrity sha512-imGccCzorssHgn3aKn+BLSo7JF5EDOoX8DkcU6iSscynsWsJTMVqc4+dO2G187QKVXK4kJZdXqaMEfWNNgZipQ==
   dependencies:
-    "@storybook/channels" "7.6.3"
-    "@storybook/client-logger" "7.6.3"
-    "@storybook/core-events" "7.6.3"
+    "@storybook/channels" "7.6.13"
+    "@storybook/client-logger" "7.6.13"
+    "@storybook/core-events" "7.6.13"
     "@storybook/global" "^5.0.0"
-    "@storybook/preview-api" "7.6.3"
+    "@storybook/preview-api" "7.6.13"
     "@vitest/utils" "^0.34.6"
     util "^0.12.4"
 
@@ -2967,15 +2967,15 @@
     fs-extra "^11.1.0"
     read-pkg-up "^7.0.1"
 
-"@storybook/test@^7.6.3":
-  version "7.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/test/-/test-7.6.3.tgz#65fb669cb6ee2c4d453e6fabdeabffe80a6ca067"
-  integrity sha512-W7rwSign2kM4Oq5RaifSmd9WSKv//QWLQpCpbdn/71hqNmE/SWQdyMLykEZY9RUTfpP6vFHOnWziXhID6Xu3Vg==
+"@storybook/test@^7.6.13":
+  version "7.6.13"
+  resolved "https://registry.yarnpkg.com/@storybook/test/-/test-7.6.13.tgz#268cd1023b94ab4f02a07bb288a228f4ddaf784f"
+  integrity sha512-us/u3knKx/WeO9UbwnP77x6S/Yf37AUG83VU7HOEPm5rL/sUO9NAkpLFbDCEPr7ctPT00ucxJISDjTWuScnkmA==
   dependencies:
-    "@storybook/client-logger" "7.6.3"
-    "@storybook/core-events" "7.6.3"
-    "@storybook/instrumenter" "7.6.3"
-    "@storybook/preview-api" "7.6.3"
+    "@storybook/client-logger" "7.6.13"
+    "@storybook/core-events" "7.6.13"
+    "@storybook/instrumenter" "7.6.13"
+    "@storybook/preview-api" "7.6.13"
     "@testing-library/dom" "^9.3.1"
     "@testing-library/jest-dom" "^6.1.3"
     "@testing-library/user-event" "14.3.0"
