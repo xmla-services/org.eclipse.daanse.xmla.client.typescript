@@ -2,10 +2,15 @@
 import StoreList from "@/components/Sidebar/StoreList.vue";
 import SidebarControl from "@/components/Sidebar/SidebarControl.vue";
 import SidebarWidget from "@/components/Sidebar/SidebarWidget.vue";
+import SidebarAppSettings from "./SidebarAppSettings.vue";
 
 const props = defineProps(["modelValue", "settingsSection"]);
 
-defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "updateBackgroundColor"]);
+
+const updateBackgroundColor = (color) => {
+ emit('updateBackgroundColor', color);
+};
 </script>
 
 <template>
@@ -26,6 +31,11 @@ defineEmits(["update:modelValue"]);
             :component="props.settingsSection.component"
             :wrapper="props.settingsSection.wrapper"
             :key="props.settingsSection.id"
+          />
+        </template>
+        <template v-if="props.settingsSection?.type === 'App'">
+          <SidebarAppSettings
+            @updateBackgroundColor="updateBackgroundColor"
           />
         </template>
       </div>
