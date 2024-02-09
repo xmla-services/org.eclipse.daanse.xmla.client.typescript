@@ -2985,7 +2985,7 @@
     chai "^4.3.7"
     util "^0.12.4"
 
-"@storybook/theming@7.6.13", "@storybook/theming@^7.6.3":
+"@storybook/theming@7.6.13", "@storybook/theming@^7.6.13":
   version "7.6.13"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-7.6.13.tgz#9026cf418101f7532da79e3684ac444e5daa6f2f"
   integrity sha512-Dj+zVF2CVdTrynjSW3Iydajc8EKCQCYNYA3bpkid0LltAIe8mLTkuTBYiI5CgviWmQc55iBrNpF2MA5AzW5Q3Q==
