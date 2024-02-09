@@ -34,13 +34,22 @@
           Add SVG
         </va-button>
         <va-button preset="primary" class="ml-2" @click="addRepeatableSvgWidget">
-          Add Repeatable SVG
+          Add repeatable SVG
+        </va-button>
+        <va-button preset="primary" class="ml-2" @click="addProgressWidget">
+          Add progress
+        </va-button>
+        <va-button preset="primary" class="ml-2" @click="addVideoWidget">
+          Add video
         </va-button>
         <va-button preset="primary" class="ml-2" @click="loadDemo">
           Load demo
         </va-button>
         <va-button preset="primary" class="ml-2" @click="addPivotTable">
           Add pivot table
+        </va-button>
+        <va-button preset="primary" class="ml-2" @click="openAppSettings">
+          Open App settings
         </va-button>
       </div>
       <div class="main-section">
@@ -544,6 +553,7 @@
     <SidebarSettings
       v-model="showSidebar"
       :settingsSection="settingsSection"
+      @updateBackgroundColor="updateBackgroundColor"
       class="sidebar"
     ></SidebarSettings>
   </div>
@@ -571,6 +581,8 @@ import TextWidget from "@/components/Widgets/Text/TextWidget.vue";
 import ListWidget from "@/components/Widgets/List/ListWidget.vue";
 import SvgWidget from "@/components/Widgets/Svg/SvgWidget.vue";
 import RepeatableSvgWidget from "@/components/Widgets/RepeatableSvg/RepeatableSvgWidget.vue";
+import ProgressWidget from "@/components/Widgets/Progress/ProgressWidget.vue";
+import VideoWidget from "@/components/Widgets/Video/VideoWidget.vue";
 import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
@@ -618,7 +630,7 @@ const showSidebar = ref(false);
 const settingsSection = ref(null as any);
 const test = ref(null);
 const test1 = ref(null);
-
+const settingsBackground = ref('#fefefe');
 const EventBus = inject("customEventBus") as any;
 
 const enabledWidgets = {
@@ -628,6 +640,8 @@ const enabledWidgets = {
   PivotTableWidget,
   SvgWidget,
   RepeatableSvgWidget,
+  ProgressWidget,
+  VideoWidget,
 };
 
 let layout = {
@@ -947,6 +961,15 @@ const openStoreList = () => {
   showSidebar.value = true;
 };
 
+const openAppSettings = () => {
+  settingsSection.value = { type: "App" };
+  showSidebar.value = true;
+};
+
+const updateBackgroundColor = (newColor) => {
+  settingsBackground.value = newColor;
+};
+
 const openSettings = (id, wrapperId, type = "Control") => {
   const refArr = refs.ctx.$refs[id];
   const ref = Array.isArray(refArr) ? refArr[0] : refArr;
@@ -1057,6 +1080,40 @@ const addRepeatableSvgWidget = () => {
   customWidgets.value.push({
     id: id,
     component: "RepeatableSvgWidget",
+    caption: "Test",
+  });
+};
+
+const addProgressWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 200,
+    height: 200,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "ProgressWidget",
+    caption: "Test",
+  });
+};
+
+const addVideoWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 300,
+    height: 200,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "VideoWidget",
     caption: "Test",
   });
 };
@@ -1410,6 +1467,7 @@ body.no-overflow[data-v-059e0ffc] {
   flex-grow: 1;
   padding-left: 65px;
   gap: 1rem;
+  background: v-bind(settingsBackground);
 }
 
 .main-section {

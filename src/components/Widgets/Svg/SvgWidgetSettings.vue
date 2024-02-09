@@ -8,7 +8,7 @@ const opened = ref({
 });
 
 const fields = ref([{className: '', fill: '', stroke: '', strokeWidth: ''}]);
-const addItmes = () => {
+const addItems = () => {
   return fields.value.push({
     className: '',
     fill: '',
@@ -40,7 +40,7 @@ watch(
       <va-input v-model="props.component.src" label="SVG" />
       <va-button
         class="add-button"
-        @click="addItmes"
+        @click="addItems"
       >
         Add items
       </va-button>
