@@ -60,26 +60,43 @@ export class Store {
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
-  async getData() {
+  async getData(body) {
     let requestTemplate = this.requestTemplate;
 
     const datasource = this.datasourceManager.getDatasource(
       this.datasourceIds[0],
     );
 
-    const paramsList = Object.keys(this.params);
-    paramsList.forEach((e) => {
-      console.log(e);
-      requestTemplate = requestTemplate.replace(
-        `{${e}}`,
-        this.runtimeParams[e],
-      );
-    });
+    console.log(datasource);
 
-    const json = await datasource?.getData(requestTemplate);
+    if (datasource.type === "REST") {
+      const paramsList = Object.keys(this.params);
 
-    this.data = json;
-    return json;
+      paramsList.forEach((e) => {
+        console.log(e);
+        requestTemplate = requestTemplate.replace(
+          `{${e}}`,
+          this.runtimeParams[e],
+        );
+      });
+
+      const json = await datasource?.getData(requestTemplate);
+
+      this.data = json;
+      return json;
+    } else if (datasource.type === "XMLA") {
+      //if (body) {
+        console.log(body);
+        const responce = await datasource.getData(body);
+        return responce;
+      //}
+    }
+
+    return null;
+  }
+
+  getDatasource() {
+    return this.datasourceManager.getDatasource(this.datasourceIds[0]);
   }
 
   setOptions({ caption = "", requestTemplate = "" }) {

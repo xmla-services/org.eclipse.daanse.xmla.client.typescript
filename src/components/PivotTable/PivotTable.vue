@@ -11,7 +11,7 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { findMaxinArrayByField, optionalArrayToArray } from "@/utils/helpers";
-import { onMounted, provide, ref, watch, type Ref, h } from "vue";
+import { onMounted, provide, ref, watch, type Ref } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -48,7 +48,7 @@ export default {
     const rowsStyles = ref([...pivotTableStore.state.styles.rows] as any[]);
 
     const eventBus = new TinyEmitter();
-    provide("eventBus", eventBus);
+    provide("pivotTableEventBus", eventBus);
 
     pivotTableStore.state.inited = true;
 

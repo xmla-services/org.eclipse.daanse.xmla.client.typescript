@@ -1396,7 +1396,7 @@ body.no-overflow[data-v-059e0ffc] {
 }
 
 .va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper {
-  z-index: 20000000;
+  z-index: 20000000 !important;
 }
 </style>
 <style scoped lang="scss">

@@ -1,8 +1,12 @@
 import { XMLAApi } from "@/api/xml";
 import { createClientAsync } from "@/XMLAClient";
+// import { usePivotTableStore } from "./PivotTable";
+// import { findIndex } from "lodash";
+// import { v4 } from "uuid";
+import { useMetadataStorage } from "@/composables/metadataStorage";
 // import { createClientAsync, type XmlaClient } from ;
 
-export default class RESTDatasource {
+export default class XMLADatasource {
   public url = "";
   public id = null as unknown as string;
   public caption = null;
@@ -17,7 +21,7 @@ export default class RESTDatasource {
 
   constructor(
     id,
-    url = "https://datacube-stage.nomad-dmz.jena.de/cube/xmla",
+    url = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
     caption,
   ) {
     this.id = id;
@@ -40,6 +44,41 @@ export default class RESTDatasource {
     const mdxResponce = await this.api?.getMDX(mdx);
     return mdxResponce;
   }
+
+  getApi() {
+    return this.api;
+  }
+
+  async openCube(catalogName: string, cube: string) {
+    const metadataStorage = useMetadataStorage();
+    await metadataStorage.initMetadataStorage(this.api, catalogName, cube);
+
+    // const pivotTableStore = usePivotTableStore();
+    // pivotTableStore.fetchPivotTableData();
+
+    // this.removeLoadingState(loadingId);
+  }
+
+  // setLoadingState() {
+  //   const uid = "id" + v4();
+  //   this.loadingUids.push(uid);
+  //   return uid;
+  // }
+
+  // removeLoadingState(loadingId) {
+  //   const loadingIdIndex = findIndex(loadingId);
+  //   if (loadingIdIndex >= 0) {
+  //     this.loadingUids.splice(loadingIdIndex, 1);
+  //   }
+  // }
+
+  // switchViewOption(option:ViewOptions){
+  //   this.viewOption = option;
+  // }
+
+  // switchOptional(selection:OptionalSelects){
+  //   this.optionalSelect = selection;
+  // }
 
   getState() {
     return {

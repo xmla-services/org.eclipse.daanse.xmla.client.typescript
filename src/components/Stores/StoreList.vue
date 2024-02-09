@@ -306,6 +306,7 @@ const getSelectedDatasources = (item) => {
 
 .type-input {
   width: 80px;
+  z-index: 1000000;
 }
 
 .url-input {

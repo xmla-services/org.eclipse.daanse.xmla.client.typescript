@@ -23,7 +23,7 @@ const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const MDDISPINFO_CHILD_COUNT = 65535;
 
 const props = defineProps(["rows", "rowsStyles", "totalContentSize"]);
-const eventBus = inject("eventBus") as TinyEmitter;
+const eventBus = inject("pivotTableEventBus") as TinyEmitter;
 const setParentStylesValue = inject("setRowsStyles") as (
   index: number,
   styles: number

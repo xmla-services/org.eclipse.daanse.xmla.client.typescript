@@ -28,7 +28,7 @@ const props = defineProps([
   "totalContentSize",
   "leftPadding",
 ]);
-const eventBus = inject("eventBus") as TinyEmitter;
+const eventBus = inject("pivotTableEventBus") as TinyEmitter;
 const setParentStylesValue = inject("setColumnsStyles") as (
   index: number,
   styles: number
