@@ -4301,12 +4301,12 @@ axe-html-reporter@^2.2.3:
     mustache "^4.0.1"
     rimraf "^3.0.2"
 
-axios@^1.6.0, axios@^1.6.2:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.2.tgz#de67d42c755b571d3e698df1b6504cde9b0ee9f2"
-  integrity sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==
+axios@^1.6.2, axios@^1.6.5:
+  version "1.6.7"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.7.tgz#7b48c2e27c96f9c68a2f8f31e2ab19f59b06b0a7"
+  integrity sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==
   dependencies:
-    follow-redirects "^1.15.0"
+    follow-redirects "^1.15.4"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -4751,13 +4751,13 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-chromedriver@119.0.1:
-  version "119.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-119.0.1.tgz#064f3650790ccea055e9bfd95c600f5ea60295e9"
-  integrity sha512-lpCFFLaXPpvElTaUOWKdP74pFb/sJhWtWqMjn7Ju1YriWn8dT5JBk84BGXMPvZQs70WfCYWecxdMmwfIu1Mupg==
+chromedriver@121.0.0:
+  version "121.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-121.0.0.tgz#f8d11dce8e5ce4b6ad75e2b84eed17a0eecabfb9"
+  integrity sha512-ZIKEdZrQAfuzT/RRofjl8/EZR99ghbdBXNTOcgJMKGP6N/UL6lHUX4n6ONWBV18pDvDFfQJ0x58h5AdOaXIOMw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.6.0"
+    axios "^1.6.5"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
     https-proxy-agent "^5.0.1"
@@ -6394,7 +6394,7 @@ flow-parser@0.*:
   resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.223.2.tgz#035e05f41bc59e35ae7281df3d726dd3d51adc13"
   integrity sha512-K68f4BNDmz+fC2aPi/DnckpNQbJvlN10srj2dUDrmUpyVCg48MPOyPMIrxwYPBRO+DtwSTYMF4wXaK3lRrDTfQ==
 
-follow-redirects@^1.15.0:
+follow-redirects@^1.15.4:
   version "1.15.5"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.5.tgz#54d4d6d062c0fa7d9d17feb008461550e3ba8020"
   integrity sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==
