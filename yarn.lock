@@ -3455,10 +3455,10 @@
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-1.3.5.tgz#1ef302e01cf7d2b5a0fa526790c9123bf1d06690"
   integrity sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==
 
-"@types/nightwatch@^2.3.23", "@types/nightwatch@^2.3.28":
-  version "2.3.28"
-  resolved "https://registry.yarnpkg.com/@types/nightwatch/-/nightwatch-2.3.28.tgz#a0266e9cd655f15eb9544e40738e72f4a6525fb0"
-  integrity sha512-/H6B/HQwdwbVAJQpcYD7S3gzOLK23f7fokoXHycoDZOKzzup4qqnib42zEF5hftEtSi040+Yvk/ceEd1EyLucw==
+"@types/nightwatch@^2.3.23", "@types/nightwatch@^2.3.30":
+  version "2.3.30"
+  resolved "https://registry.yarnpkg.com/@types/nightwatch/-/nightwatch-2.3.30.tgz#bb342bf21bc6cd0a7134681523ba42eeefe73c4d"
+  integrity sha512-TiVGKR9mORwx0nN3ylonXp2IobpQoZxwV63IjABYkxsEpNauHL8GU9kmceEThjqDUigKaeh6aPOqepwC4bwCfA==
   dependencies:
     "@types/chai" "*"
     "@types/selenium-webdriver" "*"
