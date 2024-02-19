@@ -57,7 +57,9 @@ import {
   VaListItemLabel,
   VaRadio,
   VaCollapse,
-  VaColorInput
+  VaColorInput,
+  VaCounter,
+    VaSlider
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -127,7 +129,9 @@ app.use(
       VaListItemLabel,
       VaRadio,
       VaCollapse,
-      VaColorInput
+      VaColorInput,
+      VaCounter,
+      VaSlider
     },
     config: {
       colors: {
