@@ -18,6 +18,7 @@ export class Store {
   public events = [] as Array<{ name: string; action: string }>;
   public initedEvents = [] as Array<{ name: string; cb: Function }>;
   private runtimeParams = {} as any;
+  public type = "REST";
 
   constructor(id, caption, eventBus: EventBus) {
     this.id = id;

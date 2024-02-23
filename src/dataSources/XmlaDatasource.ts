@@ -1,10 +1,6 @@
 import { XMLAApi } from "@/api/xml";
 import { createClientAsync } from "@/XMLAClient";
-// import { usePivotTableStore } from "./PivotTable";
-// import { findIndex } from "lodash";
-// import { v4 } from "uuid";
-import { useMetadataStorage } from "@/composables/metadataStorage";
-// import { createClientAsync, type XmlaClient } from ;
+import { MetadataStore } from "./Storage/MetadataStore";
 
 export default class XMLADatasource {
   public url = "";
@@ -12,12 +8,9 @@ export default class XMLADatasource {
   public caption = null;
   public type = "XMLA";
   public client: any;
+  public metadataStore: MetadataStore | null = null;
 
   private api = <XMLAApi | null>null;
-  private tmpMDX = `SELECT
-  Hierarchize(AddCalculatedMembers({[Geschlecht.Geschlecht (m/w/d)].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-  Hierarchize(AddCalculatedMembers({[Jahr].[Jahr].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
-  FROM [Bevölkerung] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
 
   constructor(
     id,
@@ -27,6 +20,7 @@ export default class XMLADatasource {
     this.id = id;
     this.url = url;
     this.caption = caption;
+
     const initApi = async () => {
       this.client = await createClientAsync("def/xmla.wsdl");
 
@@ -39,7 +33,7 @@ export default class XMLADatasource {
     initApi();
   }
 
-  async getData(mdx = this.tmpMDX) {
+  async getData(mdx) {
     console.log(mdx);
     const mdxResponce = await this.api?.getMDX(mdx);
     return mdxResponce;
@@ -50,35 +44,32 @@ export default class XMLADatasource {
   }
 
   async openCube(catalogName: string, cube: string) {
-    const metadataStorage = useMetadataStorage();
-    await metadataStorage.initMetadataStorage(this.api, catalogName, cube);
+    if (!this.api) throw new Error("API is not initialized");
 
-    // const pivotTableStore = usePivotTableStore();
-    // pivotTableStore.fetchPivotTableData();
-
-    // this.removeLoadingState(loadingId);
+    const metadataStore = new MetadataStore(this.api);
+    await metadataStore.loadMetadata(catalogName, cube);
+    this.metadataStore = metadataStore;
   }
 
-  // setLoadingState() {
-  //   const uid = "id" + v4();
-  //   this.loadingUids.push(uid);
-  //   return uid;
-  // }
+  async getHierarchies() {
+    return this.metadataStore?.getHierarchies();
+  }
 
-  // removeLoadingState(loadingId) {
-  //   const loadingIdIndex = findIndex(loadingId);
-  //   if (loadingIdIndex >= 0) {
-  //     this.loadingUids.splice(loadingIdIndex, 1);
-  //   }
-  // }
+  async getMeasures() {
+    return this.metadataStore?.getMeasures();
+  }
 
-  // switchViewOption(option:ViewOptions){
-  //   this.viewOption = option;
-  // }
+  public async getCatalogs() {
+    if (!this.api) throw new Error("API is not initialized");
 
-  // switchOptional(selection:OptionalSelects){
-  //   this.optionalSelect = selection;
-  // }
+    return await this.api.getCatalogs();
+  }
+
+  public async getCubes(catalogName: string) {
+    if (!this.api) throw new Error("API is not initialized");
+
+    return await this.api.getCubes(catalogName);
+  }
 
   getState() {
     return {
