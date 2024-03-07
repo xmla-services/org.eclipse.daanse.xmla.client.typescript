@@ -59,6 +59,7 @@ import {
   VaCollapse,
   VaColorInput,
   VaTextarea,
+  VaSlider,
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -130,6 +131,7 @@ app.use(
       VaCollapse,
       VaColorInput,
       VaTextarea,
+      VaSlider,
     },
     config: {
       colors: {
