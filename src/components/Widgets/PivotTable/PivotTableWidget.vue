@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import PivotTableWidgetSettings from "./PivotTableWidgetSettings.vue";
 import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import { findMaxinArrayByField, optionalArrayToArray } from "@/utils/helpers";
-import { provide, ref, watch, type Ref, computed } from "vue";
+import { optionalArrayToArray } from "@/utils/helpers";
+import { provide, ref, watch, type Ref, computed, inject } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import { useElementSize } from "@vueuse/core";
 import { debounce } from "lodash";
@@ -13,6 +12,7 @@ import ColumnsArea from "../../PivotTable/Areas/ColumnsArea.vue";
 import CellsArea from "../../PivotTable/Areas/CellsArea.vue";
 // import DrillthroughModal from "../../Modals/DrillthroughModal.vue";
 import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
+import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -20,6 +20,8 @@ const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const inited = ref(false);
 const storeManager = useStoreManager();
 const settings = PivotTableWidgetSettings;
+
+const EventBus = inject("customEventBus") as any;
 
 const storeId = ref("");
 
@@ -58,9 +60,15 @@ const updateFn = async () => {
 };
 
 const getData = async () => {
-  if (!storeId.value || !cube.value || !catalog.value) return;
   updateFn();
 };
+
+watch(storeId, (newVal, oldVal) => {
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
 
 defineExpose({
   settings,
@@ -115,17 +123,17 @@ const setColumnsStyles = (i: number, value: number) => {
 provide("setRowsStyles", setRowsStyles);
 provide("setColumnsStyles", setColumnsStyles);
 
-provide("drilldown", () => {
-  console.log("drilldown");
+provide("drilldown", (value, area) => {
+  EventBus.emit(`DRILLDOWN:${storeId.value}`, { value, area });
 });
-provide("drillup", () => {
-  console.log("drillup");
+provide("drillup", (value, area) => {
+  EventBus.emit(`DRILLUP:${storeId.value}`, { value, area });
 });
-provide("expand", () => {
-  console.log("expand");
+provide("expand", (value, area) => {
+  EventBus.emit(`EXPAND:${storeId.value}`, { value, area });
 });
-provide("collapse", () => {
-  console.log("collapse");
+provide("collapse", (value, area) => {
+  EventBus.emit(`COLLAPSE:${storeId.value}`, { value, area });
 });
 
 const parseCells = (cells: any[], columns: any[], rows: any[]) => {
@@ -201,11 +209,9 @@ const totalContentSize = computed(() => {
 });
 
 const getPivotTableData = debounce(async () => {
-  const store = storeManager.getStore(storeId.value) as Store;
-  const ds = store.getDatasource();
-  const api = ds.getApi();
+  const store = storeManager.getStore(storeId.value) as XMLAStore;
 
-  const mdxResponce = await api.getMDX(mdx.value);
+  const mdxResponce = await store.getData();
   console.log(mdxResponce);
   // const properties = (await metadataStorage.getMetadataStorage()).properties;
   // console.log(properties);
@@ -414,6 +420,7 @@ const getPivotTableData = debounce(async () => {
       @mousemove="onResize"
       @mouseup="onStopResize"
       @mouseleave="onStopResize"
+      @contextmenu.stop.prevent=""
     >
       <div class="placeholder">
         <div class="bar">
@@ -436,6 +443,7 @@ const getPivotTableData = debounce(async () => {
           :columns="[...propertiesCols, ...columns]"
           :totalContentSize="totalContentSize"
           :leftPadding="rowsWidth"
+          :storeId="storeId"
         ></ColumnsArea>
         <div class="d-flex flex-row overflow-hidden vertical-scroll">
           <RowsArea
@@ -443,6 +451,7 @@ const getPivotTableData = debounce(async () => {
             :rows="[...propertiesRows, ...rows]"
             :rowsStyles="rowsStyles"
             :totalContentSize="totalContentSize"
+            :storeId="storeId"
           ></RowsArea>
           <CellsArea
             :rowsStyles="rowsStyles"

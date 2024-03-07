@@ -40,7 +40,7 @@ export function useStoreManager() {
     return id;
   };
 
-  const getStore = (key): Store => {
+  const getStore = (key): Store | XMLAStore => {
     const store = availableStores.value.get(key);
     if (store) {
       return store;

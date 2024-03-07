@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, nextTick } from "vue";
 
 const storeManager = useStoreManager();
 const dslist = ref([]);
@@ -116,6 +116,7 @@ const getCubes = async () => {
 
 const getMetadata = async () => {
   const selectedDatasource = getSelectedDatasources(props.item)[0];
+  selectedDatasource.setCube(selectedCube.value.CUBE_NAME);
   await selectedDatasource.openCube(
     selectedCatalog.value.CATALOG_NAME,
     selectedCube.value.CUBE_NAME,
@@ -135,7 +136,7 @@ const setRowHierarchy = async (value) => {
 const setColHierarchy = async (value) => {
   const store = storeManager.getStore(props.item.id);
   store.setOptions({
-    col: value,
+    column: value,
   });
 };
 
@@ -144,6 +145,9 @@ const setMeasure = async (value) => {
   store.setOptions({
     measure: value,
   });
+  await nextTick();
+  console.log(value);
+  await store.getData();
 };
 </script>
 

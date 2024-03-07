@@ -8,6 +8,7 @@ export default class XMLADatasource {
   public caption = null;
   public type = "XMLA";
   public client: any;
+  public cube: string | null = null;
   public metadataStore: MetadataStore | null = null;
 
   private api = <XMLAApi | null>null;
@@ -20,6 +21,7 @@ export default class XMLADatasource {
     this.id = id;
     this.url = url;
     this.caption = caption;
+    this.cube = null;
 
     const initApi = async () => {
       this.client = await createClientAsync("def/xmla.wsdl");
@@ -69,6 +71,24 @@ export default class XMLADatasource {
     if (!this.api) throw new Error("API is not initialized");
 
     return await this.api.getCubes(catalogName);
+  }
+
+  public async setCube(cubeName: string) {
+    this.cube = cubeName;
+  }
+
+  public getProperties() {
+    return this.metadataStore?.getProperties();
+  }
+
+  public getLevels() {
+    return this.metadataStore?.getLevels();
+  }
+
+  public async getMember(parentLevel, parentName) {
+    if (!this.api) throw new Error("API is not initialized");
+
+    return await this.api?.getMember(parentLevel, parentName);
   }
 
   getState() {

@@ -97,4 +97,12 @@ export class MetadataStore {
   public getMeasures() {
     return this.storage.measures;
   }
+
+  public getProperties() {
+    return this.storage.properties;
+  }
+
+  public getLevels() {
+    return this.storage.levels;
+  }
 }

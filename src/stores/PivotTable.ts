@@ -68,6 +68,7 @@ export const usePivotTableStore = defineStore("PivotTable", () => {
       pivotTableSettings,
       metadata.properties,
       filters,
+      null as any,
     );
 
     mdx.value = mdxRequest;
