@@ -5,7 +5,20 @@
       class="app-layout-container bg grey padd"
       :class="{ editDisabled: !editEnabled }"
     >
-      <div>
+      <div class="widgets-select">
+        <va-select 
+          v-model="selectedAction"
+          :options="widgetOptions"
+          label="widgets"
+        />
+        <va-button 
+          class="add-widget-btn"
+          @click="addSelectedWidget"
+        >
+          Add Widget
+        </va-button>
+      </div>
+      <div class="buttons-list">
         <va-button preset="primary" class="ml-2" @click="toggleEdit">
           Toggle edit
         </va-button>
@@ -17,30 +30,6 @@
         </va-button>
         <va-button preset="primary" class="ml-2" @click="openStoreList">
           Open Store List
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addPlainTextWidget">
-          Add test component
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addPlainListWidget">
-          Add test list component
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addImageWidget">
-          Add image
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addTextWidget">
-          Add text
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addSvgWidget">
-          Add SVG
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addRepeatableSvgWidget">
-          Add repeatable SVG
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addProgressWidget">
-          Add progress
-        </va-button>
-        <va-button preset="primary" class="ml-2" @click="addVideoWidget">
-          Add video
         </va-button>
         <va-button preset="primary" class="ml-2" @click="loadDemo">
           Load demo
@@ -579,6 +568,8 @@ import SvgWidget from "@/components/Widgets/Svg/SvgWidget.vue";
 import RepeatableSvgWidget from "@/components/Widgets/RepeatableSvg/RepeatableSvgWidget.vue";
 import ProgressWidget from "@/components/Widgets/Progress/ProgressWidget.vue";
 import VideoWidget from "@/components/Widgets/Video/VideoWidget.vue";
+import IconWidget from "@/components/Widgets/Icon/IconWidget.vue";
+import RichTextWidget from "@/components/Widgets/RichText/RichTextWidget.vue";
 import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
@@ -628,6 +619,7 @@ const test = ref(null);
 const test1 = ref(null);
 const settingsBackground = ref('#fefefe');
 const EventBus = inject("customEventBus") as any;
+const selectedAction = ref('');
 
 const enabledWidgets = {
   ImageWidget,
@@ -637,6 +629,58 @@ const enabledWidgets = {
   RepeatableSvgWidget,
   ProgressWidget,
   VideoWidget,
+  IconWidget,
+  RichTextWidget,
+};
+
+const widgetOptions = [
+  'Plain Text Widget' ,
+  'Plain List Widget' ,
+  'Image Widget',
+  'Text Widget',
+  'Svg Widget',
+  'Repeatable Svg Widget',
+  'Progress Widget',
+  'Video Widget',
+  'Icon Widget',
+  'Rich Text Widget',
+];
+
+const addSelectedWidget = () => {
+  switch (selectedAction.value) {
+    case 'Plain Text Widget':
+      addPlainTextWidget();
+      break;
+    case 'Plain List Widget':
+      addPlainListWidget();
+      break;
+    case 'Image Widget':
+      addImageWidget();
+      break;
+    case 'Text Widget':
+      addTextWidget();
+      break;
+    case 'Svg Widget':
+      addSvgWidget();
+      break;
+    case 'Repeatable Svg Widget':
+      addRepeatableSvgWidget();
+      break;
+    case 'Progress Widget':
+      addProgressWidget();
+      break;
+    case 'Video Widget':
+      addVideoWidget();
+      break;
+    case 'Icon Widget':
+      addIconWidget();
+      break;
+    case 'Rich Text Widget':
+      addRichTextWidget();
+      break;
+    default:
+      break;
+  }
 };
 
 let layout = {
@@ -1096,6 +1140,40 @@ const addVideoWidget = () => {
     caption: "Test",
   });
 };
+
+const addIconWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 150,
+    height: 150,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "IconWidget",
+    caption: "Test",
+  });
+};
+
+const addRichTextWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 0,
+    y: 700,
+    width: 300,
+    height: 200,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "RichTextWidget",
+    caption: "Test",
+  });
+};
 </script>
 
 <style>
@@ -1449,12 +1527,31 @@ body.no-overflow[data-v-059e0ffc] {
   background: v-bind(settingsBackground);
 }
 
+.buttons-list {
+  align-self: flex-end;
+  order: 3;
+}
+
+.widgets-select {
+  display: flex;
+  align-self: flex-end;
+}
+
+.add-widget-btn {
+  align-self: self-end;
+  margin-left: 10px;
+  height: 36px;
+}
+
 .main-section {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
   gap: 1rem;
   overflow: auto;
+  -webkit-box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
+  -moz-box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
+  box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
 }
 
 .dashboard-container {
@@ -1514,5 +1611,8 @@ body.no-overflow[data-v-059e0ffc] {
 
 .sidebar {
   z-index: 1000000;
+  -webkit-box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
+  -moz-box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
+  box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
 }
 </style>

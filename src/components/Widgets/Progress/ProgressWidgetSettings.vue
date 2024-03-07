@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, Ref } from "vue";
+import { useStoreManager } from "@/composables/storeManager";
+import type { Store } from "@/stores/Widgets/Store";
 
 const props = defineProps(["component"]) as any;
 const opened = ref({
@@ -7,7 +9,40 @@ const opened = ref({
   storeSection: false,
 });
 
+const storeManager = useStoreManager();
+let stores = ref([]) as Ref<any[]>;
+const requestResult = ref("");
+const storeId = ref(props.component.storeId);
 const fields = ref([]);
+const progress = ref(props.component.progress);
+
+const getStores = () => {
+  const storeList = storeManager.getStoreList();
+
+  stores.value = Array.from(storeList.value, function (entry) {
+    return { ...entry[1] };
+  });
+};
+
+const getData = async () => {
+  const store = storeManager.getStore(storeId.value) as Store;
+
+  const data = await store.getData();
+  requestResult.value = JSON.stringify(data, null, 2);
+};
+
+const updateStore = (store) => {
+  storeId.value = store;
+  props.component.storeId = store;
+  getData();
+};
+
+onMounted(() => {
+  getStores();
+  if (storeId.value) {
+    getData();
+  }
+});
 
 const addItem = () => {
   return fields.value.push({
@@ -32,15 +67,24 @@ const deleteField = (id) => {
   fields.value = fields.value.filter((_,i) => i !== id)
 }
 
-const progress = computed({
-  get: () => props.component.progress,
-  set: (value) => {
-    const editedProgress = Math.max(0, Math.min(100, value));
-    if (editedProgress >= 0) {
-      props.component.progress = editedProgress;
+watch(
+  () => progress.value,
+  (newValue) => {
+    if (typeof newValue === 'string') {
+      const allowDot = !newValue.includes('.');
+      const sanitizedValue = newValue.replace(/,/g, '.');
+      const numericValue = parseFloat(sanitizedValue);
+
+      if (!isNaN(numericValue) && allowDot) {
+        const clampedValue = Math.max(0, Math.min(1, numericValue));
+        progress.value = clampedValue;
+        props.component.progress = clampedValue;
+      } else {
+        props.component.progress = newValue;
+      }
     }
   }
-});
+);
 
 </script>
 
@@ -100,6 +144,19 @@ const progress = computed({
     <div class="settings-container">
       <div>
         <h3 class="mb-2">Select store</h3>
+        <div class="mb-2" v-for="store in stores" :key="store.id">
+          <va-radio
+            :model-value="storeId"
+            @update:model-value="updateStore"
+            :option="{
+              text: `${store.caption} ${store.id}`,
+              id: store.id,
+            }"
+            value-by="id"
+            name="store-radio-group"
+          />
+        </div>
+        <pre class="response">{{ requestResult }}</pre>
       </div>
     </div>
   </va-collapse>
