@@ -8,7 +8,8 @@ export default class XMLADatasource {
   public caption = null;
   public type = "XMLA";
   public client: any;
-  public cube: string | null = null;
+  public cube: any | null = null;
+  public catalog: any | null = null;
   public metadataStore: MetadataStore | null = null;
 
   private api = <XMLAApi | null>null;
@@ -73,8 +74,12 @@ export default class XMLADatasource {
     return await this.api.getCubes(catalogName);
   }
 
-  public async setCube(cubeName: string) {
-    this.cube = cubeName;
+  public async setCube(cube) {
+    this.cube = cube;
+  }
+
+  public async setCatalog(catalog) {
+    this.catalog = catalog;
   }
 
   public getProperties() {

@@ -1,11 +1,12 @@
+
+import type { log } from 'console';
 <script lang="ts" setup>
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
-import { onMounted, ref, watch, nextTick } from "vue";
+import { onMounted, ref, watch, nextTick, onActivated } from "vue";
 
 const storeManager = useStoreManager();
 const dslist = ref([]);
-const selectedDatasources = ref([]);
 
 const catalogs = ref([]);
 const selectedCatalog = ref({});
@@ -44,15 +45,30 @@ watch(
     dslist.value = Object.entries(dsmap.value).map((entry) => {
       return entry[1];
     });
+    console.log(dslist.value);
   },
   { deep: true },
 );
 
+onActivated(() => {
+  dslist.value = Object.entries(dsmap.value).map((entry) => {
+    return entry[1];
+  });
+});
+
 onMounted(() => {
-  dslist.value = Array.from(dsmap.value, function (entry) {
-    console.log(entry[1]);
+  console.log(item);
+  selectedRow.value = item.value.row || {};
+  selectedCol.value = item.value.column || {};
+  selectedMeasure.value = item.value.measure || {};
+  dslist.value = Object.entries(dsmap.value).map((entry) => {
     return { ...entry[1] };
   });
+
+  const ds = getSelectedDatasources()[0];
+  selectedCatalog.value = ds?.catalog || {};
+  selectedCube.value = ds?.cube || {};
+  console.log(ds);
 });
 
 const saveStore = (item) => {
@@ -91,8 +107,8 @@ const setSelectedDatasources = (id, currentSelectedItems) => {
   getCatalogs();
 };
 
-const getSelectedDatasources = (item) => {
-  const store = storeManager.getStore(item.id);
+const getSelectedDatasources = () => {
+  const store = storeManager.getStore(item.value.id);
   const selectedDatasources = store.datasourceIds;
 
   return dslist.value.filter((e) => {
@@ -101,13 +117,14 @@ const getSelectedDatasources = (item) => {
 };
 
 const getCatalogs = async () => {
-  const selectedDatasource = getSelectedDatasources(props.item)[0];
+  const selectedDatasource = getSelectedDatasources()[0];
   catalogs.value = (await selectedDatasource.getCatalogs()).catalogs;
   console.log(catalogs.value);
 };
 
 const getCubes = async () => {
-  const selectedDatasource = getSelectedDatasources(props.item)[0];
+  const selectedDatasource = getSelectedDatasources()[0];
+  selectedDatasource.setCatalog(selectedCatalog.value);
   cubes.value = (
     await selectedDatasource.getCubes(selectedCatalog.value.CATALOG_NAME)
   ).cubes;
@@ -115,8 +132,8 @@ const getCubes = async () => {
 };
 
 const getMetadata = async () => {
-  const selectedDatasource = getSelectedDatasources(props.item)[0];
-  selectedDatasource.setCube(selectedCube.value.CUBE_NAME);
+  const selectedDatasource = getSelectedDatasources()[0];
+  selectedDatasource.setCube(selectedCube.value);
   await selectedDatasource.openCube(
     selectedCatalog.value.CATALOG_NAME,
     selectedCube.value.CUBE_NAME,
@@ -154,7 +171,8 @@ const setMeasure = async (value) => {
 <template>
   <div class="store-item-header" @click="clickHeader">
     <va-list-item-label class="store-item-header-text">
-      {{ item.caption }} {{ item.id }}
+      {{ item.caption }}
+      <!-- {{ item.id }} -->
     </va-list-item-label>
     <va-icon v-if="!isExpanded" class="material-icons"> expand_more </va-icon>
     <va-icon v-else class="material-icons"> expand_less </va-icon>
@@ -175,7 +193,7 @@ const setMeasure = async (value) => {
         class="table-crud"
         :items="dslist"
         :columns="[{ key: 'caption' }, { key: 'type' }, { key: 'url' }]"
-        :model-value="getSelectedDatasources(item)"
+        :model-value="getSelectedDatasources()"
         selectable
         select-mode="single"
         @update:model-value="setSelectedDatasources(item.id, $event)"

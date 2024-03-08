@@ -96,6 +96,10 @@ export class Store {
     return null;
   }
 
+  reset() {
+    this.calculateParams();
+  }
+
   getDatasource() {
     return this.datasourceManager.getDatasource(this.datasourceIds[0]);
   }

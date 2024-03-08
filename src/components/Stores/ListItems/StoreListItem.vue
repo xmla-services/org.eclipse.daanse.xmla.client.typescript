@@ -5,7 +5,6 @@ import { onMounted, ref, watch } from "vue";
 
 const storeManager = useStoreManager();
 const dslist = ref([]);
-const selectedDatasources = ref([]);
 
 const props = defineProps({
   item: {
@@ -27,8 +26,7 @@ const clickHeader = () => {
 watch(
   dsmap,
   () => {
-    dslist.value = Array.from(dsmap.value, function (entry) {
-      console.log(entry[1]);
+    dslist.value = Object.entries(dsmap.value).map((entry) => {
       return { ...entry[1] };
     });
   },
@@ -36,15 +34,13 @@ watch(
 );
 
 onMounted(() => {
-  dslist.value = Array.from(dsmap.value, function (entry) {
-    console.log(entry[1]);
+  dslist.value = Object.entries(dsmap.value).map((entry) => {
     return { ...entry[1] };
   });
 });
 
 const saveStore = (item) => {
   const store = storeManager.getStore(item.id);
-  console.log(store);
   store.setOptions({
     caption: item.caption,
     requestTemplate: item.requestTemplate,
@@ -123,7 +119,8 @@ const getSelectedDatasources = (item) => {
 <template>
   <div class="store-item-header" @click="clickHeader">
     <va-list-item-label class="store-item-header-text">
-      {{ item.caption }} {{ item.id }}
+      {{ item.caption }}
+      <!-- {{ item.id }} -->
     </va-list-item-label>
     <va-icon v-if="!isExpanded" class="material-icons"> expand_more </va-icon>
     <va-icon v-else class="material-icons"> expand_less </va-icon>

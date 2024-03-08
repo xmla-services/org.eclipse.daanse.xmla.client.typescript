@@ -45,6 +45,7 @@ export async function getMdxRequest(
       pivotTableSettings,
       properties,
       filtersRequest,
+      levels,
     );
   } else {
     let withSection = "WITH";
