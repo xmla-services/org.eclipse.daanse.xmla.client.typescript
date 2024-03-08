@@ -15,9 +15,7 @@ import { v4 } from "uuid";
 import RESTDatasource from "@/dataSources/RestDatasource";
 import XmlaDatasource from "@/dataSources/XmlaDatasource";
 
-const availableDatasources = ref(
-  new Map<string, RESTDatasource | XmlaDatasource>(),
-);
+const availableDatasources = ref({});
 
 export function useDatasourceManager() {
   const initDatasource = (type: string, url: string, caption: string) => {
@@ -27,19 +25,19 @@ export function useDatasourceManager() {
     if (type === "REST") {
       const datasource = new RESTDatasource(id, url, caption);
 
-      availableDatasources.value.set(id, datasource);
+      availableDatasources.value[id] = datasource;
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(id, undefined, caption);
 
-      availableDatasources.value.set(id, datasource);
+      availableDatasources.value[id] = datasource;
     }
 
     return id;
   };
 
   const getDatasource = (key) => {
-    return availableDatasources.value.get(key);
+    return availableDatasources.value[key];
   };
 
   const getDatasourceList = () => {
@@ -50,39 +48,40 @@ export function useDatasourceManager() {
     if (type === "REST") {
       const datasource = new RESTDatasource(key, url, caption);
 
-      availableDatasources.value.set(key, datasource);
+      availableDatasources.value[key] = datasource;
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(key, undefined, caption);
 
-      availableDatasources.value.set(key, datasource);
+      availableDatasources.value[key] = datasource;
     }
+
+    console.log(availableDatasources.value);
   };
 
   const getSerializedState = () => {
     const state = {};
 
-    availableDatasources.value.forEach((ds) => {
-      state[ds.id] = ds.getState();
-    });
+    // availableDatasources.value.forEach((ds) => {
+    //   state[ds.id] = ds.getState();
+    // });
 
     return JSON.stringify(state);
   };
 
   const loadState = (state) => {
-
     Object.keys(state).forEach((key) => {
       const ds = state[key];
 
       if (ds.type === "REST") {
         const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
 
-        availableDatasources.value.set(key, datasource);
+        availableDatasources.value[key] = datasource;
       }
       if (ds.type === "XMLA") {
         const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
 
-        availableDatasources.value.set(key, datasource);
+        availableDatasources.value[key] = datasource;
       }
     });
 

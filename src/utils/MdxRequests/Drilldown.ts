@@ -15,20 +15,28 @@ import { v4 } from "uuid";
 export async function getRowsDrilldownRequestString(
   hierarchy: any,
   rowsDrilldownMember: any,
-  expandedMembers: any[]
+  expandedMembers: any[],
+  levels: any[],
 ) {
-  const metadataStorage = useMetadataStorage();
-  const metadata = await metadataStorage.getMetadataStorage();
+  let metadataLevels;
+  if (!levels) {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
+
+    metadataLevels = metadata.levels;
+  } else {
+    metadataLevels = levels;
+  }
 
   if (rowsDrilldownMember) {
     const uid = "id" + v4();
     const setSection = `SET [Row_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${rowsDrilldownMember.UName}), Descendants(${rowsDrilldownMember.UName})})))'`;
 
-    const rowsMemberLevel = metadata.levels.find(
+    const rowsMemberLevel = metadataLevels.find(
       (e) => e.LEVEL_UNIQUE_NAME === rowsDrilldownMember.LName
     );
 
-    const rowsLevels = metadata.levels.filter((e) => {
+    const rowsLevels = metadataLevels.filter((e) => {
       return (
         e.HIERARCHY_UNIQUE_NAME === rowsMemberLevel?.HIERARCHY_UNIQUE_NAME &&
         e.LEVEL_NUMBER <= rowsMemberLevel.LEVEL_NUMBER
@@ -56,7 +64,7 @@ export async function getRowsDrilldownRequestString(
     }
 
     if (expandedMembers) {
-      const rowsRootLevel = metadata.levels.find((e) => {
+      const rowsRootLevel = metadataLevels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -88,10 +96,10 @@ export async function getRowsDrilldownRequestString(
       select: hierarchizeString,
     };
   } else {
-    if (!hierarchy.filters.enabled) {
+    if (!hierarchy.filters?.enabled) {
       let hierarchizeString = "";
 
-      const rowsRootLevel = metadata.levels.find((e) => {
+      const rowsRootLevel = metadataLevels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -134,7 +142,7 @@ export async function getRowsDrilldownRequestString(
       let selectSection = "";
 
       const selectedFilters = [] as any[];
-      if (filter.multipleChoise) {
+      if (filter?.multipleChoise) {
         selectedFilters.push(...filter.selectedItems);
       } else {
         selectedFilters.push(filter.selectedItem);
@@ -150,7 +158,7 @@ export async function getRowsDrilldownRequestString(
         }
       });
 
-      const rowsLevels = metadata.levels.filter((e) => {
+      const rowsLevels = metadataLevels.filter((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
           hierarchy.originalItem.HIERARCHY_UNIQUE_NAME
@@ -280,20 +288,28 @@ export async function getRowsDrilldownRequestString(
 export async function getColsDrilldownRequestString(
   hierarchy: any,
   columnsDrilldownMember: any,
-  expandedMembers: any[]
+  expandedMembers: any[],
+  levels: any[],
 ) {
-  const metadataStorage = useMetadataStorage();
-  const metadata = await metadataStorage.getMetadataStorage();
+  let metadataLevels;
+  if (!levels) {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
+
+    metadataLevels = metadata.levels;
+  } else {
+    metadataLevels = levels;
+  }
 
   if (columnsDrilldownMember) {
     const uid = "id" + v4();
     const setSection = `SET [Col_Dim_${uid}] AS 'VisualTotals(Distinct(Hierarchize({Ascendants(${columnsDrilldownMember.UName}), Descendants(${columnsDrilldownMember.UName})})))'`;
 
-    const colsMemberLevel = metadata.levels.find(
+    const colsMemberLevel = metadataLevels.find(
       (e) => e.LEVEL_UNIQUE_NAME === columnsDrilldownMember.LName
     );
 
-    const colsLevels = metadata.levels.filter((e) => {
+    const colsLevels = metadataLevels.filter((e) => {
       return (
         e.HIERARCHY_UNIQUE_NAME === colsMemberLevel?.HIERARCHY_UNIQUE_NAME &&
         e.LEVEL_NUMBER <= colsMemberLevel.LEVEL_NUMBER
@@ -320,7 +336,7 @@ export async function getColsDrilldownRequestString(
     }
 
     if (expandedMembers) {
-      const colsRootLevel = metadata.levels.find((e) => {
+      const colsRootLevel = metadataLevels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -351,10 +367,10 @@ export async function getColsDrilldownRequestString(
       select: hierarchizeString,
     };
   } else {
-    if (!hierarchy.filters.enabled) {
+    if (!hierarchy.filters?.enabled) {
       let hierarchizeString = "";
 
-      const colsRootLevel = metadata.levels.find((e) => {
+      const colsRootLevel = metadataLevels.find((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
             expandedMembers[0]?.HIERARCHY_UNIQUE_NAME && e.LEVEL_NUMBER === "0"
@@ -399,7 +415,7 @@ export async function getColsDrilldownRequestString(
       let selectSection = "";
 
       const selectedFilters = [] as any[];
-      if (filter.multipleChoise) {
+      if (filter?.multipleChoise) {
         selectedFilters.push(...filter.selectedItems);
       } else {
         selectedFilters.push(filter.selectedItem);
@@ -415,7 +431,7 @@ export async function getColsDrilldownRequestString(
         }
       });
 
-      const rowsLevels = metadata.levels.filter((e) => {
+      const rowsLevels = metadataLevels.filter((e) => {
         return (
           e.HIERARCHY_UNIQUE_NAME ===
           hierarchy.originalItem.HIERARCHY_UNIQUE_NAME

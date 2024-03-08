@@ -27,7 +27,8 @@ export async function getMdxRequest(
   measures: any[],
   pivotTableSettings: any,
   properties: any[],
-  filters: any[]
+  filters: any[],
+  levels: any[],
 ) {
   const filtersRequest = getFiltersRequest(filters);
 
@@ -43,7 +44,8 @@ export async function getMdxRequest(
       columnsExpandedMembers,
       pivotTableSettings,
       properties,
-      filtersRequest
+      filtersRequest,
+      levels,
     );
   } else {
     let withSection = "WITH";
@@ -57,7 +59,8 @@ export async function getMdxRequest(
       rows,
       rowsDrilldownMembers,
       rowsExpandedMembers,
-      measures
+      measures,
+      levels,
     );
     if (rowsRequest.with.length) {
       withSection = `${withSection} ${rowsRequest.with}`;
@@ -71,12 +74,15 @@ export async function getMdxRequest(
       columns,
       columnsDrilldownMembers,
       columnsExpandedMembers,
-      measures
+      measures,
+      levels,
     );
     if (colsRequest.with.length) {
       withSection = `${withSection} ${colsRequest.with}`;
     }
     selectSection = `${selectSection}\n${colsRequest.select} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${colsProperties} ON 0\n`;
+
+    console.log(selectSection);
 
     let resultString = "";
 
@@ -99,7 +105,8 @@ async function getColumnsRequest(
   columns: any,
   columnsDrilldownMembers: any[],
   colsExpandedMembers: any[],
-  measures: any[]
+  measures: any[],
+  levels: any[],
 ) {
   let columnsSelect = "";
   let columnsWhere = "";
@@ -111,7 +118,8 @@ async function getColumnsRequest(
         e,
         columnsDrilldownMembers,
         colsExpandedMembers,
-        measures
+        measures,
+        levels,
       );
 
       if (i === 0) {
@@ -141,7 +149,8 @@ async function getSingleColumnRequest(
   e: any,
   columnsDrilldownMembers: any[],
   colsExpandedMembers: any[],
-  measures
+  measures,
+  levels,
 ) {
   if (e.type === "Values") {
     const selectRequest = measures
@@ -161,7 +170,7 @@ async function getSingleColumnRequest(
         drilldownedMembers.HIERARCHY_UNIQUE_NAME ===
         e.originalItem.HIERARCHY_UNIQUE_NAME
       );
-    }
+    },
   );
   const expandedMembers = colsExpandedMembers.filter((drilldownedMembers) => {
     return (
@@ -175,7 +184,8 @@ async function getSingleColumnRequest(
     const request = await getColsDrilldownRequestString(
       e,
       drilledDownMember,
-      colsExpandedMembers
+      colsExpandedMembers,
+      levels,
     );
 
     return {
@@ -192,25 +202,38 @@ async function getSingleColumnRequest(
   }
 
   // Default request with no drilldowns and filters
-  const metadataStorage = useMetadataStorage();
-  const metadata = await metadataStorage.getMetadataStorage();
+  if (!levels) {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
 
-  const rootLevel = metadata.levels.find(
-    (l) =>
-      l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
-      l.LEVEL_NUMBER === "0"
-  );
-  return {
-    select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
-    with: "",
-  };
+    const rootLevel = metadata.levels.find(
+      (l) =>
+        l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+        l.LEVEL_NUMBER === "0",
+    );
+    return {
+      select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
+      with: "",
+    };
+  } else {
+    const rootLevel = levels.find(
+      (l) =>
+        l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+        l.LEVEL_NUMBER === "0",
+    );
+    return {
+      select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
+      with: "",
+    };
+  }
 }
 
 async function getRowsRequest(
   rows: any,
   rowsDrilldownMembers: any[],
   rowsExpandedMembers: any[],
-  measures: any[]
+  measures: any[],
+  levels: any[],
 ) {
   let rowsSelect = "";
   let rowsWhere = "";
@@ -223,7 +246,8 @@ async function getRowsRequest(
         e,
         rowsDrilldownMembers,
         rowsExpandedMembers,
-        measures
+        measures,
+        levels,
       );
       if (i === 0) {
         rowsSelect = rowsRequest.select;
@@ -254,7 +278,8 @@ async function getSingleRowRequest(
   e: any,
   rowsDrilldownMembers: any[],
   rowsExpandedMembers: any[],
-  measures: any[]
+  measures: any[],
+  levels: any[],
 ) {
   if (e.type === "Values") {
     const selectRequest = measures
@@ -287,7 +312,8 @@ async function getSingleRowRequest(
     const request = await getRowsDrilldownRequestString(
       e,
       drilledDownMember,
-      expandedMembers
+      expandedMembers,
+      levels,
     );
 
     return {
@@ -303,19 +329,33 @@ async function getSingleRowRequest(
   }
 
   // Default request with no drilldowns and filters
-  const metadataStorage = useMetadataStorage();
-  const metadata = await metadataStorage.getMetadataStorage();
 
-  const rootLevel = metadata.levels.find(
-    (l) =>
-      l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
-      l.LEVEL_NUMBER === "0"
-  );
+  if (!levels) {
+    const metadataStorage = useMetadataStorage();
+    const metadata = await metadataStorage.getMetadataStorage();
 
-  return {
-    select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
-    with: "",
-  };
+    const rootLevel = metadata.levels.find(
+      (l) =>
+        l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+        l.LEVEL_NUMBER === "0",
+    );
+
+    return {
+      select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
+      with: "",
+    };
+  } else {
+    const rootLevel = levels.find(
+      (l) =>
+        l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
+        l.LEVEL_NUMBER === "0",
+    );
+
+    return {
+      select: `Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))`,
+      with: "",
+    };
+  }
 }
 
 function getRowsProperies(rows: any, properties: any[]) {
@@ -325,8 +365,8 @@ function getRowsProperies(rows: any, properties: any[]) {
     rowsProperties.push(
       properties.filter(
         (prop) =>
-          prop.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME
-      )
+          prop.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME,
+      ),
     );
   });
 
@@ -346,8 +386,8 @@ function getColumnsProperies(columns: any, properties: any[]) {
     columnsProperties.push(
       properties.filter(
         (prop) =>
-          prop.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME
-      )
+          prop.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME,
+      ),
     );
   });
 
@@ -372,7 +412,8 @@ async function getSingleHierarchyRequest(
   columnsExpandedMembers: any,
   pivotTableSettings: any,
   properties: any[],
-  filtersRequest: any
+  filtersRequest: any,
+  levels,
 ) {
   const selectPart = getSelectWithOptions(pivotTableSettings);
   const fromPart = getFromPart(measures, cubename, filtersRequest.where);
@@ -382,7 +423,8 @@ async function getSingleHierarchyRequest(
       rows,
       rowsDrilldownMembers,
       rowsExpandedMembers,
-      measures
+      measures,
+      levels,
     );
 
     const rowsSelect = request.select;
@@ -407,7 +449,8 @@ async function getSingleHierarchyRequest(
       columns,
       columnsDrilldownMembers,
       columnsExpandedMembers,
-      measures
+      measures,
+      levels,
     );
 
     const colsSelect = request.select;
@@ -475,7 +518,7 @@ function getFiltersRequest(filters) {
   const filtersArray = filters.map((e) => e.filters);
 
   filtersArray.forEach((filter) => {
-    if (!filter.enabled) return;
+    if (!filter?.enabled) return;
 
     if (filter.multipleChoise) {
       const uid = "id" + v4();
@@ -506,7 +549,7 @@ async function getAxisFilterRequest(e) {
   let withSection = "";
   let selectSection = "";
 
-  if (!filter.enabled) return null;
+  if (!filter?.enabled) return null;
 
   const selectedFilters = [] as any[];
   if (filter.multipleChoise) {
@@ -539,7 +582,7 @@ async function getAxisFilterRequest(e) {
 
   const filtersDepth = Math.max(
     filtersLevels.length,
-    deseclectedFiltersLevels.length
+    deseclectedFiltersLevels.length,
   );
 
   const metadataStorage = useMetadataStorage();
@@ -552,7 +595,7 @@ async function getAxisFilterRequest(e) {
     const rootLevel = metadata.levels.find(
       (l) =>
         l.HIERARCHY_UNIQUE_NAME === e.originalItem.HIERARCHY_UNIQUE_NAME &&
-        l.LEVEL_NUMBER === "0"
+        l.LEVEL_NUMBER === "0",
     );
 
     withSection = `SET ${filterSetName} AS 'VisualTotals(Distinct(Hierarchize(AddCalculatedMembers({${rootLevel?.LEVEL_UNIQUE_NAME}.members}))))' `;
@@ -568,14 +611,14 @@ async function getAxisFilterRequest(e) {
       const members = await appSettings.api?.getLevelMembers(
         rootLevel as MDSchemaLevel,
         100,
-        0
+        0,
       );
 
       const req =
         members
           ?.map(
             (e) =>
-              `Ascendants(${e.Member.UName}), Descendants(${e.Member.UName})`
+              `Ascendants(${e.Member.UName}), Descendants(${e.Member.UName})`,
           )
           .join(",") || "";
 

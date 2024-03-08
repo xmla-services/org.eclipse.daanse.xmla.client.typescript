@@ -31,7 +31,7 @@ const emit = defineEmits(["drillthrough"]);
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
-const eventBus = inject("eventBus") as TinyEmitter;
+const eventBus = inject("pivotTableEventBus") as TinyEmitter;
 
 const xScrollPosition = ref(0);
 const yScrollPosition = ref(0);
