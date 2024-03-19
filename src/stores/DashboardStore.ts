@@ -10,9 +10,7 @@ Contributors: Smart City Jena
 */
 import {defineStore} from "pinia";
 import {ref} from "vue";
-import {getMdxRequest} from "@/utils/MdxRequests/MdxRequestConstructor";
 
-import GiteaWrapper from "@/generated/gitea/gitea_wrapper/gitea.wrapper";
 type ChartStoreItem = {
     mdx:string
 }

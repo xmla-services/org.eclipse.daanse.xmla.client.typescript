@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+-->
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 
@@ -53,7 +63,7 @@ const progress = computed({
       <va-checkbox v-model="props.component.isVertical" label="Vertical" />
       <va-checkbox v-model="props.component.isGradient" label="Gradient" />
     </div>
-    <div 
+    <div
       class="mt-3"
       v-if="props.component.isGradient"
     >
@@ -64,9 +74,9 @@ const progress = computed({
         Add color
       </va-button>
       <div>
-        <va-input 
+        <va-input
           class="mt-2"
-          v-model="props.component.rotation" 
+          v-model="props.component.rotation"
           label="Rotation" />
         <va-data-table
           class="table-config"
@@ -74,19 +84,19 @@ const progress = computed({
           :columns="[{ key: 'color' }, {key: 'location'}, {key: 'actions'}]"
         >
           <template #cell(color) = {rowIndex}>
-            <va-color-input 
+            <va-color-input
               class="input-color"
-              v-model="fields[rowIndex].color" 
+              v-model="fields[rowIndex].color"
             />
           </template>
           <template #cell(location) = {rowIndex}>
-            <va-input 
+            <va-input
               class="input"
-              v-model="fields[rowIndex].location" 
+              v-model="fields[rowIndex].location"
             />
           </template>
           <template #cell(actions) = {rowIndex}>
-            <va-button 
+            <va-button
               icon="delete"
               color="danger"
               @click="deleteField(rowIndex)"

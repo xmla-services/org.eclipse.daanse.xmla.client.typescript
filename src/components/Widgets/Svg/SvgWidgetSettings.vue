@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+-->
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 
@@ -26,7 +36,7 @@ watch(
         if (!config[className]) {
           config[className] = { fill, stroke, strokeWidth };
         }
-      }, 
+      },
     {});
     props.component.classesConfig = {...config};
   },
@@ -50,15 +60,15 @@ watch(
           :columns="[{ key: 'className' }, { key: 'fill' }, { key: 'stroke' }, { key: 'strokeWidth'}]"
         >
           <template #cell(className) = {rowIndex}>
-            <va-input 
+            <va-input
               class="input-class-name"
-              v-model="fields[rowIndex].className" 
+              v-model="fields[rowIndex].className"
             />
           </template>
           <template #cell(fill) = {rowIndex}>
             <va-color-input
               class="color-fill"
-              v-model="fields[rowIndex].fill" 
+              v-model="fields[rowIndex].fill"
             />
           </template>
           <template #cell(stroke) = {rowIndex}>
@@ -68,9 +78,9 @@ watch(
             />
           </template>
           <template #cell(strokeWidth) = {rowIndex}>
-            <va-input 
+            <va-input
               class="input-stroke-width"
-              v-model="fields[rowIndex].strokeWidth" 
+              v-model="fields[rowIndex].strokeWidth"
             />
           </template>
         </va-data-table>
