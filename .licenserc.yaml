@@ -65,6 +65,10 @@ header:
     - 'Docker/Dockerfile'
     - 'Docker/start.sh'
     - 'docker-compose.yml'
+    - 'Docker/entrypoint.sh'
+    - 'dockerfile'
+    - 'eMondrianUtils/Docker/Dockerfile'
+    - 'eMondrianUtils/Docker/entrypoint.sh'
     - 'src/generated/**'
     - 'public/def/**'
     - 'nightwatch/**'
@@ -72,5 +76,6 @@ header:
     - 'src/git_api/generated/**'
     - '.yarnrc.yml'
     - '.storybook/**'
+    - 'storybook-static/**'
 
   comment: always
