@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+-->
 <template>
   <NavBarDash></NavBarDash>
   <div class="app-container">
@@ -558,19 +568,9 @@
 
 <script setup lang="ts">
 import NavBarDash from "./NavBarDash.vue";
-import ChartWidget from "@/components/Charts/ChartWidgetModule.vue";
-import ChartPolarWidget from "@/components/Charts/ChartPolarWidgetModule.vue";
 import DashboardControls from "@/components/Dashboard/DashboardControls.vue";
-import {
-  ref,
-  markRaw,
-  getCurrentInstance,
-  onMounted,
-  inject,
-  nextTick,
-} from "vue";
+import {getCurrentInstance, inject, markRaw, nextTick, onMounted, ref,} from "vue";
 import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
-import InputControl from "@/components/Controls/Input/InputControl.vue";
 import PlainTextWidget from "@/components/Widgets/PlainText/PlainTextWidget.vue";
 import ImageWidget from "@/components/Widgets/Image/ImageWidget.vue";
 import TextWidget from "@/components/Widgets/Text/TextWidget.vue";
@@ -579,45 +579,14 @@ import SvgWidget from "@/components/Widgets/Svg/SvgWidget.vue";
 import RepeatableSvgWidget from "@/components/Widgets/RepeatableSvg/RepeatableSvgWidget.vue";
 import ProgressWidget from "@/components/Widgets/Progress/ProgressWidget.vue";
 import VideoWidget from "@/components/Widgets/Video/VideoWidget.vue";
-import { useStoreManager } from "@/composables/storeManager";
+import {useStoreManager} from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
-import { useDatasourceManager } from "@/composables/datasourceManager";
+import {useDatasourceManager} from "@/composables/datasourceManager";
 import WidgetWrapper from "@/components/Widgets/WidgetWrapper/WidgetWrapper.vue";
 
 const storeManager = useStoreManager();
 const dsManager = useDatasourceManager();
-
-const mdx = ref(`SELECT
-Hierarchize(AddCalculatedMembers({[Geschlecht.Geschlecht (m/w/d)].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-Hierarchize(AddCalculatedMembers({[Jahr].[Jahr].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
-FROM [Bevölkerung] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`);
-
-const mdx2 = ref(`SELECT
-
-        Hierarchize(
-            DrilldownLevel({[Alter.Altersgruppen (10-Jahres-Gruppen)].[(All)]},,,INCLUDE_CALC_MEMBERS)
-        ) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-
-
-        Hierarchize(
-          AddCalculatedMembers
-          (
-
-            DrilldownMember({{
-              DrilldownLevel({[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[(All)]},,,INCLUDE_CALC_MEMBERS)
-            }}, {[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Jena]})
-
-          )
-        ) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME,[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Stadt].[GeoJson],[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Planungsraum].[uuid],[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Planungsraum].[GeoJson],[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Statistischer Bezirk].[uuid],[statistischer Bezirk.Stadt - Planungsraum - statistischer Bezirk].[Statistischer Bezirk].[GeoJson] ON 0
-FROM [Bevölkerung] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`);
-
-const mdx3 = ref(`
-SELECT
-Hierarchize(AddCalculatedMembers({[Alter.Altersgruppen (Kinder)].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-
-Hierarchize(AddCalculatedMembers({[Jahr].[Jahr].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
-FROM [Bevölkerung] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`);
 
 const customWidgets = ref([] as any[]);
 const editEnabled = ref(false);

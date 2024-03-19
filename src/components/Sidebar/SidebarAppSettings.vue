@@ -1,3 +1,13 @@
+<!--
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+-->
 <script lang="ts" setup>
 import { ref } from 'vue';
 
@@ -13,8 +23,8 @@ const innerBackground = ref('#fafafa');
   <div class="app-settings">
     <div class="app-settings-title">
       <h2 class="mb-3">App settings</h2>
-      <va-color-input 
-        v-model="innerBackground" 
+      <va-color-input
+        v-model="innerBackground"
         @input="updateBackgroundColor"
         label="Background color"/>
     </div>
