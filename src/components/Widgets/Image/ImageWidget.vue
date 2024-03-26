@@ -1,7 +1,16 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, inject } from "vue";
+import { useStoreManager } from "@/composables/storeManager";
+import type { Store } from "@/stores/Widgets/Store";
 import ImageWidgetSettings from "./ImageWidgetSettings.vue";
 const settings = ImageWidgetSettings;
+
+const EventBus = inject("customEventBus") as any;
+const storeManager = useStoreManager();
+const storeId = ref("");
+const data = ref(null as unknown);
+
+let store = null as unknown as Store;
 
 const props = defineProps({
   initialState: {
@@ -20,6 +29,7 @@ const innerImgSrc = ref(initialState?.imgSrc || imgSrc || "");
 let interval = null as any;
 
 const images = ref([] as any[]);
+const imagesFromData = ref([] as any[]);
 const currentImage = ref(0);
 const imageSettings = ref({
   fit: "None",
@@ -40,6 +50,7 @@ const toPrev = () => {
 
 const getState = () => {
   return {
+    storeId: storeId.value,
     imgSrc: innerImgSrc.value,
   };
 };
@@ -83,12 +94,81 @@ defineExpose({
   setState,
   images,
   imageSettings,
+  storeId,
 });
+
+const getData = async () => {
+  if (!store) return;
+  updateFn();
+};
+
+watch(storeId, (newVal, oldVal) => {
+  console.log("store changed", storeId);
+  store = storeManager.getStore(storeId.value);
+
+  console.log(oldVal, newVal);
+
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
+
+const updateFn = async () => {
+  data.value = await store?.getData();
+  console.log(data);
+};
+
+const parsedUrl = (url) => {
+  const regex = /{(.*?)}/g;
+  const parts = url.match(regex);
+
+  if (!parts || !data.value) {
+    return url
+  }
+
+  let parsedUrl = url;
+
+  parts.forEach((element) => {
+    const trimmedString = element.replace("{", "").replace("}", "");
+    const dataField = trimmedString.split(".");
+    let res = data.value;
+
+    for (const field of dataField) {
+      res = res[field];
+    }
+    parsedUrl = parsedUrl.replace(element, res);
+  });
+  return parsedUrl;
+};
+
+watch(
+  images.value,
+  (newValue) => {
+    imagesFromData.value = newValue.map((img) => {
+        return {
+        id: img.id,
+        url: parsedUrl(img.url),
+      };
+    })
+  }
+);
+
+watch(
+  () => images.value.length, 
+  (newLength, oldLength) => {
+    if (oldLength > newLength) {
+      if (currentImage.value >= newLength) {
+        currentImage.value = newLength - 1;
+      }
+    }
+  }
+);
 </script>
 
 <template>
-  <template v-if="images.length <= 1">
-    <img class="image" :src="images[0]?.url" />
+  <template v-if="imagesFromData.length <= 1">
+    <img class="image" :src="imagesFromData[0]?.url" />
   </template>
   <template v-else>
     <div class="galery-container">
@@ -106,7 +186,7 @@ defineExpose({
         :style="`transform: translateX(-${100 * currentImage}%)`"
       >
         <div
-          v-for="(image, i) in images"
+          v-for="(image, i) in imagesFromData"
           :key="image.id"
           class="galery-image"
           :style="`transform: translateX(${100 * i}%)`"
@@ -121,7 +201,7 @@ defineExpose({
           @click="toNext()"
           icon="chevron_right"
           text-color="#ffffff"
-          :disabled="currentImage === images.length - 1"
+          :disabled="currentImage === imagesFromData.length - 1"
           preset="plain"
         ></va-button>
       </div>
