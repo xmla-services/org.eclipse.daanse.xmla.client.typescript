@@ -641,8 +641,8 @@ const enabledWidgets = {
 };
 
 const widgetOptions = [
-  'Plain Text Widget' ,
-  'Plain List Widget' ,
+  // 'Plain Text Widget',
+  // 'Plain List Widget',
   'Image Widget',
   'Text Widget',
   'Svg Widget',
@@ -652,43 +652,46 @@ const widgetOptions = [
   'Icon Widget',
   'Rich Text Widget',
   'Table Widget',
+  'Pivot Table Widget'
 ];
 
 const addSelectedWidget = () => {
   switch (selectedAction.value) {
-    case 'Plain Text Widget':
-      addPlainTextWidget();
-      break;
-    case 'Plain List Widget':
-      addPlainListWidget();
-      break;
+    // case 'Plain Text Widget':
+    //   addWidget("PlainTextWidget");
+    //   break;
+    // case 'Plain List Widget':
+    //   addWidget("ListWidget");
+    //   break;
     case 'Image Widget':
-      addImageWidget();
+      addWidget("ImageWidget");
       break;
     case 'Text Widget':
-      addTextWidget();
+      addWidget("TextWidget");
       break;
     case 'Svg Widget':
-      addSvgWidget();
+      addWidget("SvgWidget");
       break;
     case 'Repeatable Svg Widget':
-      addRepeatableSvgWidget();
+      addWidget("RepeatableSvgWidget");
       break;
     case 'Progress Widget':
-      addProgressWidget();
+      addWidget("ProgressWidget");
       break;
     case 'Video Widget':
-      addVideoWidget();
+      addWidget("VideoWidget");
       break;
     case 'Icon Widget':
-      addIconWidget();
+      addWidget("IconWidget");
       break;
     case 'Rich Text Widget':
-      addRichTextWidget();
+      addWidget("RichTextWidget");
       break;
     case 'Table Widget':
-      addTableWidget();
+      addWidget("TableWidget");
       break;
+    case 'Pivot Table Widget':
+      addWidget("PivotTableWidget")
     default:
       break;
   }
@@ -744,54 +747,6 @@ let layout = {
     height: 50,
     z: 3000,
   },
-};
-
-const addPlainTextWidget = async () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 150,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "PlainTextWidget",
-    // storeId: store.id,
-    caption: "Test",
-  });
-};
-
-const addPlainListWidget = async () => {
-  const stores = Array.from(
-    storeManager.getStoreList().value,
-    function (entry) {
-      return entry[1];
-    },
-  );
-  const store = stores[0];
-  console.log(store.id);
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 900,
-    width: 300,
-    height: 150,
-    z: 3005,
-  };
-
-  customWidgets.value.push(
-    markRaw({
-      id: id,
-      component: ListWidget,
-      storeId: store.id,
-      caption: "Test",
-    }),
-  );
-
-  console.log(customWidgets.value);
 };
 
 let refs;
@@ -1049,155 +1004,13 @@ const deleteWidget = (id) => {
   customWidgets.value = customWidgets.value.filter(widget => widget.id !== id);
 };
 
-const addImageWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 150,
-    z: 3005,
-  };
+const addWidget = (component: string, x?: number, y?: number, width?: number, height?: number, z?: number) => {
+  const id: string = `id_${Date.now()}`;
+  layout[id] = { x: x || 0, y: y || 700, width: width || 300, height: height || 150, z: z || 3005 };
 
   customWidgets.value.push({
-    id: id,
-    component: "ImageWidget",
-    // storeId: store.id,
-    caption: "Test",
-  });
-};
-
-const addTextWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 150,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "TextWidget",
-    caption: "Test",
-  });
-};
-const addPivotTable = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 800,
-    height: 450,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "PivotTableWidget",
-    caption: "Test",
-  });
-};
-
-const addSvgWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 300,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "SvgWidget",
-    caption: "Test",
-  });
-};
-
-const addRepeatableSvgWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 400,
-    height: 400,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "RepeatableSvgWidget",
-    caption: "Test",
-  });
-};
-
-const addProgressWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 200,
-    height: 200,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "ProgressWidget",
-    caption: "Test",
-  });
-};
-
-const addVideoWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 200,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "VideoWidget",
-    caption: "Test",
-  });
-};
-
-const addIconWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 150,
-    height: 150,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "IconWidget",
-    caption: "Test",
-  });
-};
-
-const addRichTextWidget = () => {
-  const id = `id_${Date.now()}`;
-  layout[id] = {
-    x: 0,
-    y: 700,
-    width: 300,
-    height: 200,
-    z: 3005,
-  };
-
-  customWidgets.value.push({
-    id: id,
-    component: "RichTextWidget",
+    id,
+    component,
     caption: "Test",
   });
 };

@@ -1,8 +1,19 @@
 <script lang="ts" setup>
 import { v4 } from "uuid";
-import { ref } from "vue";
+import { ref, onMounted, Ref } from "vue";
+import { useStoreManager } from "@/composables/storeManager";
+import type { Store } from "@/stores/Widgets/Store";
 
 const props = defineProps(["component"]) as any;
+const opened = ref({
+  imageSection: false,
+  storeSection: false,
+});
+
+const storeManager = useStoreManager();
+let stores = ref([]) as Ref<any[]>;
+const requestResult = ref("");
+const storeId = ref(props.component.storeId);
 
 const addNew = () => {
   console.log(props.component);
@@ -12,16 +23,42 @@ const addNew = () => {
   });
 };
 
-const opened = ref(false);
+const getStores = () => {
+  const storeList = storeManager.getStoreList();
+
+  stores.value = Array.from(storeList.value, function (entry) {
+    return { ...entry[1] };
+  });
+};
+
+const getData = async () => {
+  const store = storeManager.getStore(storeId.value) as Store;
+
+  const data = await store.getData();
+  requestResult.value = JSON.stringify(data, null, 2);
+};
+
+const updateStore = (store) => {
+  storeId.value = store;
+  props.component.storeId = store;
+  getData();
+};
+
+onMounted(() => {
+  getStores();
+  if (storeId.value) {
+    getData();
+  }
+});
 </script>
 
 <template>
-  <va-collapse v-model="opened" header="Image widget settings">
+  <va-collapse v-model="opened.imageSection" header="Image widget settings">
     <div class="settings-container">
       <va-button @click="addNew">Add image</va-button>
       <div class="image-list-container">
         <div
-          v-for="image in props.component.images"
+          v-for="(image, index) in props.component.images"
           :key="image.id"
           class="image-settings-container"
         >
@@ -31,7 +68,7 @@ const opened = ref(false);
             class="image-settings-remove-input"
           />
           <va-button
-            @click="() => props.component.images.splice(image, 1)"
+            @click="() => props.component.images.splice(index, 1)"
             icon="clear"
             class="image-settings-remove-button"
           />
@@ -49,6 +86,26 @@ const opened = ref(false);
         label="Diashow interval"
       >
       </va-input>
+    </div>
+  </va-collapse>
+  <va-collapse v-model="opened.storeSection" header="Store settings">
+    <div class="settings-container">
+      <div>
+        <h3 class="mb-2">Select store</h3>
+        <div class="mb-2" v-for="store in stores" :key="store.id">
+          <va-radio
+            :model-value="storeId"
+            @update:model-value="updateStore"
+            :option="{
+              text: `${store.caption} ${store.id}`,
+              id: store.id,
+            }"
+            value-by="id"
+            name="store-radio-group"
+          />
+        </div>
+        <pre class="response">{{ requestResult }}</pre>
+      </div>
     </div>
   </va-collapse>
 </template>
