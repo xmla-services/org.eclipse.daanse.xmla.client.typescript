@@ -579,6 +579,7 @@ import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import WidgetWrapper from "@/components/Widgets/WidgetWrapper/WidgetWrapper.vue";
+import TableWidget from "@/components/Widgets/Table/TableWidget.vue";
 
 const storeManager = useStoreManager();
 const dsManager = useDatasourceManager();
@@ -636,6 +637,7 @@ const enabledWidgets = {
   VideoWidget,
   IconWidget,
   RichTextWidget,
+  TableWidget,
 };
 
 const widgetOptions = [
@@ -649,6 +651,7 @@ const widgetOptions = [
   'Video Widget',
   'Icon Widget',
   'Rich Text Widget',
+  'Table Widget',
 ];
 
 const addSelectedWidget = () => {
@@ -682,6 +685,9 @@ const addSelectedWidget = () => {
       break;
     case 'Rich Text Widget':
       addRichTextWidget();
+      break;
+    case 'Table Widget':
+      addTableWidget();
       break;
     default:
       break;
@@ -1192,6 +1198,23 @@ const addRichTextWidget = () => {
   customWidgets.value.push({
     id: id,
     component: "RichTextWidget",
+    caption: "Test",
+  });
+};
+
+const addTableWidget = () => {
+  const id = `id_${Date.now()}`;
+  layout[id] = {
+    x: 200,
+    y: 40,
+    width: 1200,
+    height: 700,
+    z: 3005,
+  };
+
+  customWidgets.value.push({
+    id: id,
+    component: "TableWidget",
     caption: "Test",
   });
 };

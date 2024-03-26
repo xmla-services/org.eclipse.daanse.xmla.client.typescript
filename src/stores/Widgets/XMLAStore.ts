@@ -417,8 +417,9 @@ export class XMLAStore {
     console.log(this.row);
     console.log(this.column);
 
+    console.log(datasource.cube);
     const mdxRequest = await getMdxRequest(
-      datasource.cube,
+      datasource.cube.CUBE_NAME,
       this.rowsDrilldownMembers,
       this.columnsDrilldownMembers,
       this.rowsExpandedMembers,
