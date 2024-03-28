@@ -68,7 +68,7 @@
     "@vue/tsconfig": "^0.4.0",
     "axe-html-reporter": "^2.2.3",
     "buffer": "6.0.3",
-    "chromedriver": "119.0.1",
+    "chromedriver": "123.0.1",
     "cross-fetch": "4.0.0",
     "eslint": "8.55.0",
     "eslint-config-standard-with-typescript": "^42.0.0",
