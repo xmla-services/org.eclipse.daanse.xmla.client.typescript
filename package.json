@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@nightwatch/vue": "^0.4.5",
-    "@rushstack/eslint-patch": "^1.6.0",
+    "@rushstack/eslint-patch": "^1.10.0",
     "@storybook/addon-essentials": "^7.6.13",
     "@storybook/addon-interactions": "^7.6.3",
     "@storybook/addon-links": "^7.6.3",
