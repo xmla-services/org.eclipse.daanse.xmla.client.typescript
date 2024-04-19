@@ -9,51 +9,15 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, type Ref, watch, onMounted } from "vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { CollapseState, SvgSharingComponentProps, StyleFields, Config } from "@/@types/widgets";
+import { ref, watch } from "vue";
 
-const props = defineProps(["component"]) as SvgSharingComponentProps;
-const opened: Ref<CollapseState> = ref({
+const props = defineProps(["component"]) as any;
+const opened = ref({
   textSection: false,
   storeSection: false,
 });
 
-const storeManager = useStoreManager();
-let stores: Ref<any[]> = ref([]) as Ref<any[]>;
-const requestResult: Ref<string> = ref("");
-const storeId: Ref<string> = ref(props.component.storeId);
-
-const getStores = () => {
-  const storeList = storeManager.getStoreList();
-
-  stores.value = Array.from(storeList.value, function (entry) {
-    return { ...entry[1] };
-  });
-};
-
-const getData = async () => {
-  const store = storeManager.getStore(storeId.value) as Store;
-
-  const data = await store.getData();
-  requestResult.value = JSON.stringify(data, null, 2);
-};
-
-const updateStore = (store) => {
-  storeId.value = store;
-  props.component.storeId = store;
-  getData();
-};
-
-onMounted(() => {
-  getStores();
-  if (storeId.value) {
-    getData();
-  }
-});
-
-const fields: Ref<StyleFields[]> = ref([{className: '', fill: '', stroke: '', strokeWidth: ''}]);
+const fields = ref([{className: '', fill: '', stroke: '', strokeWidth: ''}]);
 const addItems = () => {
   return fields.value.push({
     className: '',
@@ -66,7 +30,7 @@ const addItems = () => {
 watch(
   fields,
   () => {
-    const config: Config = {};
+    const config = {};
     fields.value.forEach(
       ({ className, fill, stroke, strokeWidth }) => {
         if (!config[className]) {
@@ -126,19 +90,6 @@ watch(
     <div class="settings-container">
       <div>
         <h3 class="mb-2">Select store</h3>
-        <div class="mb-2" v-for="store in stores" :key="store.id">
-          <va-radio
-            :model-value="storeId"
-            @update:model-value="updateStore"
-            :option="{
-              text: `${store.caption} ${store.id}`,
-              id: store.id,
-            }"
-            value-by="id"
-            name="store-radio-group"
-          />
-        </div>
-        <pre class="response">{{ requestResult }}</pre>
       </div>
     </div>
   </va-collapse>

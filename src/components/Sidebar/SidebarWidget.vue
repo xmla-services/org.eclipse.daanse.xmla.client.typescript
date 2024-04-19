@@ -17,12 +17,12 @@ const props = defineProps(["component", "wrapper"]);
 <template>
   <div class="sidebar-settings">
     <div class="sidebar-settings-title">
-      <h2>Widget settings</h2>
+      <h2 class="mb-2">Widget settings</h2>
     </div>
     <div class="sidebar-settings-content">
       <WidgetWrapperSettings :wrapper="props.wrapper"></WidgetWrapperSettings>
       <component
-        :is="props.component.settingsComponent"
+        :is="props.component.settings"
         :component="props.component"
       ></component>
     </div>
@@ -47,7 +47,6 @@ const props = defineProps(["component", "wrapper"]);
 .sidebar-settings-title > h2 {
   font-size: 24px;
   flex-grow: 1;
-  margin: 38px 0 10px 22px;
 }
 
 .sidebar-settings-content {
@@ -57,6 +56,5 @@ const props = defineProps(["component", "wrapper"]);
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
-  padding: 0 12px;
 }
 </style>

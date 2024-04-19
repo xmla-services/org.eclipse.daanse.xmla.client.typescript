@@ -8,39 +8,29 @@
   Contributors: Smart City Jena
 
 */
+export default class RESTDatasource {
+  public url = null;
+  public id = null as unknown as string;
+  public caption = null;
+  public type = "REST";
 
-export default class RESTDatasource implements IDatasource, ISerializable {
-  public url: string = "";
-  public id: string = "";
-  public caption: string = "";
-  public type = "REST" as const;
-
-  constructor(id: string, url: string, caption: string) {
+  constructor(id, url, caption) {
     this.id = id;
     this.url = url;
     this.caption = caption;
   }
 
-  async getData(resourcePath: string): Promise<any> {
-    const req = await fetch(`${this.url}${resourcePath}`);
+  async getData(url) {
+    const req = await fetch(`${this.url}${url}`);
     return await req.json();
   }
 
-  getState(): string {
-    return JSON.stringify({
+  getState() {
+    return {
       id: this.id,
       url: this.url,
       caption: this.caption,
       type: this.type,
-    });
-  }
-
-  loadState(state: string) {
-    const parsed = JSON.parse(state);
-
-    this.id = parsed.id;
-    this.url = parsed.url;
-    this.caption = parsed.caption;
-    this.type = parsed.type;
+    };
   }
 }
