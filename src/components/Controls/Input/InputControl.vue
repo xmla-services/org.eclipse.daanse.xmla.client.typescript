@@ -9,23 +9,28 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
-import type { Ref } from "vue";
-import { inject, ref } from "vue";
+import { inject, ref, type Ref } from "vue";
 import InputSettings from "./InputSettings.vue";
+import type { Component } from 'vue';
+import type { ComponentProps, EventItem } from "@/@types/controls";
 
-const settings = InputSettings;
+const settings: Component = InputSettings;
+
 const EventBus = inject("customEventBus") as any;
 
-const availableEvents = ["Blur", "Input"];
-
-const inputVal = ref("");
-
-const events = ref([]) as unknown as Ref<
-  Array<{ name: string; trigger: string }>
->;
+const label: Ref<string> = ref("Sample input");
+const availableEvents: string[] = ["Blur", "Input"];
+const inputVal: Ref<string> = ref("");
+  
+const events: Ref<EventItem[]> = ref([
+  {
+    name: "Next page",
+    trigger: "Input",
+  },
+]);
 
 const input = () => {
-  events.value.forEach((e) => {
+  events.value.forEach((e: EventItem) => {
     if (e.trigger === "Input") {
       console.log(`${e.name} emited`);
       EventBus.emit(e.name);
@@ -34,7 +39,7 @@ const input = () => {
 };
 
 const blur = () => {
-  events.value.forEach((e) => {
+  events.value.forEach((e: EventItem) => {
     if (e.trigger === "Blur") {
       console.log(`${e.name} emited`);
       EventBus.emit(e.name, inputVal.value);
@@ -42,15 +47,22 @@ const blur = () => {
   });
 };
 
-const label = ref("Sample input");
-
-defineExpose({ label, events, availableEvents, settings });
+defineExpose({ label, events, availableEvents, settings }) as unknown as ComponentProps;
 </script>
+
 <template>
   <va-input
+    class="input-control"
     :label="label"
     @blur="blur"
     v-model="inputVal"
-    @update:v-model="input"
+    @update:modelValue="input"
   ></va-input>
 </template>
+
+<style scoped>
+.input-control {
+  width: 100%;
+  height: 100%;
+}
+</style>

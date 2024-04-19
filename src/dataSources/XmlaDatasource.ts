@@ -10,53 +10,134 @@
 */
 import { XMLAApi } from "@/api/xml";
 import { createClientAsync } from "@/XMLAClient";
-// import { createClientAsync, type XmlaClient } from ;
+import { MetadataStore } from "./Storage/MetadataStore";
 
-export default class RESTDatasource {
-  public url = "";
-  public id = null as unknown as string;
-  public caption = null;
-  public type = "XMLA";
-  public client: any;
+export default class XMLADatasource implements IDatasource, ISerializable {
+  public url: string;
+  public id: string;
+  public caption: string;
+  public type = "XMLA" as const;
 
-  private api = <XMLAApi | null>null;
-  private tmpMDX = `SELECT
-  Hierarchize(AddCalculatedMembers({[Geschlecht.Geschlecht (m/w/d)].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 1,
-  Hierarchize(AddCalculatedMembers({[Jahr].[Jahr].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
-  FROM [Bevölkerung] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+  private cube: string | null = null;
+  private catalog: string | null = null;
+  private metadataStore: MetadataStore | null = null;
+
+  private api: Promise<XMLAApi>;
 
   constructor(
-    id,
-    url = "https://datacube-stage.nomad-dmz.jena.de/cube/xmla",
-    caption,
+    id: string,
+    url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
+    caption: string,
   ) {
     this.id = id;
     this.url = url;
     this.caption = caption;
-    const initApi = async () => {
-      this.client = await createClientAsync("def/xmla.wsdl");
 
-      this.client.setEndpoint(url);
-      console.log(url);
-      this.api = new XMLAApi(this.client, url);
-      await this.api.startSession();
-    };
+    this.api = new Promise((res) => {
+      const initApi = async () => {
+        const client = await createClientAsync("def/xmla.wsdl");
 
-    initApi();
+        client.setEndpoint(url);
+        const api = new XMLAApi(client, url);
+        await api.startSession();
+
+        res(api);
+      };
+
+      initApi();
+    });
   }
 
-  async getData(mdx = this.tmpMDX) {
-    console.log(mdx);
-    const mdxResponce = await this.api?.getMDX(mdx);
+  async getData(mdx: string) {
+    const api = await this.api;
+    const mdxResponce = await api.getMDX(mdx);
     return mdxResponce;
   }
 
+  getApi(): Promise<XMLAApi> {
+    return this.api;
+  }
+
+  async openCube(catalogName: string, cube: string) {
+    const api = await this.api;
+
+    const metadataStore = new MetadataStore(api);
+    await metadataStore.loadMetadata(catalogName, cube);
+    this.metadataStore = metadataStore;
+  }
+
+  async getHierarchies(): Promise<MDSchemaHierarchy[]> {
+    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+
+    return this.metadataStore.getHierarchies();
+  }
+
+  async getMeasures(): Promise<MDSchemaMeasure[]> {
+    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+
+    return this.metadataStore.getMeasures();
+  }
+
+  public async getCatalogs(): Promise<DBSchemaCatalog[]> {
+    const api = await this.api;
+
+    const { catalogs } = await api.getCatalogs();
+    return catalogs;
+  }
+
+  public async getCubes(catalogName: string): Promise<MDSchemaCube[]> {
+    const api = await this.api;
+
+    const { cubes } = await api.getCubes(catalogName);
+    return cubes;
+  }
+
+  public async setCube(cube: string) {
+    this.cube = cube;
+  }
+
+  public async setCatalog(catalog: string) {
+    this.catalog = catalog;
+  }
+
+  public getProperties(): MDSchemaProperty[] {
+    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+
+    return this.metadataStore.getProperties();
+  }
+
+  public getLevels(): MDSchemaLevel[] {
+    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+
+    return this.metadataStore.getLevels();
+  }
+
+  public async getMember(
+    parentLevel: MDSchemaLevel,
+    parentName: string,
+  ): Promise<MDSchemaMember> {
+    const api = await this.api;
+
+    return await api.getMember(parentLevel, parentName);
+  }
+
   getState() {
-    return {
+    return JSON.stringify({
       id: this.id,
       url: this.url,
       caption: this.caption,
       type: this.type,
-    };
+    });
+  }
+
+  loadState(state: string) {
+    const parsed = JSON.parse(state);
+
+    this.id = parsed.id;
+    this.url = parsed.url;
+    this.caption = parsed.caption;
+    this.type = parsed.type;
+    this.catalog = parsed.catalog;
+    this.cube = parsed.cube;
   }
 }

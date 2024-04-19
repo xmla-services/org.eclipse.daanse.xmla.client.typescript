@@ -53,7 +53,7 @@ class XMLAApi {
     this.sessionId = sessionId;
   }
 
-  public async getCatalogs() {
+  public async getCatalogs(): Promise<{ catalogs: DBSchemaCatalog[] }> {
     const catalogsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
         Session: {
@@ -73,14 +73,17 @@ class XMLAApi {
     });
 
     const catalogs = this.rowToArray(
-      catalogsResponce.Body.DiscoverResponse.return[0].root.row
+      catalogsResponce.Body.DiscoverResponse.return[0].root.row,
     );
+
     return {
       catalogs,
     };
   }
 
-  public async getCubes(catalogName: string): Promise<{ cubes: any[] }> {
+  public async getCubes(
+    catalogName: string,
+  ): Promise<{ cubes: MDSchemaCube[] }> {
     const cubesResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
         Session: {
@@ -102,7 +105,7 @@ class XMLAApi {
     });
 
     const cubes = this.rowToArray(
-      cubesResponce.Body.DiscoverResponse.return[0].root.row
+      cubesResponce.Body.DiscoverResponse.return[0].root.row,
     );
     return {
       cubes,
@@ -111,7 +114,7 @@ class XMLAApi {
 
   public async getDimensions(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaDimension[]> {
     const dimensionsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -135,13 +138,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      dimensionsResponce.Body.DiscoverResponse.return[0].root.row
+      dimensionsResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaDimension[];
   }
 
   public async getHierarchies(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaHierarchy[]> {
     const hierarchiesResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -165,13 +168,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      hierarchiesResponce.Body.DiscoverResponse.return[0].root.row
+      hierarchiesResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaHierarchy[];
   }
 
   public async getLevels(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaLevel[]> {
     const levelsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -195,14 +198,14 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      levelsResponce.Body.DiscoverResponse.return[0].root.row
+      levelsResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaLevel[];
   }
 
   public async getHierarchyLevels(
     catalogName: string,
     cubeName: string,
-    hierarchyUniqueName: string
+    hierarchyUniqueName: string,
   ): Promise<MDSchemaLevel[]> {
     const levelsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -227,13 +230,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      levelsResponce.Body.DiscoverResponse.return[0].root.row
+      levelsResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaLevel[];
   }
 
   public async getMeasureGroups(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaMeasureGroup[]> {
     const measureGroupsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -257,13 +260,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      measureGroupsResponce.Body.DiscoverResponse.return[0].root.row
+      measureGroupsResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaMeasureGroup[];
   }
 
   public async getMeasures(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaMeasure[]> {
     const measuresResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -287,13 +290,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      measuresResponce.Body.DiscoverResponse.return[0].root.row
+      measuresResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaMeasure[];
   }
 
   public async getSets(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaSet[]> {
     const setsResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -317,13 +320,13 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      setsResponce.Body.DiscoverResponse.return[0].root.row
+      setsResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaSet[];
   }
 
   public async getProperties(
     catalogName: string,
-    cubeName: string
+    cubeName: string,
   ): Promise<MDSchemaProperty[]> {
     const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -347,7 +350,7 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row
+      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaProperty[];
   }
 
@@ -377,19 +380,19 @@ class XMLAApi {
     });
 
     return this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row
+      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaMember[];
   }
 
   public async getLevelMembers(
     level: MDSchemaLevel,
     amount: number,
-    start: number
+    start: number,
   ): Promise<any[]> {
     const levelMembersRequestMDX = `
       select Subset(${level.LEVEL_UNIQUE_NAME}.AllMembers, ${start}, ${
-      amount + 1
-    }) 
+        amount + 1
+      }) 
       DIMENSION PROPERTIES MEMBER_TYPE on 0, 
       {} on 1 
       from ${level.CUBE_NAME}
@@ -398,14 +401,14 @@ class XMLAApi {
     const levelMembersResponce = await this.getMDX(levelMembersRequestMDX);
     return this.rowToArray(
       levelMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
-        .Tuple
+        .Tuple,
     );
   }
 
   public async getChildMembers(
     member: MDSchemaMember,
     amount: number,
-    start: number
+    start: number,
   ): Promise<any[]> {
     const childMembersRequestMDX = `
       select Subset({AddCalculatedMembers(${
@@ -419,7 +422,7 @@ class XMLAApi {
     const childMembersResponce = await this.getMDX(childMembersRequestMDX);
     return this.rowToArray(
       childMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
-        .Tuple
+        .Tuple,
     );
   }
 
@@ -447,7 +450,7 @@ class XMLAApi {
     rows: any[],
     columns: any[],
     pivotTableSettings: any,
-    properties: any[]
+    properties: any[],
   ): Promise<any> {
     let mdxRequest;
     if (rows.length && columns.length) {
@@ -475,8 +478,8 @@ class XMLAApi {
           properties.filter(
             (prop) =>
               prop.HIERARCHY_UNIQUE_NAME ===
-              e.originalItem.HIERARCHY_UNIQUE_NAME
-          )
+              e.originalItem.HIERARCHY_UNIQUE_NAME,
+          ),
         );
       });
 
@@ -504,8 +507,8 @@ class XMLAApi {
           properties.filter(
             (prop) =>
               prop.HIERARCHY_UNIQUE_NAME ===
-              e.originalItem.HIERARCHY_UNIQUE_NAME
-          )
+              e.originalItem.HIERARCHY_UNIQUE_NAME,
+          ),
         );
       });
 
@@ -564,14 +567,14 @@ class XMLAApi {
     const mdxResponce = await this.getMDX(mdxRequest);
     const axis0 = this.rowToArray(
       mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-        ?.Tuple
+        ?.Tuple,
     );
     const axis1 = this.rowToArray(
       mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-        ?.Tuple
+        ?.Tuple,
     );
     const cells = this.rowToArray(
-      mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell
+      mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
     );
 
     return {
@@ -583,7 +586,7 @@ class XMLAApi {
 
   public async getMember(
     level: MDSchemaLevel,
-    MEMBER_UNIQUE_NAME: string
+    MEMBER_UNIQUE_NAME: string,
   ): Promise<MDSchemaMember> {
     const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
       Headers: {
@@ -611,7 +614,7 @@ class XMLAApi {
     });
 
     const array = this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row
+      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
     ) as MDSchemaMember[];
 
     return array[0];

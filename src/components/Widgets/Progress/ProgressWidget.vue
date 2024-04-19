@@ -9,10 +9,20 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { ref, computed, inject, watch, type Ref, type Component, type PropType } from "vue";
 import ProgressWidgetSettings from "./ProgressWidgetSettings.vue";
-const settings = ProgressWidgetSettings;
+import { useStoreManager } from "@/composables/storeManager";
+import type { Store } from "@/stores/Widgets/Store";
+import type { ProgressComponentProps, ProgressSharingComponentProps, FillColor } from "@/@types/widgets";
 
+const settings: Component = ProgressWidgetSettings;
+
+const EventBus = inject("customEventBus") as any;
+const storeManager = useStoreManager();
+const storeId: Ref<string> = ref("");
+const data = ref(null as unknown);
+
+let store = null as unknown as Store;
 
 const props = defineProps({
   initialState: {
@@ -20,12 +30,15 @@ const props = defineProps({
     required: false,
   },
   progress: {
-    type: Number,
+    type: String,
     required: false,
-    default: 50,
+    default: () => "0.5",
+    // validator: (value) => {
+    //   return typeof value === 'string' || typeof value === 'number';
+    // },
   },
   fillColor: {
-    type: Object,
+    type: Object as PropType<FillColor>,
     required: false,
     default: () => ({
       backgroundColor: '#00FF00',
@@ -52,43 +65,44 @@ const props = defineProps({
     required: false,
     default: 90,
   }
-});
+}) as ProgressComponentProps;
 
-const innerProgress = ref(props.progress || 50);
-const innerFillColor = ref({
-  backgroundColor: props.fillColor.backgroundColor || '#00FF00',
-  backgroundGradient: props.fillColor.backgroundGradient || '#00FF00 0, #FAFAFA 100%',
-});
-const innerBackgroundColor = ref(props.backgroundColor || '#d3d3d3');
-const innerIsGradient = ref(props.isGradient || false);
-const innerIsVertical = ref(props.isVertical || false);
-const innerRotation = ref(props.rotation || 90)
+const { initialState } = props;
 
-const backgroundProgressColor = computed(() => {
-  return innerIsGradient.value
-    ? `linear-gradient(${innerRotation.value}deg, ${innerFillColor.value.backgroundGradient})`
-    : `${innerFillColor.value.backgroundColor}`;
-})
+const innerProgress: Ref<string> = ref(initialState?.progress || props.progress || 50);
+const innerFillColor: Ref<FillColor> = ref(
+  initialState?.innerFillColor || {
+    backgroundColor: props.fillColor?.backgroundColor || '#00FF00',
+    backgroundGradient: props.fillColor?.backgroundGradient || '#00FF00 0, #FAFAFA 100%',
+  }
+);
+const innerBackgroundColor: Ref<string> = ref(initialState?.backgroundColor || props.backgroundColor || '#d3d3d3');
+const innerIsGradient: Ref<boolean> = ref(initialState?.isGradient || props.isGradient || false);
+const innerIsVertical: Ref<boolean> = ref(initialState?.isVertical || props.isVertical || false);
+const innerRotation: Ref<number> = ref(initialState?.rotation || props.rotation || 90);
 
-const transition = computed(() => {
-  return innerIsVertical.value ? 'height .7s ease' : 'width .7s ease';
-})
+const getState = () => {
+  return {
+    progress: innerProgress.value,
+    fillColor: innerFillColor.value,
+    backgroundColor: innerBackgroundColor.value,
+    isGradient: innerIsGradient.value,
+    isVertical: innerIsGradient.value,
+    rotation: innerRotation.value,
+    storeId: storeId.value,
+  };
+};
 
-const verticalPositionFiller = computed(() => {
-  return innerIsVertical.value ? `${innerProgress.value}%` : '35px';
-})
-
-const horizontalPositionFiller = computed(() => {
-  return !innerIsVertical.value ? `${innerProgress.value}%` : '35px';
-})
-
-const verticalPositionBackground = computed(() => {
-  return innerIsVertical.value ? '35px' : '100%';
-})
-
-const horizontalPositionBackground = computed(() => {
-  return !innerIsVertical.value ? '35px' : '100%';
-})
+const setState = (state) => {
+  {
+    innerProgress.value = state.progress;
+    innerFillColor.value = state.fillColor;
+    innerBackgroundColor.value = state.backgroundColor;
+    innerIsGradient.value = state.isGradient;
+    innerIsVertical.value = state.isVertical;
+    innerRotation.value = state.rotation;
+  }
+}
 
 defineExpose({
   progress: innerProgress,
@@ -97,14 +111,97 @@ defineExpose({
   isVertical: innerIsVertical,
   backgroundColor: innerBackgroundColor,
   rotation: innerRotation,
+  storeId,
+  getState,
+  setState,
   settings,
+}) as unknown as ProgressSharingComponentProps;
+
+const getData = async () => {
+  if (!store) return;
+  updateFn();
+};
+
+watch(
+  () => props,
+  (newVal) => {
+    setState(newVal);
+  },
+  { deep: true },
+);
+
+watch(
+  storeId, 
+  (newVal, oldVal) => {
+  console.log("store changed", storeId);
+  store = storeManager.getStore(storeId.value);
+
+  console.log(oldVal, newVal);
+
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
+
+const updateFn = async () => {
+  data.value = await store?.getData();
+  console.log(data);
+};
+
+const parsedProgress = computed(() => {
+  if (!isNaN(parseFloat(innerProgress.value))) return `${(parseFloat(innerProgress.value) * 100).toFixed(2)}%`;
+  
+  let processedString = innerProgress.value;
+  const regex = /{(.*?)}/g;
+  const parts = processedString.match(regex);
+
+  if (!parts || !data.value) return processedString;
+
+  parts.forEach((element: string) => {
+    const trimmedString = element.replace("{", "").replace("}", "");
+    const dataField = trimmedString.split(".");
+
+    const res = dataField.reduce((acc: any, field) => {
+      return acc[field];
+    }, data.value);
+
+    processedString = processedString.replace(element, res);
+  });
+  return `${processedString}%`;
+});
+
+const backgroundProgressColor = computed<string>(() => {
+  return innerIsGradient.value
+    ? `linear-gradient(${innerRotation.value}deg, ${innerFillColor.value.backgroundGradient})`
+    : `${innerFillColor.value.backgroundColor}`;
+});
+
+const transition = computed<string>(() => {
+  return innerIsVertical.value ? 'height .7s ease' : 'width .7s ease';
+});
+
+const verticalPositionFiller = computed<string>(() => {
+  return innerIsVertical.value ? `${parseFloat(parsedProgress.value)}%` : '35px';
+});
+
+const horizontalPositionFiller = computed<string>(() => {
+  return !innerIsVertical.value ? `${parseFloat(parsedProgress.value)}%` : '35px';
+});
+
+const verticalPositionBackground = computed<string>(() => {
+  return innerIsVertical.value ? '35px' : '100%';
+});
+
+const horizontalPositionBackground = computed<string>(() => {
+  return !innerIsVertical.value ? '35px' : '100%';
 });
 </script>
 
 <template>
   <div class="container">
     <div class="progress">
-      <span>{{ `${innerProgress}%` }}</span>
+      <span>{{ parsedProgress }}</span>
       <div class="progress-percent"></div>
     </div>
   </div>

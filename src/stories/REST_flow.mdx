@@ -1,0 +1,86 @@
+import imageUrl from './images/RESTFlow.png';
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Wireframe for REST Data" />
+
+# REST Flow
+
+<img src={imageUrl} alt="Image alt" />
+
+
+# Parts of the flow
+
+## REST Server
+Any REST api server
+
+## REST Datasource
+Datasource is responsible for connecting to REST server.
+
+It should wrap request with headers, be responsible for caching and other request-related logic.
+For now it stores only server url.
+
+## REST Store
+
+Responsible for creating request. It builds resource path and body for the request.
+
+Contains next settings:
+- `caption`
+- `requestTemplate`
+- `params`  
+Parses the `requestTemplate` string and creates list of parameters  
+Example: `requestTemplate` `/products/{page}/{id}` will produce next parameters: `{ page: null, id: null }`  
+Params have initial values, this values will be used after component creation, can be reseted via `reset` method
+
+- `events`  
+Listens for events from widgets and controls.  
+Each event is a pair `EventName:Handler`. Handler is an executed js code that gets `params` as function argument, so simple functions may be used to modify parameters from
+
+```js
+events.forEach((e: { name: string; action: string }) => {
+  const cb = (value) => {
+    const functionArgs = Object.keys(this.runtimeParams);
+    const functionArgsVals = Object.values(this.runtimeParams);
+    
+    const userEvent = Function(
+      ...functionArgs,
+      "$value",
+      `
+        ${e.action};
+        return arguments;
+      `,
+    );
+
+    const modifiedParams = userEvent(...functionArgsVals, value);
+    functionArgs.forEach((e, i) => {
+      this.runtimeParams[e] = modifiedParams[i];
+    });
+
+    this.eventBus.emit(`UPDATE:${this.id}`);
+  };
+
+  this.eventBus.on(e.name, cb);
+  this.initedEvents.push({
+    name: e.name,
+    cb,
+  });
+});
+```
+
+## Widgets
+
+Stores visual settings and is responsible for visual event like resize.
+
+In order for widget to be dynamic it should be connected to the store. Some setting should have a string containing data from store.  
+Example of template: `Price for {title} is {price}`  
+Can also use arrays: `{images.0}`
+
+Reacts for events from store:
+```js
+
+watch(storeId, (newVal, oldVal) => {
+  EventBus.off(`UPDATE:${oldVal}`, updateFn);
+  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
+
+  getData();
+});
+```

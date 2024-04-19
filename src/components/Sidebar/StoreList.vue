@@ -19,6 +19,10 @@ const storeManager = useStoreManager();
 const addNewStore = () => {
   storeManager.initStore("New store", EventBus);
 };
+
+const addNewXMLAStore = () => {
+  storeManager.initStore("New store", EventBus, "XMLA");
+};
 </script>
 
 <template>
@@ -26,6 +30,7 @@ const addNewStore = () => {
     <div class="sidebar-stores-title">
       <h2 class="mb-2">Stores</h2>
       <va-button @click="addNewStore">Add new</va-button>
+      <va-button class="ml-2" @click="addNewXMLAStore">Add new XMLA</va-button>
     </div>
     <StoreList class="mt-2" />
   </div>

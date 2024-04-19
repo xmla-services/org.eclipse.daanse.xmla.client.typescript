@@ -10,41 +10,36 @@
 */
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
+import type RESTDatasource from "@/dataSources/RestDatasource";
 
-interface EventBus {
-  emit: (string, any?) => void;
-  on: (string, Function) => void;
-  off: (string, Function) => void;
-}
-
-export class Store {
-  public caption = "";
-  public id = "";
-  public datasourceIds = [] as string[];
+export class Store implements IStore {
+  public caption: string;
+  public id: string;
   private datasourceManager: any;
-  public data = null;
-  private eventBus = null as unknown as EventBus;
-  public params = {} as any;
-  public requestTemplate = "";
-  public events = [] as Array<{ name: string; action: string }>;
-  public initedEvents = [] as Array<{ name: string; cb: Function }>;
-  private runtimeParams = {} as any;
+  private eventBus: EventBus;
 
-  constructor(id, caption, eventBus: EventBus) {
+  public datasourceId: string | null = null;
+
+  public params: IStoreParams = {};
+  public requestTemplate: string;
+  public events: IStoreEvents[] = [];
+  public initedEvents: Array<{ name: string; cb: Function }> = [];
+  private runtimeParams: IStoreParams = {};
+
+  public type = "REST" as const;
+
+  constructor(id: string, caption: string, eventBus: EventBus) {
     this.id = id;
     this.caption = caption;
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
     this.requestTemplate = "/products/{pageNum}";
-    // this.params = {
-    //   pageNum: 1,
-    // };
 
     this.calculateParams();
     this.registerForDataSourceEvents();
   }
 
-  calculateParams() {
+  calculateParams(): void {
     const cachedParams = { ...this.params };
     this.params = {};
 
@@ -54,33 +49,29 @@ export class Store {
     });
 
     this.runtimeParams = { ...this.params };
-    console.log(this.params);
   }
 
-  updateParam(paramName, value) {
+  updateParam(paramName: string, value: string): void {
     this.params[paramName] = value;
     this.runtimeParams[paramName] = value;
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
-  addDatasource(datasourceId) {
-    this.datasourceIds.push(datasourceId);
+  addDatasource(datasourceId: string): void {
+    this.datasourceId = datasourceId;
   }
 
-  setDatasources(datasourceIds) {
-    this.datasourceIds = [...datasourceIds];
+  setDatasource(datasourceId: string): void {
+    this.datasourceId = datasourceId;
     this.eventBus.emit(`UPDATE:${this.id}`);
     this.registerForDataSourceEvents();
   }
 
-  async getData() {
+  async getData(): Promise<string> {
     let requestTemplate = this.requestTemplate;
 
-    const datasource = this.datasourceManager.getDatasource(
-      this.datasourceIds[0],
-    );
-
     const paramsList = Object.keys(this.params);
+
     paramsList.forEach((e) => {
       console.log(e);
       requestTemplate = requestTemplate.replace(
@@ -89,13 +80,21 @@ export class Store {
       );
     });
 
-    const json = await datasource?.getData(requestTemplate);
+    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
+    const json = (await datasource?.getData(requestTemplate)) as string;
 
-    this.data = json;
     return json;
   }
 
-  setOptions({ caption = "", requestTemplate = "" }) {
+  reset(): void {
+    this.calculateParams();
+  }
+
+  getDatasource(): RESTDatasource {
+    return this.datasourceManager.getDatasource(this.datasourceId);
+  }
+
+  setOptions({ caption = "", requestTemplate = "" }): void {
     this.caption = caption;
     this.requestTemplate = requestTemplate;
 
@@ -145,13 +144,13 @@ export class Store {
     });
   }
 
-  registerForDataSourceEvents(){
-    for(let id of this.datasourceIds){
-      this.eventBus.on(`UPDATE:${id}`,()=>{
-        console.log('updt');
-        this.eventBus.emit(`UPDATE:${this.id}`);
-      });
-    }
+  registerForDataSourceEvents(): void {
+    // for (const id of this.datasourceIds) {
+    //   this.eventBus.on(`UPDATE:${id}`, () => {
+    //     console.log("updt");
+    //     this.eventBus.emit(`UPDATE:${this.id}`);
+    //   });
+    // }
   }
 
   getState() {
@@ -160,7 +159,7 @@ export class Store {
       id: this.id,
       requestTemplate: this.requestTemplate,
       events: this.events,
-      datasourceIds: this.datasourceIds,
+      datasourceId: this.datasourceId,
       params: this.params,
     };
   }
@@ -170,7 +169,7 @@ export class Store {
     this.id = state.id;
     this.requestTemplate = state.requestTemplate;
     this.events = state.events;
-    this.datasourceIds = state.datasourceIds;
+    this.datasourceId = state.datasourceId;
     this.params = state.params;
     this.calculateParams();
     this.updateEvents(this.events);
