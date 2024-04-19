@@ -9,19 +9,9 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, inject, watch, computed, type Ref, type Component } from "vue";
+import { ref } from "vue";
 import VideoWidgetSettings from "./VideoWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { VideoComponentProps, VideoSharingComponentProps, ObjectFitSetting } from "@/@types/widgets";
-const settings: Component = VideoWidgetSettings;
-
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
-
-let store = null as unknown as Store;
+const settings = VideoWidgetSettings;
 
 
 const props = defineProps({
@@ -34,76 +24,23 @@ const props = defineProps({
     required: false,
     default: "",
   }
-}) as VideoComponentProps;
-
-const getState = () => {
-  return {
-    storeId: storeId.value,
-  };
-};
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
-
-
-const innerVideoUrl: Ref<string> = ref(props.videoUrl || "");
-const videoSettings: Ref<ObjectFitSetting> = ref({
+const innerVideoUrl = ref(props.videoUrl || "");
+const videoSettings = ref({
   fit: "None",
 })
 
 defineExpose({
   videoUrl: innerVideoUrl,
   videoSettings,
-  storeId,
   settings,
-  getState,
-}) as unknown as VideoSharingComponentProps;
-
-const videoUrlParced = computed(() => {
-  let processedString = innerVideoUrl.value;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
-
-  if (!parts || !data.value) {
-    return processedString;
-  }
-
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
-
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
 });
 </script>
 
 <template>
   <div class="container">
-    <video controls :src="videoUrlParced">
+    <video controls :src="innerVideoUrl">
       Your browser does not support embedded videos.
     </video>
   </div>

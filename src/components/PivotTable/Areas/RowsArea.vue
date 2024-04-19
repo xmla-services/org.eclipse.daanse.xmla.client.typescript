@@ -15,26 +15,18 @@ import { computed, inject, ref, watch, type Ref } from "vue";
 import MemberDropdown from "./MemberDropdown.vue";
 import MemberPropertiesModal from "@/components/Modals/MemberPropertiesModal.vue";
 import { useMetadataStorage } from "@/composables/metadataStorage";
-import { useStoreManager } from "@/composables/storeManager";
-import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
 const { state } = usePivotTableStore();
-const storeManager = useStoreManager();
 
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const MDDISPINFO_CHILD_COUNT = 65535;
 
-const props = defineProps([
-  "rows",
-  "rowsStyles",
-  "totalContentSize",
-  "storeId",
-]);
-const eventBus = inject("pivotTableEventBus") as TinyEmitter;
+const props = defineProps(["rows", "rowsStyles", "totalContentSize"]);
+const eventBus = inject("eventBus") as TinyEmitter;
 const setParentStylesValue = inject("setRowsStyles") as (
   index: number,
-  styles: number,
+  styles: number
 ) => {};
 
 const scrollPosition = ref(0);
@@ -73,7 +65,7 @@ watch(
         }
       }
     }
-  },
+  }
 );
 
 watch(
@@ -88,7 +80,7 @@ watch(
         }
       }
     }
-  },
+  }
 );
 
 const getRowMemberStyle = (i: number, j: number) => {
@@ -138,7 +130,7 @@ const hasChildrenDisplayed = (i: number, j: number) => {
 
   if (
     currentHierarchyMembers.some(
-      (e) => e && e.PARENT_UNIQUE_NAME === currentMember.UName,
+      (e) => e && e.PARENT_UNIQUE_NAME === currentMember.UName
     )
   ) {
     return true;
@@ -148,14 +140,6 @@ const hasChildrenDisplayed = (i: number, j: number) => {
 
 const rowIsExpanded = (i: number, j: number) => {
   const currentMember = props.rows?.[i]?.[j];
-
-  if (props.storeId) {
-    const store = storeManager.getStore(props.storeId) as XMLAStore;
-
-    return store.rowsExpandedMembers.some(
-      (e) => e.UName === currentMember.UName,
-    );
-  }
 
   return state.rowsExpandedMembers.some((e) => e.UName === currentMember.UName);
 };
@@ -283,7 +267,7 @@ const showMemberProperties = (member) => {
 
 const hideMemberProperties = (member) => {
   const indexToRemove = state.membersWithProps.indexOf(
-    (e) => e === member.HIERARCHY_UNIQUE_NAME,
+    (e) => e === member.HIERARCHY_UNIQUE_NAME
   );
   state.membersWithProps.splice(indexToRemove, 1);
 };
@@ -296,7 +280,7 @@ watch(
   () => currentlyDisplayedValues.value,
   () => {
     translate.value = currentlyDisplayedValues.value.translate;
-  },
+  }
 );
 </script>
 <template>

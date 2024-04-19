@@ -17,7 +17,12 @@ import XmlaDatasource from "@/dataSources/XmlaDatasource";
 import MQTTDatasource from "@/dataSources/MqttDatasource";
 import {inject} from "vue";
 
-const availableDatasources = ref({});
+
+
+
+const availableDatasources = ref(
+  new Map<string, RESTDatasource | XmlaDatasource | MQTTDatasource>(),
+);
 
 export function useDatasourceManager() {
   const EventBus = inject("customEventBus") as any;
@@ -30,25 +35,25 @@ export function useDatasourceManager() {
     if (type === "REST") {
       const datasource = new RESTDatasource(id, url, caption);
 
-      availableDatasources.value[id] = datasource;
+      availableDatasources.value.set(id, datasource);
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(id, undefined, caption);
 
-      availableDatasources.value[id] = datasource;
+      availableDatasources.value.set(id, datasource);
     }
     if (type === "MQTT") {
 
       const datasource = new MQTTDatasource(id, url, caption, EventBus);
 
-      availableDatasources.value[id] = datasource;
+      availableDatasources.value.set(id, datasource);
     }
 
     return id;
   };
 
   const getDatasource = (key) => {
-    return availableDatasources.value[key];
+    return availableDatasources.value.get(key);
   };
 
   const getDatasourceList = () => {
@@ -59,43 +64,44 @@ export function useDatasourceManager() {
     if (type === "REST") {
       const datasource = new RESTDatasource(key, url, caption);
 
-      availableDatasources.value[key] = datasource;
+      availableDatasources.value.set(key, datasource);
     }
     if (type === "XMLA") {
       const datasource = new XmlaDatasource(key, undefined, caption);
 
-      availableDatasources.value[key] = datasource;
+      availableDatasources.value.set(key, datasource);
     }
     if (type === "MQTT") {
       const datasource = new MQTTDatasource(key, url, caption,EventBus);
 
-      availableDatasources.value[key] = datasource;
+      availableDatasources.value.set(key, datasource);
     }
   };
 
-  const getState = () => {
+  const getSerializedState = () => {
     const state = {};
 
-    // availableDatasources.value.forEach((ds) => {
-    //   state[ds.id] = ds.getState();
-    // });
+    availableDatasources.value.forEach((ds) => {
+      state[ds.id] = ds.getState();
+    });
 
     return JSON.stringify(state);
   };
 
   const loadState = (state) => {
+
     Object.keys(state).forEach((key) => {
       const ds = state[key];
 
       if (ds.type === "REST") {
         const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
 
-        availableDatasources.value[key] = datasource;
+        availableDatasources.value.set(key, datasource);
       }
       if (ds.type === "XMLA") {
         const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
 
-        availableDatasources.value[key] = datasource;
+        availableDatasources.value.set(key, datasource);
       }
     });
 
@@ -107,7 +113,7 @@ export function useDatasourceManager() {
     getDatasource,
     getDatasourceList,
     updateDatasource,
-    getState,
+    getSerializedState,
     loadState,
   };
 }

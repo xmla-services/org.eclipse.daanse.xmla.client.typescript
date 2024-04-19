@@ -9,16 +9,15 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
-import { inject, ref, type Component, type Ref } from "vue";
-import type { EventItem, ButtonComponentProps } from "@/@types/controls";
+import { inject, ref } from "vue";
 import ButtonSettings from "@/components/Controls/Button/ButtonSettings.vue";
 
-const settings: Component = ButtonSettings;
-const title: Ref<string> = ref("Next page");
 const EventBus = inject("customEventBus") as any;
-const availableEvents: string[] = ["Click"];
+const settings = ButtonSettings;
 
-const events: Ref<EventItem[]> = ref([
+const availableEvents = ["Click"];
+
+const events = ref([
   {
     name: "Next page",
     trigger: "Click",
@@ -26,24 +25,18 @@ const events: Ref<EventItem[]> = ref([
 ]);
 
 const click = () => {
-  events.value.forEach((e: EventItem) => {
+  events.value.forEach((e) => {
     if (e.trigger === "Click") {
-      console.log(`${e.name} emited`, settings);
+      console.log(`${e.name} emited`);
       EventBus.emit(e.name);
     }
   });
 };
 
-defineExpose({ title, events, availableEvents, settings }) as unknown as ButtonComponentProps;
+const title = ref("Next page");
+
+defineExpose({ title, events, availableEvents, settings });
 </script>
-
 <template>
-  <va-button class="button-control" @click="click"> {{ title }} </va-button>
+  <va-button @click="click"> {{ title }} </va-button>
 </template>
-
-<style scoped>
-.button-control {
-  width: 100%;
-  height: 100%;
-}
-</style>

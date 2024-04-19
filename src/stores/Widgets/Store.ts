@@ -10,36 +10,41 @@
 */
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
-import type RESTDatasource from "@/dataSources/RestDatasource";
 
-export class Store implements IStore {
-  public caption: string;
-  public id: string;
+interface EventBus {
+  emit: (string, any?) => void;
+  on: (string, Function) => void;
+  off: (string, Function) => void;
+}
+
+export class Store {
+  public caption = "";
+  public id = "";
+  public datasourceIds = [] as string[];
   private datasourceManager: any;
-  private eventBus: EventBus;
+  public data = null;
+  private eventBus = null as unknown as EventBus;
+  public params = {} as any;
+  public requestTemplate = "";
+  public events = [] as Array<{ name: string; action: string }>;
+  public initedEvents = [] as Array<{ name: string; cb: Function }>;
+  private runtimeParams = {} as any;
 
-  public datasourceId: string | null = null;
-
-  public params: IStoreParams = {};
-  public requestTemplate: string;
-  public events: IStoreEvents[] = [];
-  public initedEvents: Array<{ name: string; cb: Function }> = [];
-  private runtimeParams: IStoreParams = {};
-
-  public type = "REST" as const;
-
-  constructor(id: string, caption: string, eventBus: EventBus) {
+  constructor(id, caption, eventBus: EventBus) {
     this.id = id;
     this.caption = caption;
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
     this.requestTemplate = "/products/{pageNum}";
+    // this.params = {
+    //   pageNum: 1,
+    // };
 
     this.calculateParams();
     this.registerForDataSourceEvents();
   }
 
-  calculateParams(): void {
+  calculateParams() {
     const cachedParams = { ...this.params };
     this.params = {};
 
@@ -49,29 +54,33 @@ export class Store implements IStore {
     });
 
     this.runtimeParams = { ...this.params };
+    console.log(this.params);
   }
 
-  updateParam(paramName: string, value: string): void {
+  updateParam(paramName, value) {
     this.params[paramName] = value;
     this.runtimeParams[paramName] = value;
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
-  addDatasource(datasourceId: string): void {
-    this.datasourceId = datasourceId;
+  addDatasource(datasourceId) {
+    this.datasourceIds.push(datasourceId);
   }
 
-  setDatasources(datasourceId: string): void {
-    this.datasourceId = datasourceId;
+  setDatasources(datasourceIds) {
+    this.datasourceIds = [...datasourceIds];
     this.eventBus.emit(`UPDATE:${this.id}`);
     this.registerForDataSourceEvents();
   }
 
-  async getData(): Promise<string> {
+  async getData() {
     let requestTemplate = this.requestTemplate;
 
-    const paramsList = Object.keys(this.params);
+    const datasource = this.datasourceManager.getDatasource(
+      this.datasourceIds[0],
+    );
 
+    const paramsList = Object.keys(this.params);
     paramsList.forEach((e) => {
       console.log(e);
       requestTemplate = requestTemplate.replace(
@@ -80,21 +89,13 @@ export class Store implements IStore {
       );
     });
 
-    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
-    const json = (await datasource?.getData(requestTemplate)) as string;
+    const json = await datasource?.getData(requestTemplate);
 
+    this.data = json;
     return json;
   }
 
-  reset(): void {
-    this.calculateParams();
-  }
-
-  getDatasource(): RESTDatasource {
-    return this.datasourceManager.getDatasource(this.datasourceId);
-  }
-
-  setOptions({ caption = "", requestTemplate = "" }): void {
+  setOptions({ caption = "", requestTemplate = "" }) {
     this.caption = caption;
     this.requestTemplate = requestTemplate;
 
@@ -144,13 +145,13 @@ export class Store implements IStore {
     });
   }
 
-  registerForDataSourceEvents(): void {
-    // for (const id of this.datasourceIds) {
-    //   this.eventBus.on(`UPDATE:${id}`, () => {
-    //     console.log("updt");
-    //     this.eventBus.emit(`UPDATE:${this.id}`);
-    //   });
-    // }
+  registerForDataSourceEvents(){
+    for(let id of this.datasourceIds){
+      this.eventBus.on(`UPDATE:${id}`,()=>{
+        console.log('updt');
+        this.eventBus.emit(`UPDATE:${this.id}`);
+      });
+    }
   }
 
   getState() {
@@ -159,7 +160,7 @@ export class Store implements IStore {
       id: this.id,
       requestTemplate: this.requestTemplate,
       events: this.events,
-      datasourceId: this.datasourceId,
+      datasourceIds: this.datasourceIds,
       params: this.params,
     };
   }
@@ -169,7 +170,7 @@ export class Store implements IStore {
     this.id = state.id;
     this.requestTemplate = state.requestTemplate;
     this.events = state.events;
-    this.datasourceId = state.datasourceId;
+    this.datasourceIds = state.datasourceIds;
     this.params = state.params;
     this.calculateParams();
     this.updateEvents(this.events);

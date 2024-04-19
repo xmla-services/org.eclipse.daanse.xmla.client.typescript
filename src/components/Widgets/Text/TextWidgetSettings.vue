@@ -13,36 +13,16 @@ import { ref, type Ref, onMounted } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import type { Store } from "@/stores/Widgets/Store";
 
-import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
-
-interface ITextSettings {
-  text: string;
-  fontSize: number;
-  fontColor: string;
-  fontWeight: string;
-  textDecoration: string;
-  horizontalAlign: string;
-  verticalAlign: string;
-}
-
-interface ITextComponent {
-  store: Store | XMLAStore;
-  settings: ITextSettings;
-  setSetting: (key: string, value: any) => void;
-  setStore: (store: Store | XMLAStore) => void;
-}
-
-const { component } = defineProps<{ component: ITextComponent }>();
-
+const props = defineProps(["component"]) as any;
 const opened = ref({
   textSection: false,
   storeSection: false,
 });
 
-// TODO: Move to store selection component
 const storeManager = useStoreManager();
-let stores = ref([]) as Ref<Store[]>;
+let stores = ref([]) as Ref<any[]>;
 const requestResult = ref("");
+const storeId = ref(props.component.storeId);
 
 const getStores = () => {
   const storeList = storeManager.getStoreList();
@@ -53,21 +33,24 @@ const getStores = () => {
 };
 
 const getData = async () => {
-  const store = component.store as Store;
+  const store = storeManager.getStore(storeId.value) as Store;
+
   const data = await store.getData();
   requestResult.value = JSON.stringify(data, null, 2);
 };
 
-const updateStore = (storeId) => {
-  const store = storeManager.getStore(storeId) as Store;
-  component.setStore(store);
-  console.log(component);
+const updateStore = (store) => {
+  storeId.value = store;
+  props.component.storeId = store;
+  // props.component.setSettings({
+  //   store: store,
+  // });
   getData();
 };
 
 onMounted(() => {
   getStores();
-  if (component.store) {
+  if (storeId.value) {
     getData();
   }
 });
@@ -76,92 +59,12 @@ onMounted(() => {
 <template>
   <va-collapse v-model="opened.textSection" header="Text widget settings">
     <div class="settings-container">
-      <div class="settings-block">
-        <va-input
-          class="text-title"
-          label="Title"
-          :model-value="component.settings.text"
-          @update:model-value="component.setSetting('text', $event)"
-        />
-        <va-input
-          class="text-size"
-          label="Font Size"
-          :model-value="component.settings.fontSize"
-          @update:model-value="component.setSetting('fontSize', $event)"
-        />
-        
-      </div>
-      <div class="settings-block">
-        <va-color-input
-          class="text-color"
-          label="Font Color"
-          :model-value="component.settings.fontColor"
-          @update:model-value="component.setSetting('fontColor', $event)"
-        />
-        <div class="align-buttons-group">
-          <VaButtonGroup
-            class="button-group"
-            size="medium"
-            grow
-            preset="plain"
-            border-color="#CDCFDB"
-          >
-            <VaButton 
-              color="#000000"
-              class="align-button ml-2" 
-              icon="align_horizontal_left" 
-              :model-value="component.settings.horizontalAlign"
-              @click="component.setSetting('horizontalAlign', 'Left')"
-            />
-            <VaButton 
-              color="#000000"
-              class="align-button" 
-              icon="align_horizontal_center" 
-              :model-value="component.settings.horizontalAlign"
-              @click="component.setSetting('horizontalAlign', 'Center')"
-            />
-            <VaButton 
-              color="#000000"
-              class="align-button" 
-              icon="align_horizontal_right"
-              :model-value="component.settings.horizontalAlign"
-              @click="component.setSetting('horizontalAlign', 'Right')"
-            />
-            <VaButton 
-              color="#000000"
-              class="align-button" 
-              icon="align_vertical_top" 
-              :model-value="component.settings.verticalAlign"
-              @click="component.setSetting('verticalAlign', 'Top')"
-            />
-            <VaButton 
-              color="#000000"
-              class="align-button" 
-              icon="align_vertical_center" 
-              :model-value="component.settings.verticalAlign"
-              @click="component.setSetting('verticalAlign', 'Center')"
-            />
-            <VaButton 
-              color="#000000"
-              class="align-button" 
-              icon="align_vertical_bottom" 
-              :model-value="component.settings.verticalAlign"
-              @click="component.setSetting('verticalAlign', 'Bottom')"
-            />
-          </VaButtonGroup>
-          
-        </div>
-        <va-input
-            class="text-weight ml-2"
-            label="Font Weight"
-            :model-value="component.settings.fontWeight"
-            @update:model-value="component.setSetting('fontWeight', $event)"
-          />
-    </div>
-    <div class="settings-block">
-        
-      </div>
-      <!-- <va-select
+      <va-input v-model="props.component.text" label="Text" />
+      <va-input v-model="props.component.fontSize" label="Font Size" />
+      <va-input v-model="props.component.fontColor" label="Font Color" />
+      <va-input v-model="props.component.fontWeight" label="Font Weight" />
+      <va-select
+        v-model="props.component.textDecoration"
         label="Text decoration"
         :options="[
           'Underline solid',
@@ -171,9 +74,17 @@ onMounted(() => {
           'Overline',
           'None',
         ]"
-        :model-value="component.settings.textDecoration"
-        @update:model-value="component.setSetting('textDecoration', $event)"
-      /> -->      
+      />
+      <va-select
+        v-model="props.component.horizontalAlign"
+        label="Horizontal align"
+        :options="['Left', 'Center', 'Right']"
+      />
+      <va-select
+        v-model="props.component.verticalAlign"
+        label="Vertical align"
+        :options="['Top', 'Center', 'Bottom']"
+      />
     </div>
   </va-collapse>
   <va-collapse v-model="opened.storeSection" header="Store settings">
@@ -182,7 +93,7 @@ onMounted(() => {
         <h3 class="mb-2">Select store</h3>
         <div class="mb-2" v-for="store in stores" :key="store.id">
           <va-radio
-            :model-value="component.store?.id"
+            :model-value="storeId"
             @update:model-value="updateStore"
             :option="{
               text: `${store.caption} ${store.id}`,
@@ -197,53 +108,11 @@ onMounted(() => {
     </div>
   </va-collapse>
 </template>
-<style lang="scss" scoped>
+<style scoped>
 .settings-container {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
-}
-
-.settings-block {
-  display: flex;
-  flex-direction: row;
-}
-
-.text-title {
-  width: 100%;
-}
-
-.text-size {
-  width: 63px;
-  margin-left: 12px;
-}
-
-.text-color {
-  width: 156px;
-}
-
-.text-weight {
-  width: 100px;
-}
-
-.align-buttons-group {
-  display: flex;
-  align-items: flex-end;
-
-  .button-group {
-    padding: 2px;
-  }
-
-  .align-button {
-
-    &:hover  {
-      --va-background-color: rgb(162, 181, 218) !important;
-    }
-
-    &:nth-child(4) {
-      // padding-left: 10px;
-    }
-  }
 }
 </style>

@@ -16,7 +16,7 @@ import { v4 } from "uuid";
 defineEmits(["openCellProperties", "drillthrough"]);
 
 const opened = ref(false);
-const eventBus = inject("pivotTableEventBus") as TinyEmitter;
+const eventBus = inject("eventBus") as TinyEmitter;
 const uid = "id" + v4();
 
 eventBus.on("DropdownOpened", (openedUid: string) => {

@@ -9,23 +9,11 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { computed, getCurrentInstance, onMounted, ref, watch, inject, type Ref, type Component, PropType } from "vue";
+import { computed, getCurrentInstance, onMounted, ref } from "vue";
 import SvgWidgetSettings from "./SvgWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { Config, RepeatableSvgSharingComponentProps, SvgComponentProps } from "@/@types/widgets";
-const settings: Component = SvgWidgetSettings;
+const settings = SvgWidgetSettings;
 
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
-const svgSource: Ref<string> = ref("");
-const inst = getCurrentInstance();
-const scope = inst?.type.__scopeId;
-
-let store = null as unknown as Store;
-
+const svgSource = ref("");
 const props = defineProps({
   initialState: {
     type: Object,
@@ -37,45 +25,19 @@ const props = defineProps({
     default: "/demo/test.svg",
   },
   classesConfig: {
-    type: Object as PropType<Config>,
+    type: Object,
     required: false,
     default: null,
   },
-}) as SvgComponentProps;
-
-const getState = () => {
-  return {
-    storeId: storeId.value,
-  };
-};
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
+const innerClassesConfig = ref(props.classesConfig || null);
 
-const innerClassesConfig: Ref<Config> = ref(props.classesConfig || null);
+const styles = computed(() => {
+  let string = "";
 
-const styles: Ref<string> = computed(() => {
-  let string: string = "";
-
+  const inst = getCurrentInstance();
+  const scope = inst?.type.__scopeId;
   if (innerClassesConfig.value) {
     string += "<style>";
     for (const [key, value] of Object.entries(innerClassesConfig.value)) {
@@ -103,37 +65,13 @@ onMounted(async () => {
 defineExpose({
   src: svgSource,
   classesConfig: innerClassesConfig,
-  storeId,
   settings,
-  getState,
-}) as unknown as RepeatableSvgSharingComponentProps;
-
-const svgSourceParced = computed(() => {
-  let processedString = svgSource.value;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
-
-  if (!parts || !data.value) {
-    return processedString;
-  }
-
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
-
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
 });
 </script>
 
 <template>
   <div v-html="styles"></div>
-  <div class="svg" v-html="svgSourceParced"></div>
+  <div class="svg" v-html="svgSource"></div>
 </template>
 
 <style scoped>
