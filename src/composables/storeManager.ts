@@ -15,23 +15,32 @@ import queryString from "query-string";
 import { optionalArrayToArray } from "@/utils/helpers";
 import { v4, v5 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
+import { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
 const availableStores = ref(new Map<string, any>());
 
 export function useStoreManager() {
-  const initStore = (caption = "NO CAPTION", eventBus): string => {
+  const initStore = (
+    caption = "NO CAPTION",
+    eventBus,
+    type = "REST",
+  ): string => {
     console.log(eventBus);
     const id = v4();
-    const store = reactive(new Store(id, caption, eventBus));
-    console.log("inited");
 
-    // store.addDatasource("REST", "https://dummyjson.com");
-    availableStores.value.set(id, store);
+    if (type === "REST") {
+      const store = reactive(new Store(id, caption, eventBus));
+      availableStores.value.set(id, store);
+    } else {
+      const store = reactive(new XMLAStore(id, caption, eventBus));
+      availableStores.value.set(id, store);
+    }
+    console.log("inited");
 
     return id;
   };
 
-  const getStore = (key): Store => {
+  const getStore = (key): IStore => {
     const store = availableStores.value.get(key);
     if (store) {
       return store;
@@ -44,7 +53,7 @@ export function useStoreManager() {
     return availableStores;
   };
 
-  const getSerializedState = () => {
+  const getState = () => {
     const state = {};
 
     availableStores.value.forEach((store) => {
@@ -69,7 +78,7 @@ export function useStoreManager() {
     initStore,
     getStore,
     getStoreList,
-    getSerializedState,
+    getState,
     loadState,
   };
 }

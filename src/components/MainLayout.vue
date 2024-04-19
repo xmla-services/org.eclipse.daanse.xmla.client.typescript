@@ -21,8 +21,8 @@ const getLeftWidth = () => {
 </script>
 
 <template>
+  <navbar></navbar>
   <div class="app-layout-container bg grey overflow-hidden">
-    <navbar></navbar>
     <div v-if="appSettings.cubeOpened" class="split-container marginLeft">
       <va-split
         class="split"

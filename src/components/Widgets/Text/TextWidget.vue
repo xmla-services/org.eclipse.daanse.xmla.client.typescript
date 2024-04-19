@@ -9,106 +9,60 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, watch, computed, inject } from "vue";
+interface ITextSettings {
+  text: string;
+  fontSize: number;
+  fontColor: string;
+  fontWeight: string;
+  textDecoration: string;
+  horizontalAlign: string;
+  verticalAlign: string;
+}
+
+interface ITextSettingsProps {
+  text?: string;
+  fontSize?: number;
+  fontColor?: string;
+  fontWeight?: string;
+  textDecoration?: string;
+  horizontalAlign?: string;
+  verticalAlign?: string;
+}
+
+import { computed } from "vue";
 import TextWidgetSettings from "./TextWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
-const settings = TextWidgetSettings;
 
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId = ref("");
-const data = ref(null as unknown);
+const settingsComponent = TextWidgetSettings;
 
-let store = null as unknown as Store;
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  text: {
-    type: String,
-    required: false,
-    default: "",
-  },
-  fontSize: {
-    type: Number,
-    required: false,
-    default: 12,
-  },
-  fontColor: {
-    type: String,
-    required: false,
-    default: "#000",
-  },
-  fontWeight: {
-    type: String,
-    required: false,
-    default: "normal",
-  },
-  textDecoration: {
-    type: String,
-    required: false,
-    default: "None",
-  },
-  horizontalAlign: {
-    type: String,
-    required: false,
-    default: "Left",
-  },
-  verticalAlign: {
-    type: String,
-    required: false,
-    default: "Top",
-  },
+const props = withDefaults(defineProps<ITextSettingsProps>(), {
+  text: "",
+  fontSize: 12,
+  fontColor: "#000",
+  fontWeight: "normal",
+  textDecoration: "None",
+  horizontalAlign: "Left",
+  verticalAlign: "Top",
 });
 
-const { initialState, text } = props;
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
 
-const innerText = ref(initialState?.text || text || "");
-const innerFontSize = ref(initialState?.fontSize || props.fontSize || 12);
-const innerFontColor = ref(
-  initialState?.fontColor || props.fontColor || "#000",
-);
-const innerFontWeight = ref(
-  initialState?.fontWeight || props.fontWeight || "normal",
-);
-const innerTextDecoration = ref(
-  initialState?.textDecoration || props.textDecoration || "None",
-);
-const innerVerticalAlign = ref(
-  initialState?.verticalAlign || props.verticalAlign || "Top",
-);
-const innerHorizontalAlign = ref(
-  initialState?.horizontalAlign || props.horizontalAlign || "Left",
-);
-
-const getState = () => {
-  return {
-    text: innerText.value,
-    fontSize: innerFontSize.value,
-    fontColor: innerFontColor.value,
-    fontWeight: innerFontWeight.value,
-    textDecoration: innerTextDecoration.value,
-    verticalAlign: innerVerticalAlign.value,
-    horizontalAlign: innerHorizontalAlign.value,
-    storeId: storeId.value,
-  };
-};
-
-const setState = (state) => {
-  innerText.value = state.text;
-  innerFontSize.value = state.fontSize;
-  innerFontColor.value = state.fontColor;
-  innerFontWeight.value = state.fontWeight;
-  innerTextDecoration.value = state.textDecoration;
-  innerVerticalAlign.value = state.verticalAlign;
-  innerHorizontalAlign.value = state.horizontalAlign;
-};
+defineExpose({
+  setSetting,
+  settings,
+  settingsComponent,
+  store,
+  setStore,
+  getState,
+});
 
 const textDecorationStyle = computed(() => {
-  switch (innerTextDecoration.value) {
+  switch (settings.value.textDecoration) {
     case "Underline solid":
       return "underline solid";
     case "Underline dashed":
@@ -124,52 +78,8 @@ const textDecorationStyle = computed(() => {
   }
 });
 
-defineExpose({
-  text: innerText,
-  fontSize: innerFontSize,
-  fontColor: innerFontColor,
-  fontWeight: innerFontWeight,
-  textDecoration: innerTextDecoration,
-  horizontalAlign: innerHorizontalAlign,
-  verticalAlign: innerVerticalAlign,
-  storeId,
-  settings,
-  getState,
-  setState,
-});
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(
-  () => props,
-  (newVal) => {
-    setState(newVal);
-  },
-  { deep: true },
-);
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
-});
-
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
-
 const parsedText = computed(() => {
-  let processedString = innerText.value;
+  let processedString = settings.value.text;
   const regex = /{(.*?)}/g;
   const parts = processedString.match(regex);
 
@@ -196,11 +106,11 @@ const parsedText = computed(() => {
     class="text-container"
     :style="{
       'justify-content':
-        innerVerticalAlign === 'Top'
+        settings.verticalAlign === 'Top'
           ? 'flex-start'
-          : innerVerticalAlign === 'Center'
-          ? 'center'
-          : 'flex-end',
+          : settings.verticalAlign === 'Center'
+            ? 'center'
+            : 'flex-end',
     }"
   >
     <div class="component">
@@ -220,10 +130,10 @@ const parsedText = computed(() => {
 }
 
 .component {
-  font-size: v-bind(innerFontSize + "px");
-  color: v-bind(innerFontColor);
-  text-align: v-bind(innerHorizontalAlign);
-  font-weight: v-bind(innerFontWeight);
+  font-size: v-bind(settings.fontSize + "px");
+  color: v-bind(settings.fontColor);
+  text-align: v-bind(settings.horizontalAlign);
+  font-weight: v-bind(settings.fontWeight);
   text-decoration: v-bind(textDecorationStyle);
   overflow: hidden;
 }

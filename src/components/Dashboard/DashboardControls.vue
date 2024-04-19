@@ -11,7 +11,7 @@ Contributors: Smart City Jena
 <template>
   <div class="controls-container">
     <va-button icon="settings" size="small" @click="$emit('openSettings')" />
-    <va-button icon="clear" color="danger" size="small" @click="$emit('deleteWidget')" />
+    <va-button icon="clear" color="danger" size="small" @click="$emit('deleteElement')" />
   </div>
 </template>
 <style>

@@ -9,20 +9,22 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-const props = defineProps(["component"]) as any;
-const options = props.component.availableEvents;
-let events = props.component.events;
+import type { ComponentProps, EventItem } from "@/@types/controls";
+import { ref, type Ref } from "vue";
+
+const props = defineProps(['component']) as ComponentProps;
+const options: Ref<string[]> = ref(props.component.availableEvents);
+const events: Ref<EventItem[]> = ref(props.component.events);
 
 const addEvent = () => {
-  events.push({
+  events.value.push({
     name: "",
     trigger: "",
   });
 };
 
-const deleteEvent = (id) => {
-  props.component.events = [...events.slice(0, id), ...events.slice(id + 1)];
-  events = props.component.events;
+const deleteEvent = (id: number) => {
+  events.value.splice(id, 1);
 };
 </script>
 
@@ -65,6 +67,7 @@ const deleteEvent = (id) => {
     </div>
   </div>
 </template>
+
 <style>
 .events-list {
   margin-top: 20px;
