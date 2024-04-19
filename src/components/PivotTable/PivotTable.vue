@@ -11,7 +11,7 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { findMaxinArrayByField, optionalArrayToArray } from "@/utils/helpers";
-import { onMounted, provide, ref, watch, type Ref, h } from "vue";
+import { onMounted, provide, ref, watch, type Ref } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import RowsArea from "./Areas/RowsArea.vue";
 import ColumnsArea from "./Areas/ColumnsArea.vue";
@@ -48,7 +48,7 @@ export default {
     const rowsStyles = ref([...pivotTableStore.state.styles.rows] as any[]);
 
     const eventBus = new TinyEmitter();
-    provide("eventBus", eventBus);
+    provide("pivotTableEventBus", eventBus);
 
     pivotTableStore.state.inited = true;
 
@@ -142,8 +142,10 @@ export default {
       const mdx = pivotTableStore.mdx;
 
       const mdxResponce = await api.getMDX(mdx);
+      console.log(mdxResponce);
       const properties = (await metadataStorage.getMetadataStorage())
         .properties;
+      console.log(properties);
       const axis0 = optionalArrayToArray(
         optionalArrayToArray(
           mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis,
@@ -473,12 +475,12 @@ export default {
       });
     },
     downloadCSV() {
-      const { init, close, closeAll } = useToast();
+      const { init } = useToast();
       try {
         const rowMaxLevel = findMaxinArrayByField(["0", "LNum"], this.rows);
         const colMaxLevel = findMaxinArrayByField(["0", "LNum"], this.columns);
 
-        let csv = [];
+        let csv = [] as any;
         for (let row = 0; row <= colMaxLevel; row++) {
           csv.push([]);
           for (let col = 0; col <= rowMaxLevel; col++) {

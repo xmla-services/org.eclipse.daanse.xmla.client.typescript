@@ -22,21 +22,22 @@ const innerBackground = ref('#fafafa');
 <template>
   <div class="app-settings">
     <div class="app-settings-title">
-      <h2 class="mb-3">App settings</h2>
+      <h2>App settings</h2>
       <va-color-input
         v-model="innerBackground"
         @input="updateBackgroundColor"
-        label="Background color"/>
+        label="Background color"
+      />
     </div>
   </div>
 </template>
 
-<style lang="css">
+<style lang="scss" scoped>
 .app-settings {
   display: flex;
   flex-direction: column;
   align-items: start;
-  padding: 10px;
+  padding: 32px;
   width: 100%;
 }
 
@@ -49,5 +50,6 @@ const innerBackground = ref('#fafafa');
 .app-settings-title > h2 {
   font-size: 24px;
   flex-grow: 1;
+  margin-bottom: 32px;
 }
 </style>
