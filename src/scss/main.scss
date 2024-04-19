@@ -53,6 +53,9 @@ Logos
 //Toasts
 @import "toast.scss";
 
+// Vuestic, overriding library styles
+@import "custom-vuestic.scss";
+
 html {
   font-size: 14px;
 }
