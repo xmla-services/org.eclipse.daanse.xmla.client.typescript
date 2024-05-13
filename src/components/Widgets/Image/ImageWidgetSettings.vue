@@ -12,23 +12,40 @@ Contributors: Smart City Jena
 import { v4 } from "uuid";
 import { ref, onMounted, type Ref } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
-import type { CollapseState, ImageSharingComponentProps } from "@/@types/widgets";
+import type {
+  CollapseState,
+  ImageGalleryItem,
+  ImageSettings,
+} from "@/@types/widgets";
 import type { Store } from "@/stores/Widgets/Store";
+import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
-const props = defineProps(["component"]) as ImageSharingComponentProps;
+export interface ImageComponentSettings {
+  images: ImageGalleryItem[];
+  imagesSettings: ImageSettings;
+}
+
+export interface ImageComponent {
+  store: Store | XMLAStore;
+  settings: ImageComponentSettings;
+  setSetting: (key: string, value: any) => void;
+  setStore: (store: Store | XMLAStore) => void;
+}
+
+const { component } = defineProps<{ component: ImageComponent }>();
+
 const opened: Ref<CollapseState> = ref({
-  imageSection: false,
+  widgetSection: false,
   storeSection: false,
 });
 
 const storeManager = useStoreManager();
 let stores: Ref<any[]> = ref([]) as Ref<any[]>;
 const requestResult: Ref<string> = ref("");
-const storeId: Ref<string> = ref(props.component.storeId);
 
 const addNew = () => {
-  console.log(props.component);
-  props.component.images?.push({
+  const images = component.settings.images;
+  images?.push({
     id: v4(),
     url: "Test",
   });
@@ -43,33 +60,34 @@ const getStores = () => {
 };
 
 const getData = async () => {
-  const store = storeManager.getStore(storeId.value) as Store;
+  const store = component.store as Store;
 
   const data = await store.getData();
   requestResult.value = JSON.stringify(data, null, 2);
 };
 
-const updateStore = (store) => {
-  storeId.value = store;
-  props.component.storeId = store;
+const updateStore = (storeId) => {
+  const store = storeManager.getStore(storeId) as Store;
+  component.setStore(store);
+  console.log(component);
   getData();
 };
 
 onMounted(() => {
   getStores();
-  if (storeId.value) {
+  if (component.store) {
     getData();
   }
 });
 </script>
 
 <template>
-  <va-collapse v-model="opened.imageSection" header="Image widget settings">
+  <va-collapse v-model="opened.widgetSection" header="Image widget settings">
     <div class="settings-container">
       <va-button @click="addNew">Add image</va-button>
       <div class="image-list-container">
         <div
-          v-for="(image, index) in props.component.images"
+          v-for="(image, index) in component.settings.images"
           :key="image.id"
           class="image-settings-container"
         >
@@ -77,9 +95,10 @@ onMounted(() => {
             v-model="image.url"
             label="Image src"
             class="image-settings-remove-input"
+            @update:model-value="component.setSetting('url', $event)"
           />
           <va-button
-            @click="() => props.component.images.splice(index, 1)"
+            @click="() => component.settings.images.splice(index, 1)"
             icon="clear"
             class="image-settings-remove-button"
           />
@@ -87,14 +106,16 @@ onMounted(() => {
         </div>
       </div>
       <va-select
-        v-model="props.component.imageSettings.fit"
+        :model-value="component.settings.imagesSettings.fit"
         label="Fit"
         :options="['Cover', 'Contain', 'Stretch', 'Fill', 'None']"
+        @update:model-value="component.setSetting('fit', $event)"
       >
       </va-select>
       <va-input
-        v-model="props.component.imageSettings.diashowInterval"
+        :model-value="component.settings.imagesSettings.diashowInterval"
         label="Diashow interval"
+        @update:model-value="component.setSetting('diashowInterval', $event)"
       >
       </va-input>
     </div>
@@ -105,7 +126,7 @@ onMounted(() => {
         <h3 class="mb-2">Select store</h3>
         <div class="mb-2" v-for="store in stores" :key="store.id">
           <va-radio
-            :model-value="storeId"
+            :model-value="component.store?.id"
             @update:model-value="updateStore"
             :option="{
               text: `${store.caption} ${store.id}`,

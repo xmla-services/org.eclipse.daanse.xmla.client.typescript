@@ -9,18 +9,38 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import type { CollapseState, MaterialIcon, IconSharingComponentProps } from "@/@types/widgets";
 import { ref, onMounted, computed, type Ref } from "vue";
-import MaterialIcons from '@/assets/icons/MaterialIcons.json';
+import type { CollapseState, MaterialIcon } from "@/@types/widgets";
+import type { Store } from "@/stores/Widgets/Store";
+import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import MaterialIcons from "@/assets/icons/MaterialIcons.json";
 
-const props = defineProps(["component"]) as IconSharingComponentProps;
+export interface IIconSettings {
+  currentIcon: string;
+  iconColor: string;
+  iconSize: number;
+  isIconFilled: boolean;
+  strokeWeight: number;
+  opticSize: number;
+  grade: number;
+}
+
+export interface IIconComponent {
+  store: Store | XMLAStore;
+  settings: IIconSettings;
+  setSetting: (key: string, value: any) => void;
+  setStore: (store: Store | XMLAStore) => void;
+}
+
+const { component } = defineProps<{ component: IIconComponent }>();
+
 const opened: Ref<CollapseState> = ref({
-  textSection: false,
+  widgetSection: false,
   storeSection: false,
 });
 
-const innerIconList: Ref<MaterialIcon[]> = ref([]);
-const searchQuery: Ref<string> = ref('');
+const iconsList: Ref<MaterialIcon[]> = ref([]);
+const searchQuery: Ref<string> = ref("");
 
 function filterUniqueIcons(icons: MaterialIcon[]) {
   const uniqueNames: Set<string> = new Set();
@@ -34,84 +54,98 @@ function filterUniqueIcons(icons: MaterialIcon[]) {
 }
 
 const filteredIcons = computed(() => {
-  return innerIconList.value.filter((icon: MaterialIcon) =>
-    icon.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return iconsList.value.filter((icon: MaterialIcon) =>
+    icon.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 });
 
 const handleIconClick = (icon: MaterialIcon) => {
-  if (icon) props.component.currentIcon = icon.name;
+  if (icon) component.settings.currentIcon = icon.name;
+  component.setSetting("currentIcon", icon.name);
 };
 
 onMounted(() => {
-  console.log(props)
-  innerIconList.value = filterUniqueIcons(MaterialIcons);
+  iconsList.value = filterUniqueIcons(MaterialIcons);
 });
 </script>
 
 <template>
-  <va-collapse 
-    v-model="opened.textSection" 
-    header="Icon widget settings"
-  >
+  <va-collapse v-model="opened.widgetSection" header="Icon widget settings">
     <div class="settings-container">
-      <va-input 
-        v-model="searchQuery" 
-        placeholder="Search icon..." 
+      <va-input
+        v-model="searchQuery"
+        placeholder="Search icon..."
         label="Search icons"
       />
-      <div class="icons-container" style="font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 100, 'opsz' 48;">
+      <div
+        class="icons-container"
+        style="
+          font-variation-settings:
+            &quot;FILL&quot; 0,
+            &quot;wght&quot; 200,
+            &quot;GRAD&quot; 100,
+            &quot;opsz&quot; 48;
+        "
+      >
         <span
           v-for="icon in filteredIcons"
           :key="icon.name + icon.version"
           @click="handleIconClick(icon)"
-          :class="{ 'active-icon': icon.name === props.component.currentIcon }"
+          :class="{
+            'active-icon': icon.name === component.settings.currentIcon,
+          }"
           class="material-symbols-outlined"
         >
           {{ icon.name }}
         </span>
       </div>
-      <va-checkbox 
-        v-model="props.component.isIconFilled" 
+      <va-checkbox
+        :model-value="component.settings.isIconFilled"
         label="Icon filled"
+        @update:model-value="component.setSetting('isIconFilled', $event)"
       />
-      <va-color-input 
-        v-model="props.component.iconColor" 
+      <va-color-input
+        :model-value="component.settings.iconColor"
         label="Icon color"
+        @update:model-value="component.setSetting('iconColor', $event)"
       />
       <va-input
-        v-model="props.component.iconSize" 
+        :model-value="component.settings.iconSize"
         label="Icon size"
+        @update:model-value="component.setSetting('iconSize', $event)"
       />
-      <va-slider 
+      <va-slider
         class="slider"
-        v-model="props.component.strokeWeight"
+        :model-value="component.settings.strokeWeight"
         track-label-visible
-        :min="100" 
-        :max="700" 
+        :min="100"
+        :max="700"
         :step="100"
         label="Stroke weight"
+        @update:model-value="component.setSetting('strokeWeight', $event)"
       />
-      <va-slider 
+      <va-slider
         class="slider"
-        v-model="props.component.opticSize"
+        :model-value="component.settings.opticSize"
         track-label-visible
-        :min="20" 
-        :max="48" 
+        :min="20"
+        :max="48"
         label="Optic size"
+        @update:model-value="component.setSetting('opticSize', $event)"
       />
-      <va-slider 
+      <va-slider
         class="slider"
-        v-model="props.component.grade"
+        :model-value="component.settings.grade"
         track-label-visible
-        :min="-25" 
+        :min="-25"
         :max="200"
         :step="15"
         label="Grade"
+        @update:model-value="component.setSetting('grade', $event)"
       />
     </div>
   </va-collapse>
-  <va-collapse 
+  <!-- <va-collapse 
     v-model="opened.storeSection" 
     header="Store settings"
   >
@@ -120,9 +154,9 @@ onMounted(() => {
         <h3 class="mb-2">Select store</h3>
       </div>
     </div>
-  </va-collapse>
+  </va-collapse> -->
 </template>
-<style scoped>
+<style lang="scss" scoped>
 .settings-container {
   display: flex;
   flex-direction: column;
@@ -143,7 +177,7 @@ onMounted(() => {
 }
 
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
+  font-family: "Material Symbols Outlined";
   font-weight: normal;
   font-style: inherit;
   font-size: 40px;
@@ -156,11 +190,13 @@ onMounted(() => {
   direction: ltr;
   border: 2px solid transparent;
   border-radius: 5px;
-  transition: border-color 0.5s ease, transform 0.5s ease;
-}
+  transition:
+    border-color 0.5s ease,
+    transform 0.5s ease;
 
-.material-symbols-outlined:hover {
-  transform: scale(1.1);
+  &:hover {
+    transform: scale(1.1);
+  }
 }
 
 .active-icon {

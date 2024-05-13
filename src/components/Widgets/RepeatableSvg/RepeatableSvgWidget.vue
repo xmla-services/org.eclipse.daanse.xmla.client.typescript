@@ -9,122 +9,68 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { onMounted, ref, watch, inject, computed, type Ref, type Component, PropType } from "vue";
-import RepeatableSvgWidgetSettings from "./RepeatableSvgWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { ItemStyles, RepeatableSvgComponentProps, RepeatableSvgSharingComponentProps } from "@/@types/widgets";
-const settings: Component = RepeatableSvgWidgetSettings;
-
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
-
-let store = null as unknown as Store;
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  src: {
-    type: String,
-    required: false,
-    default: "/demo/human.svg",
-  },
-  activeItemStyles: {
-    type: Object as PropType<ItemStyles>,
-    required: false,
-    default: () => ({
-      fill: "#ff0000",
-      stroke: "#FFFF00",
-    }),
-  },
-  defaultItemStyles: {
-    type: Object as PropType<ItemStyles>,
-    required: false,
-    default: () => ({
-      fill: "#777777",
-      stroke: "#777777",
-    }),
-  },
-  repeations: {
-    type: String,
-    required: false,
-    default: '4',
-  },
-  progress: {
-    type: String,
-    required: false,
-    default: '0.5',
-  },
-}) as RepeatableSvgComponentProps;
-
-const { src, activeItemStyles, defaultItemStyles, repeations, progress } = props;
-
-const svgSource: Ref<string> = ref(src || "");
-const innerActiveItemStyles: Ref<ItemStyles> = ref({
-  fill: activeItemStyles?.fill || '#ff0000',
-  stroke: activeItemStyles?.stroke || '#FFFF00',
-});
-const innerDefaultItemStyles: Ref<ItemStyles> = ref({
-  fill: defaultItemStyles?.fill || '#777777',
-  stroke: defaultItemStyles?.stroke || '#777777',
-});
-const innerRepeations: Ref<string> = ref(repeations || '4');
-const innerProgress: Ref<string> = ref(progress || '0.5');
-
-const getState = () => {
-  return {
-    storeId: storeId.value,
+export interface IRepeatableSVGSettingsProps {
+  src?: string;
+  activeItemStyles?: {
+    fill: string;
+    stroke: string;
   };
-};
+  defaultItemStyles?: {
+    fill: string;
+    stroke: string;
+  };
+  repeations?: string;
+  progress?: string;
+}
 
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
+import { onMounted, computed, type Ref, ref } from "vue";
+import RepeatableSvgWidgetSettings from "./RepeatableSvgWidgetSettings.vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
+import type { Store } from "@/stores/Widgets/Store";
+import type { ItemStyles } from "@/@types/widgets";
 
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
+const settingsComponent = RepeatableSvgWidgetSettings;
 
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
+const props = withDefaults(defineProps<IRepeatableSVGSettingsProps>(), {
+  src: "/demo/human.svg",
+  activeItemStyles: (): ItemStyles => ({
+    fill: "#ff0000",
+    stroke: "#FFFF00",
+  }),
+  defaultItemStyles: (): ItemStyles => ({
+    fill: "#777777",
+    stroke: "#777777",
+  }),
+  repeations: "4",
+  progress: "0.5",
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
+const svgSource: Ref<string> = ref("");
 
 onMounted(async () => {
-  if(!props.src) return;
-  const req = await fetch(props.src);
+  if (!settings.value.src) return;
+  const req = await fetch(settings.value.src);
   const svgObject = await req.text();
   svgSource.value = svgObject;
-
 });
 
 defineExpose({
-  src: svgSource,
-  activeItemStyles: innerActiveItemStyles,
-  defaultItemStyles: innerDefaultItemStyles,
-  progress: innerProgress,
-  repeations: innerRepeations,
-  storeId,
+  setSetting,
   settings,
+  settingsComponent,
   getState,
-}) as unknown as RepeatableSvgSharingComponentProps;
+  store,
+  setStore,
+});
 
 const createParsedData = (prop) => {
   return computed(() => {
-    let processedString = String(prop.value);
+    let processedString = String(prop);
     const regex = /{(.*?)}/g;
     const parts = processedString.match(regex);
 
@@ -144,18 +90,19 @@ const createParsedData = (prop) => {
     });
     return processedString;
   });
-}
-
-const svgProgressParse: Ref<string> = createParsedData(innerProgress);
+};
 
 const repeationsToNumber: Ref<number> = computed(() => {
-  return !isNaN(parseFloat(innerRepeations.value)) ? Math.floor(Number(innerRepeations.value)) : 0;
-})
+  return !isNaN(parseFloat(settings.value.repeations))
+    ? Math.floor(Number(settings.value.repeations))
+    : 0;
+});
 
 const progressToNumber: Ref<number> = computed(() => {
-  return !isNaN(parseFloat(svgProgressParse.value)) ? Number(svgProgressParse.value) : 0;
-})
-
+  return !isNaN(parseFloat(createParsedData(settings.value.progress).value))
+    ? Number(createParsedData(settings.value.progress).value)
+    : 0;
+});
 </script>
 
 <template>
@@ -176,14 +123,14 @@ const progressToNumber: Ref<number> = computed(() => {
             x="0"
             y="0"
             style="fill: #adadad"
-            :width="100 * repeationsToNumber * progressToNumber"  
+            :width="100 * repeationsToNumber * progressToNumber"
             height="100"
           />
         </mask>
       </defs>
       <g
-        :fill="innerDefaultItemStyles.fill"
-        :stroke="innerDefaultItemStyles.stroke"
+        :fill="settings.defaultItemStyles.fill"
+        :stroke="settings.defaultItemStyles.stroke"
       >
         <g
           v-html="svgSource"
@@ -194,8 +141,8 @@ const progressToNumber: Ref<number> = computed(() => {
       </g>
       <g
         mask="url(#bubbleKenseo)"
-        :fill="innerActiveItemStyles.fill"
-        :stroke="innerActiveItemStyles.stroke"
+        :fill="settings.activeItemStyles.fill"
+        :stroke="settings.activeItemStyles.stroke"
       >
         <g
           v-html="svgSource"
@@ -215,9 +162,5 @@ const progressToNumber: Ref<number> = computed(() => {
   display: flex;
   flex-direction: row;
   object-fit: contain;
-}
-
-.svg {
-
 }
 </style>

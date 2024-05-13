@@ -9,25 +9,25 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import type { log } from 'console';
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
 import { onMounted, ref, watch, nextTick, onActivated } from "vue";
+import type XMLADatasource from "@/dataSources/XmlaDatasource";
 
 const storeManager = useStoreManager();
-const dslist = ref([]);
+const dslist = ref([] as XMLADatasource[]);
 
-const catalogs = ref([]);
-const selectedCatalog = ref({});
+const catalogs = ref([] as DBSchemaCatalog[]);
+const selectedCatalog = ref({} as DBSchemaCatalog);
 
-const cubes = ref([]);
-const selectedCube = ref({});
+const cubes = ref([] as MDSchemaCube[]);
+const selectedCube = ref({} as MDSchemaCube);
 
-const hierarchies = ref([]);
+const hierarchies = ref([] as MDSchemaHierarchy[]);
 const selectedRow = ref({});
 const selectedCol = ref({});
 
-const measures = ref([]);
+const measures = ref([] as MDSchemaMeasure[]);
 const selectedMeasure = ref({});
 
 const props = defineProps({
@@ -50,11 +50,9 @@ const clickHeader = () => {
 watch(
   dsmap,
   () => {
-    console.log(dsmap.value);
     dslist.value = Object.entries(dsmap.value).map((entry) => {
       return entry[1];
-    });
-    console.log(dslist.value);
+    }) as XMLADatasource[];
   },
   { deep: true },
 );
@@ -62,27 +60,39 @@ watch(
 onActivated(() => {
   dslist.value = Object.entries(dsmap.value).map((entry) => {
     return entry[1];
-  });
+  }) as XMLADatasource[];
 });
 
-onMounted(() => {
-  console.log(item);
+onMounted(async () => {
   selectedRow.value = item.value.row || {};
   selectedCol.value = item.value.column || {};
   selectedMeasure.value = item.value.measure || {};
   dslist.value = Object.entries(dsmap.value).map((entry) => {
-    return { ...entry[1] };
-  });
+    return entry[1];
+  }) as XMLADatasource[];
 
-  const ds = getSelectedDatasources()[0];
-  selectedCatalog.value = ds?.catalog || {};
-  selectedCube.value = ds?.cube || {};
-  console.log(ds);
+  const ds = getSelectedDatasource();
+  selectedCatalog.value = ds?.catalog || {
+    CATALOG_NAME: "",
+    DESCRIPTION: "",
+  };
+  selectedCube.value = ds?.cube || {
+    CUBE_NAME: "",
+    CUBE_CAPTION: "",
+  };
+
+  await getCatalogs();
+
+  if (selectedCatalog.value.CATALOG_NAME) {
+    await getCubes();
+  }
+  if (selectedCube.value.CUBE_NAME) {
+    await getMetadata();
+  }
 });
 
 const saveStore = (item) => {
   const store = storeManager.getStore(item.id);
-  console.log(store);
   store.setOptions({
     caption: item.caption,
   });
@@ -93,10 +103,9 @@ const createDatasource = () => {
 };
 
 const updateDatasource = (index, type) => {
-  const datasourceToUpdate = dslist.value[index];
+  const datasourceToUpdate = dslist.value[index] as XMLADatasource;
   if (datasourceToUpdate) {
     if (datasourceToUpdate.type !== type) {
-      console.log(datasourceToUpdate, type);
       dsManager.updateDatasource(
         datasourceToUpdate.id,
         type,
@@ -107,41 +116,53 @@ const updateDatasource = (index, type) => {
   }
 };
 
-const setSelectedDatasources = (id, currentSelectedItems) => {
-  console.log(currentSelectedItems);
+const setSelectedDatasource = (id, currentSelectedItems) => {
   const ids = currentSelectedItems.map((e) => e.id);
   const store = storeManager.getStore(id);
-  store.setDatasources(ids);
+  store.setDatasource(ids[0]);
 
   getCatalogs();
 };
 
-const getSelectedDatasources = () => {
+const getSelectedDatasource = (): XMLADatasource => {
   const store = storeManager.getStore(item.value.id);
-  const selectedDatasources = store.datasourceIds;
+  const selectedDatasource = store.datasourceId;
 
-  return dslist.value.filter((e) => {
-    return selectedDatasources.includes(e.id);
-  });
+  return dslist.value.find((e) => {
+    return selectedDatasource === e.id;
+  }) as XMLADatasource;
 };
 
 const getCatalogs = async () => {
-  const selectedDatasource = getSelectedDatasources()[0];
-  catalogs.value = (await selectedDatasource.getCatalogs()).catalogs;
-  console.log(catalogs.value);
+  const selectedDatasource = getSelectedDatasource();
+  if (!selectedDatasource) {
+    return;
+  }
+
+  catalogs.value = await selectedDatasource.getCatalogs();
 };
 
 const getCubes = async () => {
-  const selectedDatasource = getSelectedDatasources()[0];
+  const selectedDatasource = getSelectedDatasource();
+
+  if (!selectedDatasource || !selectedCatalog.value) {
+    return;
+  }
+
   selectedDatasource.setCatalog(selectedCatalog.value);
-  cubes.value = (
-    await selectedDatasource.getCubes(selectedCatalog.value.CATALOG_NAME)
-  ).cubes;
-  console.log(cubes);
+
+  cubes.value = await selectedDatasource.getCubes(
+    selectedCatalog.value.CATALOG_NAME,
+  );
 };
 
 const getMetadata = async () => {
-  const selectedDatasource = getSelectedDatasources()[0];
+  const selectedDatasource = getSelectedDatasource();
+
+  if (!selectedDatasource || !selectedCube.value) {
+    return;
+  }
+
   selectedDatasource.setCube(selectedCube.value);
   await selectedDatasource.openCube(
     selectedCatalog.value.CATALOG_NAME,
@@ -172,7 +193,6 @@ const setMeasure = async (value) => {
     measure: value,
   });
   await nextTick();
-  console.log(value);
   await store.getData();
 };
 </script>
@@ -202,15 +222,15 @@ const setMeasure = async (value) => {
         class="table-crud"
         :items="dslist"
         :columns="[{ key: 'caption' }, { key: 'type' }, { key: 'url' }]"
-        :model-value="getSelectedDatasources()"
+        :model-value="[getSelectedDatasource()]"
         selectable
         select-mode="single"
-        @update:model-value="setSelectedDatasources(item.id, $event)"
+        @update:model-value="setSelectedDatasource(item.id, $event)"
       >
         <template #cell(caption)="{ rowIndex }">
           <va-input
             class="caption-input"
-            @blur="updateDatasource(rowIndex)"
+            @blur="updateDatasource(rowIndex, null)"
             v-model="dslist[rowIndex].caption"
           ></va-input>
         </template>
@@ -225,12 +245,12 @@ const setMeasure = async (value) => {
         <template #cell(url)="{ rowIndex }">
           <va-input
             class="url-input"
-            @blur="updateDatasource(rowIndex)"
+            @blur="updateDatasource(rowIndex, null)"
             v-model="dslist[rowIndex].url"
           ></va-input>
         </template>
       </va-data-table>
-      <template v-if="getSelectedDatasources(item).length">
+      <template v-if="getSelectedDatasource()">
         <h2 class="mt-3">Catalog:</h2>
         <va-select
           text-by="CATALOG_NAME"

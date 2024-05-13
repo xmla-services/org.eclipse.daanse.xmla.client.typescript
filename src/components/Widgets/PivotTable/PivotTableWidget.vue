@@ -29,7 +29,7 @@ const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const inited = ref(false);
 const storeManager = useStoreManager();
-const settings = PivotTableWidgetSettings;
+const settingsComponent = PivotTableWidgetSettings;
 
 const EventBus = inject("customEventBus") as any;
 
@@ -81,7 +81,7 @@ watch(storeId, (newVal, oldVal) => {
 });
 
 defineExpose({
-  settings,
+  settingsComponent,
   storeId,
   mdx,
   catalog,
@@ -219,7 +219,7 @@ const totalContentSize = computed(() => {
 });
 
 const getPivotTableData = debounce(async () => {
-  const store = storeManager.getStore(storeId.value) as XMLAStore;
+  const store = storeManager.getStore(storeId.value) as unknown as XMLAStore;
 
   const mdxResponce = await store.getData();
   console.log(mdxResponce);

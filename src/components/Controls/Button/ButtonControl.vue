@@ -9,24 +9,37 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
-import { inject, ref, type Component, type Ref } from "vue";
-import type { EventItem, ButtonComponentProps } from "@/@types/controls";
+export interface IButtonSettingsProps {
+  title?: string;
+  availableEvents?: string[];
+  events?: EventItem[];
+}
+
+import { inject } from "vue";
+import type { EventItem } from "@/@types/controls";
+import { useSettings } from "@/composables/widgets/settings";
+import { useSerialization } from "@/composables/widgets/serialization";
 import ButtonSettings from "@/components/Controls/Button/ButtonSettings.vue";
 
-const settings: Component = ButtonSettings;
-const title: Ref<string> = ref("Next page");
+const settingsComponent = ButtonSettings;
 const EventBus = inject("customEventBus") as any;
-const availableEvents: string[] = ["Click"];
 
-const events: Ref<EventItem[]> = ref([
-  {
-    name: "Next page",
-    trigger: "Click",
-  },
-]);
+const props = withDefaults(defineProps<IButtonSettingsProps>(), {
+  title: "Next page",
+  availableEvents: (): string[] => ["Click"],
+  events: (): EventItem[] => [
+    {
+      name: "Next page",
+      trigger: "Click",
+    },
+  ],
+});
+
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { getState } = useSerialization(settings);
 
 const click = () => {
-  events.value.forEach((e: EventItem) => {
+  settings.value.events.forEach((e: EventItem) => {
     if (e.trigger === "Click") {
       console.log(`${e.name} emited`, settings);
       EventBus.emit(e.name);
@@ -34,11 +47,13 @@ const click = () => {
   });
 };
 
-defineExpose({ title, events, availableEvents, settings }) as unknown as ButtonComponentProps;
+defineExpose({ setSetting, settings, settingsComponent, getState });
 </script>
 
 <template>
-  <va-button class="button-control" @click="click"> {{ title }} </va-button>
+  <va-button class="button-control" @click="click">
+    {{ settings.title }}
+  </va-button>
 </template>
 
 <style scoped>

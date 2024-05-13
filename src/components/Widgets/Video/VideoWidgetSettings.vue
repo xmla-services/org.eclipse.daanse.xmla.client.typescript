@@ -12,18 +12,31 @@ Contributors: Smart City Jena
 import { ref, onMounted, type Ref } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import type { Store } from "@/stores/Widgets/Store";
-import type { CollapseState, VideoSharingComponentProps } from "@/@types/widgets";
+import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import type { CollapseState, ObjectFitSetting } from "@/@types/widgets";
 
-const props = defineProps(["component"]) as VideoSharingComponentProps;
+export interface IVideoSettings {
+  videoSettings: ObjectFitSetting;
+  videoUrl: string;
+}
+
+export interface IVideoComponent {
+  store: Store | XMLAStore;
+  settings: IVideoSettings;
+  setSetting: (key: string, value: any) => void;
+  setStore: (store: Store | XMLAStore) => void;
+}
+
+const { component } = defineProps<{ component: IVideoComponent }>();
+
 const opened: Ref<CollapseState> = ref({
-  textSection: false,
+  widgetSection: false,
   storeSection: false,
 });
 
 const storeManager = useStoreManager();
 let stores: Ref<any[]> = ref([]) as Ref<any[]>;
 const requestResult: Ref<string> = ref("");
-const storeId: Ref<string> = ref(props.component.storeId);
 
 const getStores = () => {
   const storeList = storeManager.getStoreList();
@@ -34,37 +47,41 @@ const getStores = () => {
 };
 
 const getData = async () => {
-  const store = storeManager.getStore(storeId.value) as Store;
+  const store = component.store as Store;
 
   const data = await store.getData();
   requestResult.value = JSON.stringify(data, null, 2);
 };
 
-const updateStore = (store) => {
-  storeId.value = store;
-  props.component.storeId = store;
+const updateStore = (storeId) => {
+  const store = storeManager.getStore(storeId) as Store;
+  component.setStore(store);
+  console.log(component);
   getData();
 };
 
 onMounted(() => {
   getStores();
-  if (storeId.value) {
+  if (component.store) {
     getData();
   }
 });
-
-
 </script>
 
 <template>
-  <va-collapse v-model="opened.textSection" header="Video widget settings">
+  <va-collapse v-model="opened.widgetSection" header="Video widget settings">
     <div class="settings-container">
-      <va-input v-model="props.component.videoUrl" label="Video url" />
+      <va-input
+        :model-value="component.settings.videoUrl"
+        label="Video url"
+        @update:model-value="component.setSetting('videoUrl', $event)"
+      />
       <va-select
         class="mt-2"
-        v-model="props.component.videoSettings.fit"
+        :model-value="component.settings.videoSettings.fit"
         label="Fit"
         :options="['Cover', 'Contain', 'Stretch', 'Fill', 'None']"
+        @update:model-value="component.setSetting('fit', $event)"
       >
       </va-select>
     </div>
@@ -75,7 +92,7 @@ onMounted(() => {
         <h3 class="mb-2">Select store</h3>
         <div class="mb-2" v-for="store in stores" :key="store.id">
           <va-radio
-            :model-value="storeId"
+            :model-value="component.store?.id"
             @update:model-value="updateStore"
             :option="{
               text: `${store.caption} ${store.id}`,
@@ -97,5 +114,4 @@ onMounted(() => {
   align-items: stretch;
   gap: 1rem;
 }
-
 </style>

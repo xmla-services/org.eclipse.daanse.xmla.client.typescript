@@ -9,150 +9,53 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, computed, inject, watch, type Ref, type Component, type PropType } from "vue";
-import ProgressWidgetSettings from "./ProgressWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { ProgressComponentProps, ProgressSharingComponentProps, FillColor } from "@/@types/widgets";
-
-const settings: Component = ProgressWidgetSettings;
-
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
-
-let store = null as unknown as Store;
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  progress: {
-    type: String,
-    required: false,
-    default: () => "0.5",
-    // validator: (value) => {
-    //   return typeof value === 'string' || typeof value === 'number';
-    // },
-  },
-  fillColor: {
-    type: Object as PropType<FillColor>,
-    required: false,
-    default: () => ({
-      backgroundColor: '#00FF00',
-      backgroundGradient: '#00FF00 0, #FAFAFA 85%'
-    }),
-  },
-  backgroundColor: {
-    type: String,
-    required: false,
-    default: "#d3d3d3",
-  },
-  isGradient: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  isVertical: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  rotation: {
-    type: Number,
-    required: false,
-    default: 90,
-  }
-}) as ProgressComponentProps;
-
-const { initialState } = props;
-
-const innerProgress: Ref<string> = ref(initialState?.progress || props.progress || 50);
-const innerFillColor: Ref<FillColor> = ref(
-  initialState?.innerFillColor || {
-    backgroundColor: props.fillColor?.backgroundColor || '#00FF00',
-    backgroundGradient: props.fillColor?.backgroundGradient || '#00FF00 0, #FAFAFA 100%',
-  }
-);
-const innerBackgroundColor: Ref<string> = ref(initialState?.backgroundColor || props.backgroundColor || '#d3d3d3');
-const innerIsGradient: Ref<boolean> = ref(initialState?.isGradient || props.isGradient || false);
-const innerIsVertical: Ref<boolean> = ref(initialState?.isVertical || props.isVertical || false);
-const innerRotation: Ref<number> = ref(initialState?.rotation || props.rotation || 90);
-
-const getState = () => {
-  return {
-    progress: innerProgress.value,
-    fillColor: innerFillColor.value,
-    backgroundColor: innerBackgroundColor.value,
-    isGradient: innerIsGradient.value,
-    isVertical: innerIsGradient.value,
-    rotation: innerRotation.value,
-    storeId: storeId.value,
-  };
-};
-
-const setState = (state) => {
-  {
-    innerProgress.value = state.progress;
-    innerFillColor.value = state.fillColor;
-    innerBackgroundColor.value = state.backgroundColor;
-    innerIsGradient.value = state.isGradient;
-    innerIsVertical.value = state.isVertical;
-    innerRotation.value = state.rotation;
-  }
+export interface IProgressSettingsProps {
+  progress?: string;
+  fillColor?: string;
+  gradientColor?: string;
+  backgroundColor?: string;
+  isGradient?: boolean;
+  isVertical?: boolean;
+  rotation?: number;
 }
 
-defineExpose({
-  progress: innerProgress,
-  fillColor: innerFillColor,
-  isGradient: innerIsGradient,
-  isVertical: innerIsVertical,
-  backgroundColor: innerBackgroundColor,
-  rotation: innerRotation,
-  storeId,
-  getState,
-  setState,
-  settings,
-}) as unknown as ProgressSharingComponentProps;
+import { computed } from "vue";
+import ProgressWidgetSettings from "./ProgressWidgetSettings.vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
+import type { Store } from "@/stores/Widgets/Store";
 
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
+const settingsComponent = ProgressWidgetSettings;
 
-watch(
-  () => props,
-  (newVal) => {
-    setState(newVal);
-  },
-  { deep: true },
-);
-
-watch(
-  storeId, 
-  (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
+const props = withDefaults(defineProps<IProgressSettingsProps>(), {
+  progress: "0.5",
+  fillColor: "#00FF00",
+  gradientColor: "#00FF00 0, #FAFAFA 85%",
+  backgroundColor: "#d3d3d3",
+  isGradient: false,
+  isVertical: false,
+  rotation: 90,
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
+
+defineExpose({
+  setSetting,
+  settings,
+  settingsComponent,
+  getState,
+  store,
+  setStore,
+});
 
 const parsedProgress = computed(() => {
-  if (!isNaN(parseFloat(innerProgress.value))) return `${(parseFloat(innerProgress.value) * 100).toFixed(2)}%`;
-  
-  let processedString = innerProgress.value;
+  if (!isNaN(parseFloat(settings.value.progress)))
+    return `${(parseFloat(settings.value.progress) * 100).toFixed(2)}%`;
+
+  let processedString = settings.value.progress;
   const regex = /{(.*?)}/g;
   const parts = processedString.match(regex);
 
@@ -168,33 +71,42 @@ const parsedProgress = computed(() => {
 
     processedString = processedString.replace(element, res);
   });
-  return `${processedString}%`;
+
+  return !isNaN(parseFloat(processedString))
+    ? parseFloat(processedString) > 100
+      ? "100%"
+      : `${processedString}%`
+    : `${processedString}%`;
 });
 
-const backgroundProgressColor = computed<string>(() => {
-  return innerIsGradient.value
-    ? `linear-gradient(${innerRotation.value}deg, ${innerFillColor.value.backgroundGradient})`
-    : `${innerFillColor.value.backgroundColor}`;
+const backgroundProgressColor = computed(() => {
+  return settings.value.isGradient
+    ? `linear-gradient(${settings.value.rotation}deg, ${settings.value.gradientColor})`
+    : `${settings.value.fillColor}`;
 });
 
-const transition = computed<string>(() => {
-  return innerIsVertical.value ? 'height .7s ease' : 'width .7s ease';
+const transition = computed(() => {
+  return settings.value.isVertical ? "height .7s ease" : "width .7s ease";
 });
 
-const verticalPositionFiller = computed<string>(() => {
-  return innerIsVertical.value ? `${parseFloat(parsedProgress.value)}%` : '35px';
+const verticalPositionFiller = computed(() => {
+  return settings.value.isVertical
+    ? `${parseFloat(parsedProgress.value)}%`
+    : "35px";
 });
 
-const horizontalPositionFiller = computed<string>(() => {
-  return !innerIsVertical.value ? `${parseFloat(parsedProgress.value)}%` : '35px';
+const horizontalPositionFiller = computed(() => {
+  return !settings.value.isVertical
+    ? `${parseFloat(parsedProgress.value)}%`
+    : "35px";
 });
 
-const verticalPositionBackground = computed<string>(() => {
-  return innerIsVertical.value ? '35px' : '100%';
+const verticalPositionBackground = computed(() => {
+  return settings.value.isVertical ? "35px" : "100%";
 });
 
-const horizontalPositionBackground = computed<string>(() => {
-  return !innerIsVertical.value ? '35px' : '100%';
+const horizontalPositionBackground = computed(() => {
+  return !settings.value.isVertical ? "35px" : "100%";
 });
 </script>
 
@@ -219,7 +131,7 @@ const horizontalPositionBackground = computed<string>(() => {
 .progress {
   width: v-bind(verticalPositionBackground);
   height: v-bind(horizontalPositionBackground);
-  background: v-bind(innerBackgroundColor);
+  background: v-bind(settings.backgroundColor);
   border-radius: 10px;
   display: flex;
   align-items: end;

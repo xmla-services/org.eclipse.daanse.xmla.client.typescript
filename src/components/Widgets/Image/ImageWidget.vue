@@ -9,47 +9,38 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { onMounted, ref, watch, inject, type Ref, type Component, computed } from "vue";
-import { useStoreManager } from "@/composables/storeManager";
+export interface IImageSettingsProps {
+  imagesSettings?: ImageSettings;
+  images?: ImageGalleryItem[];
+}
+
+import { onMounted, ref, watch, type Ref, computed } from "vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
+import type { ImageGalleryItem, ImageSettings } from "@/@types/widgets";
 import ImageWidgetSettings from "./ImageWidgetSettings.vue";
-import type { ImageComponentProps, ImageSettings, ImageSharingComponentProps, ImageGalleryItem } from "@/@types/widgets";
-const settings: Component = ImageWidgetSettings;
 
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
+const settingsComponent = ImageWidgetSettings;
 
-let store = null as unknown as Store;
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  imgSrc: {
-    type: String,
-    required: false,
-    default: "",
-  },
-}) as ImageComponentProps;
-
-const { initialState, imgSrc } = props;
-
-const innerImgSrc: Ref<string> = ref(initialState?.imgSrc || imgSrc || "");
-let interval = null as any;
-
-const images: Ref<ImageGalleryItem[]> = ref([]);
-const imagesFromData: Ref<ImageGalleryItem[]> = ref([]);
-const currentImage: Ref<number> = ref(0);
-const imageSettings: Ref<ImageSettings> = ref({
-  fit: "None",
-  diashowInterval: 0,
+const props = withDefaults(defineProps<IImageSettingsProps>(), {
+  imagesSettings: () => ({
+    fit: "None",
+    diashowInterval: 0,
+  }),
+  images: (): ImageGalleryItem[] => [],
 });
 
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
+
+let interval = null as any;
+const currentImage: Ref<number> = ref(0);
+
 const toNext = () => {
-  if (currentImage.value < images.value.length - 1) {
+  if (currentImage.value < settings.value.images.length - 1) {
     currentImage.value++;
   }
 };
@@ -60,39 +51,18 @@ const toPrev = () => {
   }
 };
 
-const getState = () => {
-  return {
-    storeId: storeId.value,
-    imgSrc: innerImgSrc.value,
-    images: images.value,
-    imageSettings: imageSettings.value,
-  };
-};
-
-watch(
-  () => props.imgSrc,
-  (newVal) => {
-    innerImgSrc.value = newVal;
-  },
-);
-
-const setState = (state) => {
-  images.value = state.images;
-  imageSettings.value = state.imageSettings;
-};
-
 const initInterval = () => {
   if (interval) {
     clearInterval(interval);
   }
-  if (imageSettings.value.diashowInterval > 0) {
+  if (settings.value.imagesSettings.diashowInterval > 0) {
     interval = setInterval(() => {
-      if (currentImage.value === images.value.length - 1) {
+      if (currentImage.value === settings.value.images.length - 1) {
         currentImage.value = 0;
         return;
       }
       toNext();
-    }, imageSettings.value.diashowInterval * 1000);
+    }, settings.value.imagesSettings.diashowInterval * 1000);
   }
 };
 
@@ -100,51 +70,28 @@ onMounted(() => {
   initInterval();
 });
 
-watch(() => imageSettings.value.diashowInterval, initInterval);
+watch(() => settings.value.imagesSettings.diashowInterval, initInterval);
 
 defineExpose({
-  imgSrc: innerImgSrc,
+  setSetting,
   settings,
+  settingsComponent,
   getState,
-  setState,
-  images,
-  imageSettings,
-  storeId,
-}) as unknown as ImageSharingComponentProps;
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
+  store,
+  setStore,
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
-
-const parsedUrl = (url) => {
+const parsedUrl = (url: string): string => {
   const regex = /{(.*?)}/g;
-  const parts = url.match(regex);
+  const parts = url?.match(regex);
 
   if (!parts || !data.value) {
-    return url
+    return url;
   }
 
   let parsedUrl = url;
 
-  parts.forEach((element) => {
+  parts.forEach((element: string) => {
     const trimmedString = element.replace("{", "").replace("}", "");
     const dataField = trimmedString.split(".");
     let res = data.value;
@@ -152,36 +99,26 @@ const parsedUrl = (url) => {
     for (const field of dataField) {
       res = res[field];
     }
-    parsedUrl = parsedUrl.replace(element, res);
+    parsedUrl = parsedUrl.replace(element, String(res));
   });
   return parsedUrl;
 };
 
 watch(
-  images.value,
-  (newValue) => {
-    imagesFromData.value = newValue.map((img: ImageGalleryItem) => {
-        return {
-        id: img.id,
-        url: parsedUrl(img.url),
-      };
-    })
-  }
-);
-
-watch(
-  () => images.value.length, 
+  () => settings.value.images.length,
   (newLength, oldLength) => {
     if (oldLength > newLength) {
       if (currentImage.value >= newLength) {
         currentImage.value = newLength - 1;
       }
     }
-  }
+  },
 );
 
 const lastImageIndex = computed(() => {
-  return imagesFromData.value.length > 0 ? imagesFromData.value.length - 1 : 0;
+  return settings.value.images.length > 0
+    ? settings.value.images.length - 1
+    : 0;
 });
 
 watch(lastImageIndex, () => {
@@ -190,8 +127,8 @@ watch(lastImageIndex, () => {
 </script>
 
 <template>
-  <template v-if="imagesFromData.length <= 1">
-    <img class="image" :src="imagesFromData[0]?.url" />
+  <template v-if="settings.images.length <= 1">
+    <img class="image" :src="parsedUrl(settings.images[0]?.url)" />
   </template>
   <template v-else>
     <div class="galery-container">
@@ -209,13 +146,13 @@ watch(lastImageIndex, () => {
         :style="`transform: translateX(-${100 * currentImage}%)`"
       >
         <div
-          v-for="(image, i) in imagesFromData"
+          v-for="(image, i) in settings.images"
           :key="image.id"
           class="galery-image"
           :style="`transform: translateX(${100 * i}%)`"
         >
           <!-- {{ image.url }} -->
-          <img class="image" :src="image.url" />
+          <img class="image" :src="parsedUrl(image.url)" />
         </div>
       </div>
 
@@ -224,7 +161,7 @@ watch(lastImageIndex, () => {
           @click="toNext()"
           icon="chevron_right"
           text-color="#ffffff"
-          :disabled="currentImage === imagesFromData.length - 1"
+          :disabled="currentImage === settings.images.length - 1"
           preset="plain"
         ></va-button>
       </div>
@@ -236,7 +173,7 @@ watch(lastImageIndex, () => {
 .image {
   width: 100%;
   height: 100%;
-  object-fit: v-bind(imageSettings.fit);
+  object-fit: v-bind(settings.imagesSettings.fit);
 }
 
 .galery-container {
@@ -264,7 +201,8 @@ watch(lastImageIndex, () => {
   left: 10px;
 }
 
-.button-next, .button-prev {
+.button-next,
+.button-prev {
   position: absolute;
   top: 50%;
   width: 2rem;

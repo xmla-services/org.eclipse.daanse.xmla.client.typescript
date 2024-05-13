@@ -9,77 +9,43 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, inject, watch, computed, type Ref, type Component } from "vue";
+export interface IVideoSettingsProps {
+  videoSettings?: ObjectFitSetting;
+  videoUrl?: string;
+}
+
+import { computed } from "vue";
 import VideoWidgetSettings from "./VideoWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
-import type { VideoComponentProps, VideoSharingComponentProps, ObjectFitSetting } from "@/@types/widgets";
-const settings: Component = VideoWidgetSettings;
+import type { ObjectFitSetting } from "@/@types/widgets";
 
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
+const settingsComponent = VideoWidgetSettings;
 
-let store = null as unknown as Store;
-
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  videoUrl: {
-    type: String,
-    required: false,
-    default: "",
-  }
-}) as VideoComponentProps;
-
-const getState = () => {
-  return {
-    storeId: storeId.value,
-  };
-};
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
+const props = withDefaults(defineProps<IVideoSettingsProps>(), {
+  videoSettings: () => ({
+    fit: "None",
+  }),
+  videoUrl: "",
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
-
-
-const innerVideoUrl: Ref<string> = ref(props.videoUrl || "");
-const videoSettings: Ref<ObjectFitSetting> = ref({
-  fit: "None",
-})
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
 
 defineExpose({
-  videoUrl: innerVideoUrl,
-  videoSettings,
-  storeId,
+  setSetting,
   settings,
+  settingsComponent,
   getState,
-}) as unknown as VideoSharingComponentProps;
+  store,
+  setStore,
+});
 
 const videoUrlParced = computed(() => {
-  let processedString = innerVideoUrl.value;
+  let processedString = settings.value.videoUrl;
   const regex = /{(.*?)}/g;
   const parts = processedString.match(regex);
 
@@ -122,6 +88,6 @@ const videoUrlParced = computed(() => {
   width: 100%;
   height: 100%;
   border-radius: 3px;
-  object-fit: v-bind(videoSettings.fit);
+  object-fit: v-bind(settings.videoSettings.fit);
 }
 </style>

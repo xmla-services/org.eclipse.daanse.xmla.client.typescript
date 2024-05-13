@@ -9,60 +9,74 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
-import { inject, ref, type Ref, type Component } from "vue";
+export interface ISelectSettingsProps {
+  label?: string;
+  options?: string[];
+  selectedValue?: string;
+  availableEvents?: string[];
+  events?: EventItem[];
+}
+
+import { inject } from "vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useSerialization } from "@/composables/widgets/serialization";
 import SelectSettings from "@/components/Controls/Select/SelectSettings.vue";
-import type { SelectComponentProps, EventItem } from "@/@types/controls";
+import type { EventItem } from "@/@types/controls";
 
 const EventBus = inject("customEventBus") as any;
-const settings: Component = SelectSettings;
+const settingsComponent = SelectSettings;
 
-const label: Ref<string> = ref('Test');
-const selectValue: Ref<string> = ref('');
-const options: Ref<string[]> = ref([]);
-const availableEvents: string[] = ["Click", "Clear", "Scroll Bottom"];
+const props = withDefaults(defineProps<ISelectSettingsProps>(), {
+  label: "Test",
+  options: (): string[] => ["Test"],
+  selectedValue: "",
+  availableEvents: (): string[] => ["Click", "Clear", "Scroll Bottom"],
+  events: (): EventItem[] => [
+    {
+      name: "Next page",
+      trigger: "Click",
+    },
+  ],
+});
 
-const events: Ref<EventItem[]> = ref([
-  {
-    name: "Next page",
-    trigger: "Click",
-  },
-]);
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { getState } = useSerialization(settings);
 
 const click = () => {
-  events.value.forEach((e: EventItem) => {
+  settings.value.events.forEach((e: EventItem) => {
     if (e.trigger === "Click") {
       console.log(`${e.name} emited`);
-      EventBus.emit(e.name, selectValue.value);
+      EventBus.emit(e.name, settings.value.selectedValue);
     }
   });
 };
 
 const clear = () => {
-  events.value.forEach((e: EventItem) => {
-    if(e.trigger === "Clear") {
+  settings.value.events.forEach((e: EventItem) => {
+    if (e.trigger === "Clear") {
       console.log(`${e.name} emited`);
-      EventBus.emit(e.name, selectValue.value);
-    }  
+      EventBus.emit(e.name, settings.value.selectedValue);
+    }
   });
 };
 
 const scrollBottom = () => {
-  events.value.forEach((e: EventItem) => {
-    if(e.trigger === "Scroll Bottom") {
+  settings.value.events.forEach((e: EventItem) => {
+    if (e.trigger === "Scroll Bottom") {
       console.log(`${e.name} emited`);
       EventBus.emit(e.name);
     }
   });
 };
 
-defineExpose({ label, events, options, availableEvents, settings, selectValue }) as unknown as SelectComponentProps;
+defineExpose({ setSetting, settings, settingsComponent, getState });
 </script>
 
-<template> 
+<template>
   <va-select
-    v-model="selectValue"
-    :label="label"
-    :options="options"
+    :model-value="settings.selectedValue"
+    :label="settings.label"
+    :options="settings.options"
     placeholder="Select an option"
     @update:modelValue="click"
     @clear="clear"
@@ -70,4 +84,3 @@ defineExpose({ label, events, options, availableEvents, settings, selectValue })
     clearable
   />
 </template>
-
