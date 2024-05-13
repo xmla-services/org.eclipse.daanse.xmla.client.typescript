@@ -1,3 +1,14 @@
+/*
+Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+
+Contributors: Smart City Jena
+
+*/
+
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
 
@@ -7,16 +18,16 @@ interface EventBus {
   off: (string, Function) => void;
 }
 
-export class XMLAStore {
+export class XMLAStore implements IStore {
   public caption = "";
   public id = "";
-  public datasourceIds = [] as string[];
+  public datasourceId: string | null = null;
   private datasourceManager: any;
   public data = null;
   private eventBus = null as unknown as EventBus;
   public events = [] as Array<{ name: string; action: string }>;
   public initedEvents = [] as Array<{ name: string; cb: Function }>;
-  public type = "XMLA";
+  public type = "XMLA" as const;
 
   public rowsDrilldownMembers = [] as any[];
   public columnsDrilldownMembers = [] as any[];
@@ -34,7 +45,6 @@ export class XMLAStore {
     this.eventBus = eventBus;
 
     this.eventBus.on(`EXPAND:${this.id}`, ({ value, area }) => {
-      console.log("EXPAND", value, area);
       if (area === "rows") {
         this.expandOnRows(value);
       } else if (area === "columns") {
@@ -44,7 +54,6 @@ export class XMLAStore {
     });
 
     this.eventBus.on(`DRILLDOWN:${this.id}`, ({ value, area }) => {
-      console.log("DRILLDOWN", value, area);
       if (area === "rows") {
         this.drilldownOnRows(value);
       } else if (area === "columns") {
@@ -54,20 +63,16 @@ export class XMLAStore {
     });
 
     this.eventBus.on(`DRILLUP:${this.id}`, ({ value, area }) => {
-      console.log("DRILLUP", value, area);
       if (area === "rows") {
         this.drillupOnRows(value);
       } else if (area === "columns") {
         this.drillupOnColumns(value);
       }
 
-      console.log(this.rowsDrilldownMembers);
-      console.log(this.columnsDrilldownMembers);
       this.eventBus.emit(`UPDATE:${this.id}`);
     });
 
     this.eventBus.on(`COLLAPSE:${this.id}`, ({ value, area }) => {
-      console.log("COLLAPSE", value, area);
       if (area === "rows") {
         this.collapseOnRows(value);
       } else if (area === "columns") {
@@ -100,9 +105,7 @@ export class XMLAStore {
   }
 
   async drillupOnRows(member) {
-    const datasource = this.datasourceManager.getDatasource(
-      this.datasourceIds[0],
-    );
+    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
     const levels = datasource.getLevels();
 
@@ -140,9 +143,7 @@ export class XMLAStore {
   }
 
   async drillupOnColumns(member) {
-    const datasource = this.datasourceManager.getDatasource(
-      this.datasourceIds[0],
-    );
+    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
     const levels = datasource.getLevels();
 
@@ -347,19 +348,13 @@ export class XMLAStore {
     });
   }
 
-  addDatasource(datasourceId) {
-    this.datasourceIds.push(datasourceId);
-  }
-
-  setDatasources(datasourceIds) {
-    this.datasourceIds = [...datasourceIds];
+  setDatasource(datasourceIds) {
+    this.datasourceId = datasourceIds;
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
   async getData() {
-    const datasource = this.datasourceManager.getDatasource(
-      this.datasourceIds[0],
-    );
+    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
     this.flushDrilldowns();
     this.flushExpands();
@@ -367,10 +362,8 @@ export class XMLAStore {
       showEmpty: true,
       alignContent: "right",
     });
-    console.log();
 
     const responce = await datasource.getData(body);
-    console.log(responce);
     return responce;
   }
 
@@ -380,16 +373,11 @@ export class XMLAStore {
     this.column = column || this.column;
     this.measure = measure || this.measure;
 
-    // if (this.row && this.column && this.measure) {
-    //   this.getData();
-    // }
-
-    console.log("EMITED UPDATE", this.id);
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
   getDatasource() {
-    return this.datasourceManager.getDatasource(this.datasourceIds[0]);
+    return this.datasourceManager.getDatasource(this.datasourceId);
   }
 
   getState() {
@@ -397,7 +385,7 @@ export class XMLAStore {
       caption: this.caption,
       id: this.id,
       events: this.events,
-      datasourceIds: this.datasourceIds,
+      datasourceIds: this.datasourceId,
     };
   }
 
@@ -405,19 +393,12 @@ export class XMLAStore {
     this.caption = state.caption;
     this.id = state.id;
     this.events = state.events;
-    this.datasourceIds = state.datasourceIds;
+    this.datasourceId = state.datasourceId;
   }
 
   async getMDXRequest(pivotTableSettings) {
-    const datasource = this.datasourceManager.getDatasource(
-      this.datasourceIds[0],
-    );
+    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
-    console.log(this.measure);
-    console.log(this.row);
-    console.log(this.column);
-
-    console.log(datasource.cube);
     const mdxRequest = await getMdxRequest(
       datasource.cube.CUBE_NAME,
       this.rowsDrilldownMembers,

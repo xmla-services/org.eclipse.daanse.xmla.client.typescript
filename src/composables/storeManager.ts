@@ -17,7 +17,7 @@ import { v4, v5 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
 import { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
-const availableStores = ref(new Map<string, any>());
+const availableStores = ref(new Map<string, IStore>());
 
 export function useStoreManager() {
   const initStore = (

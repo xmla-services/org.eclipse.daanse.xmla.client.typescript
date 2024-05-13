@@ -20,7 +20,7 @@ Contributors: Smart City Jena
           <va-button
             preset="primary"
             class="settings-button"
-            :borderColor="editEnabled ? 'enabled' : ''"
+            :borderColor="editEnabled ? '#4153b5' : ''"
             @click="toggleEdit"
           >
             Edit mode
@@ -47,10 +47,11 @@ Contributors: Smart City Jena
                 class="widgets-dropdown-button"
                 icon="add"
                 v-model="isDropdownVisible"
-                :preset="isDropdownVisible ? 'primary' : ''"
-                :border-color="isDropdownVisible ? '#4153B5' : ''"
-                :iconColor="isMouseOver ? '#4153B5' : ''"
-                color="#4153B5"
+                :preset="isDropdownVisible || isMouseOver ? 'primary' : ''"
+                :border-color="isDropdownVisible ? '#4153b5' : ''"
+                :iconColor="isMouseOver || isActiveButton ? '#4153b5' : ''"
+                :background-opacity="isDropdownVisible ? 0 : 1"
+                color="#4153b5"
                 @mousedown="mousedown"
                 @mouseup="mouseup"
                 @mouseover="mouseover"

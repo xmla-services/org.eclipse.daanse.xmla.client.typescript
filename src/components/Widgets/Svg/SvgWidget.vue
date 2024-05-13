@@ -9,76 +9,47 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { computed, getCurrentInstance, onMounted, ref, watch, inject, type Ref, type Component, PropType } from "vue";
-import SvgWidgetSettings from "./SvgWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
-import type { Config, RepeatableSvgSharingComponentProps, SvgComponentProps } from "@/@types/widgets";
-const settings: Component = SvgWidgetSettings;
+export interface ISVGSettingsProps {
+  initialState?: any;
+  src?: string;
+  classesConfig?: Config;
+}
 
-const EventBus = inject("customEventBus") as any;
-const storeManager = useStoreManager();
-const storeId: Ref<string> = ref("");
-const data = ref(null as unknown);
+import { computed, getCurrentInstance, onMounted, ref, type Ref } from "vue";
+import SvgWidgetSettings from "./SvgWidgetSettings.vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
+import type { Store } from "@/stores/Widgets/Store";
+import type { Config } from "@/@types/widgets";
+
+const settingsComponent = SvgWidgetSettings;
+
 const svgSource: Ref<string> = ref("");
 const inst = getCurrentInstance();
 const scope = inst?.type.__scopeId;
 
-let store = null as unknown as Store;
-
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  src: {
-    type: String,
-    required: false,
-    default: "/demo/test.svg",
-  },
-  classesConfig: {
-    type: Object as PropType<Config>,
-    required: false,
-    default: null,
-  },
-}) as SvgComponentProps;
-
-const getState = () => {
-  return {
-    storeId: storeId.value,
-  };
-};
-
-const getData = async () => {
-  if (!store) return;
-  updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-  console.log("store changed", storeId);
-  store = storeManager.getStore(storeId.value);
-
-  console.log(oldVal, newVal);
-
-  EventBus.off(`UPDATE:${oldVal}`, updateFn);
-  EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-  getData();
+const props = withDefaults(defineProps<ISVGSettingsProps>(), {
+  src: "/demo/test.svg",
+  classesConfig: () => ({
+    primary: {
+      fill: "#ff5733",
+      stroke: "#1e8449",
+      strokeWidth: "5px",
+    },
+  }),
 });
 
-const updateFn = async () => {
-  data.value = await store?.getData();
-  console.log(data);
-};
-
-const innerClassesConfig: Ref<Config> = ref(props.classesConfig || null);
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, data, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
 
 const styles: Ref<string> = computed(() => {
   let string: string = "";
 
-  if (innerClassesConfig.value) {
+  if (settings.value.classesConfig) {
     string += "<style>";
-    for (const [key, value] of Object.entries(innerClassesConfig.value)) {
+    for (const [key, value] of Object.entries(settings.value.classesConfig)) {
       string += `
         [${scope}] .${key} {
           stroke: ${value.stroke};
@@ -94,19 +65,20 @@ const styles: Ref<string> = computed(() => {
 });
 
 onMounted(async () => {
-  if(!props.src) return;
-  const req = await fetch(props.src);
+  if (!settings.value.src) return;
+  const req = await fetch(settings.value.src);
   const svgObject = await req.text();
   svgSource.value = svgObject;
 });
 
 defineExpose({
-  src: svgSource,
-  classesConfig: innerClassesConfig,
-  storeId,
+  setSetting,
   settings,
+  settingsComponent,
   getState,
-}) as unknown as RepeatableSvgSharingComponentProps;
+  store,
+  setStore,
+});
 
 const svgSourceParced = computed(() => {
   let processedString = svgSource.value;

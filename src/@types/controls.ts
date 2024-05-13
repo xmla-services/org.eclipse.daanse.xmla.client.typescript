@@ -8,39 +8,7 @@
   Contributors: Smart City Jena
 
 */
-import { type Component } from 'vue';
-
 export interface EventItem {
   name: string;
   trigger: string;
-}
-
-export interface ButtonComponentProps {
-  component: {
-    title: string;
-    availableEvents: string[];
-    events: EventItem[];
-    settings: Component;
-  }
-}
-
-export interface ComponentProps {
-  component: {
-    label: string;
-    availableEvents: string[];
-    events: EventItem[];
-    settings: Component;
-  }
-}
-
-export interface SelectComponentProps {
-  component: {
-    label: string;
-    title: string;
-    availableEvents: string[];
-    events: EventItem[];
-    options: string[];
-    settings: Component;
-    selectValue: string;
-  }
 }

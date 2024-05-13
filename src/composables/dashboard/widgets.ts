@@ -9,7 +9,6 @@
 
 */
 import { ref, getCurrentInstance } from "vue";
-import type { ISerializable } from "./serialization";
 import { enabledWidgets, widgetNames } from "@/components/Widgets";
 
 declare interface Widget {
@@ -19,16 +18,16 @@ declare interface Widget {
   state?: any;
 }
 
-declare interface Control {
-  id: string;
-  component: string;
-  caption: string;
-  state: any;
-}
+// declare interface Control {
+//   id: string;
+//   component: string;
+//   caption: string;
+//   state?: any;
+// }
 
 export function useWidgets() {
   const instance = getCurrentInstance();
-  const widgets = ref<(Widget | Control)[]>([]);
+  const widgets = ref<Widget[]>([]);
 
   const widgetsStorage: ISerializable = {
     getState: () => {
@@ -48,7 +47,7 @@ export function useWidgets() {
       return JSON.stringify(state);
     },
     loadState: (state) => {
-      console.warn("Not implemented");
+      console.warn("Not implemented", state);
     },
   };
 

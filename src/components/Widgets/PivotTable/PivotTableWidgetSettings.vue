@@ -11,23 +11,11 @@ Contributors: Smart City Jena
 <script lang="ts" setup>
 import { onMounted, ref, type Ref } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
-import type { Store } from "@/stores/Widgets/Store";
 
 const props = defineProps(["component"]) as any;
-const requestResult = ref("");
-const catalogs = ref([]) as Ref<any[]>;
-const cubes = ref([]) as Ref<any[]>;
-// const field = ref(props.component.objectField);
 const storeId = ref(props.component.storeId);
 const storeManager = useStoreManager();
 let stores = ref([]) as Ref<any[]>;
-
-const getData = async () => {
-
-  // console.log(store);
-  // const data = await store.getData();
-  // console.log(data);
-};
 
 const getStores = () => {
   const storeList = storeManager.getStoreList();
@@ -40,43 +28,10 @@ const getStores = () => {
 const updateStore = async (storeIdSelected) => {
   storeId.value = storeIdSelected;
   props.component.storeId = storeId.value;
-
-  const store = storeManager.getStore(storeId.value) as Store;
-  const ds = store.getDatasource();
-  const api = ds.getApi();
-
-  catalogs.value = (await api.getCatalogs()).catalogs;
 };
-
-const updateCatalog = async (catalogName) => {
-  const catalog = catalogs.value.find((c) => c.CATALOG_NAME === catalogName);
-  props.component.catalog = catalog;
-
-  const store = storeManager.getStore(storeId.value) as Store;
-  const ds = store.getDatasource();
-  const api = ds.getApi();
-
-  cubes.value = (await api.getCubes(catalog.CATALOG_NAME)).cubes;
-};
-
-const updateCube = (cubeName) => {
-  const cube = cubes.value.find((c) => c.CUBE_NAME === cubeName);
-  props.component.cube = cube;
-};
-
-// const updateField = (fieldVal) => {
-//   field.value = fieldVal;
-
-//   props.component.setSettings({
-//     field: field.value,
-//   });
-// };
 
 onMounted(() => {
   getStores();
-  if (storeId.value) {
-    getData();
-  }
 });
 </script>
 
@@ -95,37 +50,6 @@ onMounted(() => {
         name="store-radio-group"
       />
     </div>
-  </div>
-  <div v-if="props.component.storeId">
-    <va-select
-      class="mb-2 input"
-      :model-value="props.component.catalog?.CATALOG_NAME"
-      @update:model-value="updateCatalog"
-      text-by="CATALOG_NAME"
-      value-by="CATALOG_NAME"
-      :options="catalogs"
-      placeholder="Select catalog"
-      label="Select catalog"
-    />
-  </div>
-  <div v-if="props.component.catalog">
-    <va-select
-      class="mb-2 input"
-      :model-value="props.component.cube?.CUBE_NAME"
-      @update:model-value="updateCube"
-      text-by="CUBE_NAME"
-      value-by="CUBE_NAME"
-      :options="cubes"
-      placeholder="Select cube"
-      label="Select cube"
-    />
-  </div>
-  <div>
-    <h3 class="mb-2">MDX</h3>
-    <va-textarea
-      style="width: 100%; height: 500px"
-      v-model="props.component.mdx"
-    />
   </div>
 </template>
 <style>

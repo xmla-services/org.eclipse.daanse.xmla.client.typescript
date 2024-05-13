@@ -9,12 +9,24 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import type { ComponentProps, EventItem } from "@/@types/controls";
+export interface IColorSettings {
+  label: string;
+  availableEvents: string[];
+  events: EventItem[];
+}
+
+export interface IColorComponent {
+  settings: IColorSettings;
+  setSetting: (key: string, value: any) => void;
+}
+
+import type { EventItem } from "@/@types/controls";
 import { ref, type Ref } from "vue";
 
-const props = defineProps(["component"]) as ComponentProps;
-const options: Ref<string[]> = ref(props.component.availableEvents);
-const events: Ref<EventItem[]> = ref(props.component.events);
+const { component } = defineProps<{ component: IColorComponent }>();
+
+const options: Ref<string[]> = ref(component.settings.availableEvents);
+const events: Ref<EventItem[]> = ref(component.settings.events);
 
 const addEvent = () => {
   events.value.push({
@@ -24,15 +36,16 @@ const addEvent = () => {
 };
 
 const deleteEvent = (id: number) => {
-  events.value.splice(id, 1)
+  events.value.splice(id, 1);
 };
 </script>
 
 <template>
   <va-input
     class="event-input"
-    v-model="props.component.label"
+    :model-value="component.settings.label"
     label="Label text"
+    @update:model-value="component.setSetting('label', $event)"
   />
   <div class="events-list">
     <div class="events-list-label">
@@ -46,7 +59,11 @@ const deleteEvent = (id: number) => {
         :columns="[{ key: 'name' }, { key: 'trigger' }, { key: 'actions' }]"
       >
         <template #cell(name)="{ rowIndex }">
-          <va-input class="name-input" v-model="events[rowIndex].name">
+          <va-input
+            class="name-input"
+            v-model="events[rowIndex].name"
+            @update:model-value="component.setSetting('name', $event)"
+          >
           </va-input>
         </template>
         <template #cell(trigger)="{ rowIndex }">
@@ -54,6 +71,7 @@ const deleteEvent = (id: number) => {
             class="trigger-input"
             v-model="events[rowIndex].trigger"
             :options="options"
+            @update:model-value="component.setSetting('trigger', $event)"
           />
         </template>
         <template #cell(actions)="{ rowIndex }">

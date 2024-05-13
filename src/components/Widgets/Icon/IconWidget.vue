@@ -9,88 +9,68 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import type { IconSharingComponentProps, IconComponentProps } from "@/@types/widgets";
-import { ref, computed, type Ref, type Component } from "vue";
+export interface IIconSettingsProps {
+  initialState?: any;
+  currentIcon?: string;
+  iconColor?: string;
+  iconSize?: number;
+  isIconFilled?: boolean;
+  strokeWeight?: number;
+  opticSize?: number;
+  grade?: number;
+}
+
+import { computed } from "vue";
+import { useSettings } from "@/composables/widgets/settings";
+import { useStore } from "@/composables/widgets/store";
+import { useSerialization } from "@/composables/widgets/serialization";
+import type { Store } from "@/stores/Widgets/Store";
 import IconWidgetSettings from "./IconWidgetSettings.vue";
-const settings: Component = IconWidgetSettings;
 
-const props = defineProps({
-  initialState: {
-    type: Object,
-    required: false,
-  },
-  currentIcon: {
-    type: String,
-    required: false,
-    default: "",
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: "#000",
-  },
-  iconSize: {
-    type: Number,
-    required: false,
-    default: 100,
-  },
-  isIconFilled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  strokeWeight: {
-    type: Number,
-    required: false,
-    default: 100,
-  },
-  opticSize: {
-    type: Number,
-    required: false,
-    default: 48,
-  },
-  grade: {
-    type: Number,
-    required: false,
-    default: 0,
-  }
-}) as IconComponentProps;
+const settingsComponent = IconWidgetSettings;
 
-const innerCurrentIcon: Ref<string> = ref(props.currentIcon || "");
-const innerIconColor: Ref<string> = ref(props.iconColor || "#000");
-const innerIconSize: Ref<number> = ref(props.iconSize || 100);
-const innerIsIconFilled: Ref<boolean> = ref(props.isIconFilled || false);
-const innerStrokeWeight: Ref<number> = ref(props.strokeWeight || 100);
-const innerOpticSize: Ref<number> = ref(props.opticSize || 48);
-const innerGrade: Ref<number> = ref(props.grade || 48);
+const props = withDefaults(defineProps<IIconSettingsProps>(), {
+  currentIcon: "",
+  iconColor: "#000",
+  iconSize: 100,
+  isIconFilled: false,
+  strokeWeight: 100,
+  opticSize: 48,
+  grade: 48,
+});
 
-const iconStyle = computed<string>(() => {
+const { settings, setSetting } = useSettings<typeof props>(props);
+const { store, setStore } = useStore<Store>();
+const { getState } = useSerialization(settings);
+
+const iconStyle = computed(() => {
   return `
     font-variation-settings: 
-      'FILL' ${+innerIsIconFilled.value}, 
-      'wght' ${innerStrokeWeight.value}, 
-      'GRAD' ${innerGrade.value}, 
-      'opsz' ${innerOpticSize.value};
-  `
+      'FILL' ${+settings.value.isIconFilled}, 
+      'wght' ${settings.value.strokeWeight}, 
+      'GRAD' ${settings.value.grade}, 
+      'opsz' ${settings.value.opticSize};
+  `;
 });
 
 defineExpose({
-  currentIcon: innerCurrentIcon,
-  iconColor: innerIconColor,
-  iconSize: innerIconSize,
-  isIconFilled: innerIsIconFilled,
-  strokeWeight: innerStrokeWeight,
-  opticSize: innerOpticSize,
-  grade: innerGrade,
+  setSetting,
   settings,
-}) as unknown as IconSharingComponentProps;
+  settingsComponent,
+  getState,
+  store,
+  setStore,
+});
 </script>
 
 <template>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet"
+  />
   <div class="icon">
     <div :style="iconStyle">
-      <span class="material-symbols-outlined">{{ innerCurrentIcon }}</span>
+      <span class="material-symbols-outlined">{{ settings.currentIcon }}</span>
     </div>
   </div>
 </template>
@@ -104,11 +84,11 @@ defineExpose({
   align-items: center;
 }
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
+  font-family: "Material Symbols Outlined";
   font-weight: normal;
   font-style: normal;
-  font-size: v-bind(`${innerIconSize}px`);
-  color: v-bind(innerIconColor);
+  font-size: v-bind(`${settings.iconSize}px`);
+  color: v-bind(settings.iconColor);
   display: inline-block;
   line-height: 1;
   text-transform: none;

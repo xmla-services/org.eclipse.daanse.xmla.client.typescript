@@ -18,8 +18,8 @@ export default class XMLADatasource implements IDatasource, ISerializable {
   public caption: string;
   public type = "XMLA" as const;
 
-  private cube: string | null = null;
-  private catalog: string | null = null;
+  public cube: MDSchemaCube | null = null;
+  public catalog: DBSchemaCatalog | null = null;
   private metadataStore: MetadataStore | null = null;
 
   private api: Promise<XMLAApi>;
@@ -92,11 +92,11 @@ export default class XMLADatasource implements IDatasource, ISerializable {
     return cubes;
   }
 
-  public async setCube(cube: string) {
+  public async setCube(cube: MDSchemaCube) {
     this.cube = cube;
   }
 
-  public async setCatalog(catalog: string) {
+  public async setCatalog(catalog: DBSchemaCatalog) {
     this.catalog = catalog;
   }
 
