@@ -15,11 +15,21 @@ import queryString from "query-string";
 import { optionalArrayToArray } from "@/utils/helpers";
 import { v4, v5 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
-import { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import type BaseStore from "@/stores/Widgets/BaseStore";
 
 const availableStores = ref(new Map<string, IStore>());
+const storeRegistry:Array<typeof BaseStore> = [];
 
-export function useStoreManager() {
+export interface StoreManagerI{
+  initStore:Function,
+  getStore:Function,
+  getState:Function,
+  getStoreList:Function,
+  loadState:Function,
+  registerStoreType:Function
+}
+
+export function useStoreManager():StoreManagerI {
   const initStore = (
     caption = "NO CAPTION",
     eventBus,
@@ -28,12 +38,12 @@ export function useStoreManager() {
     console.log(eventBus);
     const id = v4();
 
-    if (type === "REST") {
-      const store = reactive(new Store(id, caption, eventBus));
-      availableStores.value.set(id, store);
-    } else {
-      const store = reactive(new XMLAStore(id, caption, eventBus));
-      availableStores.value.set(id, store);
+    for (let storeClass of storeRegistry){
+      if(type == storeClass.TYPE){
+        const store = reactive(new storeClass(id, caption, eventBus) as IStore);
+        availableStores.value.set(id, store);
+      }
+
     }
     console.log("inited");
 
@@ -74,7 +84,12 @@ export function useStoreManager() {
     console.log(availableStores.value);
   };
 
+  const registerStoreType = (classOfStoreType:typeof Store)=>{
+    storeRegistry.push(classOfStoreType);
+  }
+
   return {
+    registerStoreType,
     initStore,
     getStore,
     getStoreList,

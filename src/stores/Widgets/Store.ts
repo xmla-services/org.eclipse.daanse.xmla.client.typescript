@@ -11,10 +11,10 @@
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
+import BaseStore from "@/stores/Widgets/BaseStore";
 
-export class Store implements IStore {
-  public caption: string;
-  public id: string;
+export class Store extends BaseStore implements IStore {
+  public static readonly TYPE = 'REST';
   private datasourceManager: any;
   private eventBus: EventBus;
 
@@ -26,11 +26,10 @@ export class Store implements IStore {
   public initedEvents: Array<{ name: string; cb: Function }> = [];
   private runtimeParams: IStoreParams = {};
 
-  public type = "REST" as const;
+  public type = Store.TYPE;
 
   constructor(id: string, caption: string, eventBus: EventBus) {
-    this.id = id;
-    this.caption = caption;
+    super(id,caption,eventBus);
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
     this.requestTemplate = "/products/{pageNum}";

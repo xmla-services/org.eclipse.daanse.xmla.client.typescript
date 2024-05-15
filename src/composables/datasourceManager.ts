@@ -16,11 +16,12 @@ import RESTDatasource from "@/dataSources/RestDatasource";
 import XmlaDatasource from "@/dataSources/XmlaDatasource";
 import MQTTDatasource from "@/dataSources/MqttDatasource";
 import { inject } from "vue";
+import DataSource from "@/dataSources/DataSource";
 
 declare interface DatasourceMap {
   [key: string]: IDatasource;
 }
-
+const dataSourceRegistry:Array<typeof DataSource> = [];
 const availableDatasources: Ref<DatasourceMap> = ref({});
 
 export function useDatasourceManager() {
@@ -29,8 +30,14 @@ export function useDatasourceManager() {
   const initDatasource = (type: string, url: string, caption: string) => {
     const id = v4();
 
+    for(let classinst of dataSourceRegistry){
+      if(type == classinst.TYPE){
+        const datasource = (new classinst(id, url, caption, EventBus) as IDatasource);
+        availableDatasources.value[id] = datasource;
+      }
+    }
     console.log("Datasource should be inited");
-    if (type === "REST") {
+    /*if (type === "REST") {
       const datasource = new RESTDatasource(id, url, caption);
 
       availableDatasources.value[id] = datasource;
@@ -44,7 +51,7 @@ export function useDatasourceManager() {
       const datasource = new MQTTDatasource(id, url, caption, EventBus);
 
       availableDatasources.value[id] = datasource;
-    }
+    }*/
 
     return id;
   };
@@ -58,20 +65,11 @@ export function useDatasourceManager() {
   };
 
   const updateDatasource = (key, type, caption, url) => {
-    if (type === "REST") {
-      const datasource = new RESTDatasource(key, url, caption);
-
-      availableDatasources.value[key] = datasource;
-    }
-    if (type === "XMLA") {
-      const datasource = new XmlaDatasource(key, undefined, caption);
-
-      availableDatasources.value[key] = datasource;
-    }
-    if (type === "MQTT") {
-      const datasource = new MQTTDatasource(key, url, caption, EventBus);
-
-      availableDatasources.value[key] = datasource;
+    for(let classinst of dataSourceRegistry){
+      if(type == classinst.TYPE){
+        const datasource = (new classinst(key, url, caption, EventBus) as IDatasource);
+        availableDatasources.value[key] = datasource;
+      }
     }
   };
 
@@ -104,7 +102,16 @@ export function useDatasourceManager() {
     console.log(availableDatasources.value);
   };
 
+  const registerDataSource = (class_ref)=>{
+    dataSourceRegistry.push(class_ref);
+  }
+  const unRegisterDataSource = (class_ref:IDatasource)=>{
+    //dataSourceRegistry.push(class_ref);
+  }
+
   return {
+    registerDataSource,
+    unRegisterDataSource,
     initDatasource,
     getDatasource,
     getDatasourceList,

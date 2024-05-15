@@ -12,6 +12,7 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import SOAPClient from "./plugins/SOAPClient";
 import EventBus from "./plugins/EventBus";
+import 'reflect-metadata';
 
 import App from "./App.vue";
 // import router from './router'
@@ -73,6 +74,14 @@ import "./scss/main.scss";
 import { router } from "@/router/router";
 
 import VueSmartWidget from "vue-smart-widget";
+import TestPlugin from "@/plugins/TestPlugin";
+import {useDatasourceManager} from "@/composables/datasourceManager";
+import XMLADatasource from "@/dataSources/XmlaDatasource";
+import RESTDatasource from "@/dataSources/RestDatasource";
+import MQTTDatasource from "@/dataSources/MqttDatasource";
+import {useStoreManager} from "@/composables/storeManager";
+import {XMLAStore} from "@/stores/Widgets/XMLAStore";
+import {Store} from "@/stores/Widgets/Store";
 
 const app = createApp(App);
 
@@ -82,6 +91,7 @@ app.use(pinia);
 console.log(router);
 app.use(router);
 app.use(VueSmartWidget);
+
 
 app.use(EventBus);
 const fonts = [
@@ -154,6 +164,14 @@ app.use(
     },
   }),
 );
+useDatasourceManager().registerDataSource(XMLADatasource);
+useDatasourceManager().registerDataSource(RESTDatasource);
+useDatasourceManager().registerDataSource(MQTTDatasource);
 
+//useStoreManager().registerStoreType(MQTTStore);
+useStoreManager().registerStoreType(XMLAStore);
+useStoreManager().registerStoreType(Store);
+
+app.use(TestPlugin);
 app.mount("#app");
 export default app;

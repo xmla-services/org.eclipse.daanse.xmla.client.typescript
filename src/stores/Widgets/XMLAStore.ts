@@ -11,6 +11,7 @@ Contributors: Smart City Jena
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
+import BaseStore from "@/stores/Widgets/BaseStore";
 
 interface EventBus {
   emit: (string, any?) => void;
@@ -18,16 +19,17 @@ interface EventBus {
   off: (string, Function) => void;
 }
 
-export class XMLAStore implements IStore {
-  public caption = "";
-  public id = "";
+export class XMLAStore extends BaseStore implements IStore{
+  public static readonly TYPE = "XMLA";
+  public readonly type = XMLAStore.TYPE;
+
   public datasourceId: string | null = null;
   private datasourceManager: any;
   public data = null;
   private eventBus = null as unknown as EventBus;
   public events = [] as Array<{ name: string; action: string }>;
   public initedEvents = [] as Array<{ name: string; cb: Function }>;
-  public type = "XMLA" as const;
+
 
   public rowsDrilldownMembers = [] as any[];
   public columnsDrilldownMembers = [] as any[];
@@ -39,8 +41,8 @@ export class XMLAStore implements IStore {
   public measure = null as any;
 
   constructor(id, caption, eventBus: EventBus) {
-    this.id = id;
-    this.caption = caption;
+    super(id, caption, eventBus);
+
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
 

@@ -23,6 +23,9 @@ const addNewStore = () => {
 const addNewXMLAStore = () => {
   storeManager.initStore("New store", EventBus, "XMLA");
 };
+const addNewSTAStore = () => {
+  storeManager.initStore("New store", EventBus, "OGCSTA");
+};
 </script>
 
 <template>
@@ -31,6 +34,7 @@ const addNewXMLAStore = () => {
       <h2 class="mb-2">Stores</h2>
       <va-button @click="addNewStore">Add new</va-button>
       <va-button class="ml-2" @click="addNewXMLAStore">Add new XMLA</va-button>
+      <va-button class="ml-2" @click="addNewSTAStore">Add new STA</va-button>
     </div>
     <StoreList class="mt-2" />
   </div>
