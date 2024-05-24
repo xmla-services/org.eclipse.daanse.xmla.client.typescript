@@ -50,9 +50,11 @@ const clickHeader = () => {
 watch(
   dsmap,
   () => {
-    dslist.value = Object.entries(dsmap.value).map((entry) => {
-      return entry[1];
-    }) as XMLADatasource[];
+    dslist.value = Object.entries(dsmap.value)
+      .map((entry) => {
+        return entry[1];
+      })
+      .filter((e) => e.type === "XMLA") as XMLADatasource[];
   },
   { deep: true },
 );
@@ -99,7 +101,7 @@ const saveStore = (item) => {
 };
 
 const createDatasource = () => {
-  dsManager.initDatasource("REST", "", "");
+  dsManager.initDatasource("XMLA", "", "");
 };
 
 const updateDatasource = (index, type) => {
@@ -221,7 +223,7 @@ const setMeasure = async (value) => {
       <va-data-table
         class="table-crud"
         :items="dslist"
-        :columns="[{ key: 'caption' }, { key: 'type' }, { key: 'url' }]"
+        :columns="[{ key: 'caption' }, { key: 'url' }]"
         :model-value="[getSelectedDatasource()]"
         selectable
         select-mode="single"
@@ -234,14 +236,14 @@ const setMeasure = async (value) => {
             v-model="dslist[rowIndex].caption"
           ></va-input>
         </template>
-        <template #cell(type)="{ rowIndex }">
+        <!-- <template #cell(type)="{ rowIndex }">
           <va-select
             class="type-input"
             :model-value="dslist[rowIndex].type"
             @update:modelValue="updateDatasource(rowIndex, $event)"
             :options="['REST', 'XMLA']"
           />
-        </template>
+        </template> -->
         <template #cell(url)="{ rowIndex }">
           <va-input
             class="url-input"
