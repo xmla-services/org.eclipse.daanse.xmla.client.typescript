@@ -64,7 +64,7 @@ export function useDatasourceManager() {
       availableDatasources.value[key] = datasource;
     }
     if (type === "XMLA") {
-      const datasource = new XmlaDatasource(key, undefined, caption);
+      const datasource = new XmlaDatasource(key, url, caption);
 
       availableDatasources.value[key] = datasource;
     }
