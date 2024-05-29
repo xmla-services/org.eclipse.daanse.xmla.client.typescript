@@ -12,6 +12,7 @@ Contributors: Smart City Jena
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
 import { type Ref, onMounted, ref, watch } from "vue";
+import DataSource from "@/dataSources/DataSource";
 
 // TODO: fix duplicate interface
 declare interface IDatasource {
@@ -138,6 +139,7 @@ const getSelectedDatasource = (item) => {
 </script>
 
 <template>
+
   <div class="store-item-header" @click="clickHeader">
     <va-list-item-label class="store-item-header-text">
       {{ item.caption }}
@@ -184,7 +186,7 @@ const getSelectedDatasource = (item) => {
             class="type-input"
             v-model="dslist[rowIndex].type"
             @update:modelValue="updateDatasource(rowIndex)"
-            :options="['REST', 'XMLA']"
+            :options="dsManager.getDataSourceRegistry().map(i=>i.TYPE)"
           />
         </template>
         <template #cell(url)="{ rowIndex }">

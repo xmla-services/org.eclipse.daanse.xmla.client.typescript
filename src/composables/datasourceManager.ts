@@ -108,8 +108,12 @@ export function useDatasourceManager() {
   const unRegisterDataSource = (class_ref:IDatasource)=>{
     //dataSourceRegistry.push(class_ref);
   }
+  const getDataSourceRegistry = ()=>{
+    return dataSourceRegistry
+  }
 
   return {
+    getDataSourceRegistry,
     registerDataSource,
     unRegisterDataSource,
     initDatasource,

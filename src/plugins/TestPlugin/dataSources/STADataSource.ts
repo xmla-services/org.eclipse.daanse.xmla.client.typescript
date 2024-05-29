@@ -1,8 +1,8 @@
 import {
     Configuration,
-    type Datastream, DatastreamsApi,
-    type Observation, ObservationsApi,
-    type Thing, ThingsApi
+    type Datastream, DatastreamsApi, LocationsApi,
+    type Observation, ObservationsApi,type Location,
+    type Thing, type Things, ThingsApi
 } from "@/plugins/TestPlugin/dataSources/STAClient";
 import DataSource from "@/dataSources/DataSource";
 
@@ -21,8 +21,19 @@ export interface IOGCSTAOptions{
         all?:boolean,
         ids?:Array<string>,
         filter?:any
+    },
+    locations?:{
+        all?:boolean,
+        ids?:Array<string>,
+        filter?:any
     }
 
+}
+export interface IOGCSTA{
+    things?:Thing[],
+    datastreams?:Datastream[],
+    observations?:Observation[],
+    locations?:Location[]
 }
 
 
@@ -45,13 +56,18 @@ export default class STADataSource extends DataSource implements IDatasource {
     }
 
     getData(options: IOGCSTAOptions){
-        let listOfPromesis:Promise<Thing[]|Datastream[]|Observation[]>[] = [];
+
+        let listOfPromesis:Promise<IOGCSTA>[] = [];
+
+
+        if(options && typeof options == 'object'){
         if('things' in options){
             if('all' in options.things!){
                 listOfPromesis.push(new Promise(async (resolve, reject)=>{
                    try{
-                       resolve(
-                           (await new ThingsApi(this.baseConfigration).v11ThingsGet()).data.value!);
+                       let data = (await new ThingsApi(this.baseConfigration).v11ThingsGet()).data.value!
+
+                       resolve({things:data});
                    }catch (e){
                        reject(e);
                    }
@@ -73,8 +89,8 @@ export default class STADataSource extends DataSource implements IDatasource {
             if('all' in options.datastreams!){
                 listOfPromesis.push(new Promise(async (resolve, reject)=>{
                     try{
-                        resolve(
-                            (await new DatastreamsApi(this.baseConfigration).v11DatastreamsGet()).data.value!);
+                        const data= ( await new DatastreamsApi(this.baseConfigration).v11DatastreamsGet()).data.value!
+                        resolve({datastreams:data});
                     }catch (e){
                         reject(e);
                     }
@@ -96,8 +112,9 @@ export default class STADataSource extends DataSource implements IDatasource {
             if('all' in options.observations!){
                 listOfPromesis.push(new Promise(async (resolve, reject)=>{
                     try{
-                        resolve(
-                            (await new ObservationsApi(this.baseConfigration).v11ObservationsGet()).data.value!);
+                        const data = (await new ObservationsApi(this.baseConfigration).v11ObservationsGet()).data.value!;
+                        resolve({observations:data});
+
                     }catch (e){
                         reject(e);
                     }
@@ -115,7 +132,37 @@ export default class STADataSource extends DataSource implements IDatasource {
                     }));
                 }
             }
-        }
+        }}
+        else {
+            listOfPromesis.push(new Promise(async (resolve, reject)=>{
+                try{
+                    const data = (await new ThingsApi(this.baseConfigration).v11ThingsGet()).data.value!;
+                    resolve({things:data});
+                }catch (e){
+
+
+                    reject(e);
+                }
+            }));
+            listOfPromesis.push(new Promise(async (resolve, reject)=>{
+                    try{
+                        const data =  (await new DatastreamsApi(this.baseConfigration).v11DatastreamsGet()).data.value!;
+                        resolve({datastreams:data});
+                    }catch (e){
+                        reject(e);
+                    }
+                }));
+            listOfPromesis.push(new Promise(async (resolve, reject)=>{
+                try{
+                    const data =  (await new LocationsApi(this.baseConfigration).v11LocationsGet()).data.value!;
+                    resolve({locations:data});
+                }catch (e){
+                    reject(e);
+                }
+            }));
+
+    }
+
         return Promise.all(listOfPromesis);
     };
 

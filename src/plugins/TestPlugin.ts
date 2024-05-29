@@ -1,4 +1,4 @@
-import Picon  from './TestPlugin/Icon/PiconWidget.vue';
+import ThingWidget  from './TestPlugin/widgets/ThingWidget.vue';
 
 import {enabledWidgets, widgetNames} from "@/components/Widgets";
 import {cid, container, inject, injectable} from 'inversify-props';
@@ -12,9 +12,9 @@ import StaStore from "@/plugins/TestPlugin/stores/StaStore";
 export default {
 
     install: (app) => {
-        app.component(Picon);
-        enabledWidgets['PiconWidget']= Picon;  //ToDo add register Method on widget registery
-        widgetNames.push( { name: "PiconWidget", label: "p-icon"});
+        app.component(ThingWidget);
+        enabledWidgets['ThingWidget']= ThingWidget;  //ToDo add register Method on widget registery
+        widgetNames.push( { name: "ThingWidget", label: "ThingWidget"});
 
         const storemanger = container.get<StoreManagerI>(cid.UseStoreManager); // injection via inverserify
         //console.log(storemanger.register(...)) //register Store
