@@ -17,8 +17,8 @@ import { v4, v5 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
 import type BaseStore from "@/stores/Widgets/BaseStore";
 
-const availableStores = ref(new Map<string, IStore>());
-const storeRegistry:Array<typeof BaseStore> = [];
+const availableStores = ref(new Map<string, IStore & ISerializable>());
+const storeRegistry:Map<string,typeof BaseStore> = new Map();
 
 export interface StoreManagerI{
   initStore:Function,
@@ -38,13 +38,10 @@ export function useStoreManager():StoreManagerI {
     console.log(eventBus);
     const id = v4();
 
-    for (let storeClass of storeRegistry){
-      if(type == storeClass.TYPE){
-        const store = reactive(new storeClass(id, caption, eventBus) as IStore);
-        availableStores.value.set(id, store);
-      }
+    let storeClass = storeRegistry[type];
+    const store = reactive(new storeClass(id, caption, eventBus) as IStore & ISerializable);
+    availableStores.value.set(id, store);
 
-    }
     console.log("inited");
 
     return id;
@@ -77,7 +74,9 @@ export function useStoreManager():StoreManagerI {
     availableStores.value.clear();
 
     Object.keys(state).forEach((key) => {
-      const store = new Store(key, state[key].caption, eventBus);
+
+      let storeClass = storeRegistry[state[key].type];
+      const store:(IStore & ISerializable) = reactive(new storeClass(key, state[key].caption, eventBus)) ;
       store.loadState(state[key]);
       availableStores.value.set(key, store);
     });
@@ -85,7 +84,7 @@ export function useStoreManager():StoreManagerI {
   };
 
   const registerStoreType = (classOfStoreType:typeof Store)=>{
-    storeRegistry.push(classOfStoreType);
+    storeRegistry[classOfStoreType.TYPE]= classOfStoreType;
   }
 
   return {

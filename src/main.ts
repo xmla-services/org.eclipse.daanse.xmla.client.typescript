@@ -85,6 +85,7 @@ import {Store} from "@/stores/Widgets/Store";
 const app = createApp(App);
 
 const pinia = createPinia();
+// @ts-ignore
 pinia.use(SOAPClient);
 app.use(pinia);
 app.use(router);
@@ -103,6 +104,7 @@ const fonts = [
   },
 ];
 
+// @ts-ignore
 app.use(
   createVuesticEssential({
     components: {

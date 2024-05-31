@@ -369,7 +369,7 @@ export class XMLAStore extends BaseStore implements IStore{
     return responce;
   }
 
-  setOptions({ caption, column, row, measure }) {
+  setOptions({ caption, column, row, measure }:IStoreParams) {
     this.caption = caption || this.caption;
     this.row = row || this.row;
     this.column = column || this.column;

@@ -25,7 +25,7 @@ interface IStore {
   id: string;
   caption: string;
   events: IStoreEvents[];
-  type: "REST" | "XMLA";
+  type: string;
   datasourceId: string | null;
   setDatasource: (datasourceId: string) => void;
   getDatasource: (datasourceId: string) => IDatasource;
