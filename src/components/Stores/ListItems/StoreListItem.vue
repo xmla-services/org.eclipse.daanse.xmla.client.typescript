@@ -186,7 +186,7 @@ const getSelectedDatasource = (item) => {
             class="type-input"
             v-model="dslist[rowIndex].type"
             @update:modelValue="updateDatasource(rowIndex)"
-            :options="dsManager.getDataSourceRegistry().map(i=>i.TYPE)"
+            :options="Object.keys(dsManager.getDataSourceRegistry())"
           />
         </template>
         <template #cell(url)="{ rowIndex }">

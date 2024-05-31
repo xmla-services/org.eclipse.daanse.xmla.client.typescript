@@ -25,7 +25,7 @@ export default class RESTDatasource extends  DataSource implements IDatasource, 
     this.caption = caption;
   }
 
-  async getData(resourcePath: string): Promise<any> {
+  async getData(resourcePath: string=''): Promise<any> {
     const req = await fetch(`${this.url}${resourcePath}`);
     return await req.json();
   }

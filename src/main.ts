@@ -74,7 +74,6 @@ import "./scss/main.scss";
 import { router } from "@/router/router";
 
 import VueSmartWidget from "vue-smart-widget";
-import TestPlugin from "@/plugins/TestPlugin";
 import {useDatasourceManager} from "@/composables/datasourceManager";
 import XMLADatasource from "@/dataSources/XmlaDatasource";
 import RESTDatasource from "@/dataSources/RestDatasource";
@@ -88,7 +87,6 @@ const app = createApp(App);
 const pinia = createPinia();
 pinia.use(SOAPClient);
 app.use(pinia);
-console.log(router);
 app.use(router);
 app.use(VueSmartWidget);
 
@@ -168,10 +166,9 @@ useDatasourceManager().registerDataSource(XMLADatasource);
 useDatasourceManager().registerDataSource(RESTDatasource);
 useDatasourceManager().registerDataSource(MQTTDatasource);
 
-//useStoreManager().registerStoreType(MQTTStore);
+
 useStoreManager().registerStoreType(XMLAStore);
 useStoreManager().registerStoreType(Store);
 
-app.use(TestPlugin);
 app.mount("#app");
 export default app;

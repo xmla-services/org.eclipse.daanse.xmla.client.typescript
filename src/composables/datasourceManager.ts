@@ -12,16 +12,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type Ref, ref, watch } from "vue";
 import { v4 } from "uuid";
-import RESTDatasource from "@/dataSources/RestDatasource";
-import XmlaDatasource from "@/dataSources/XmlaDatasource";
-import MQTTDatasource from "@/dataSources/MqttDatasource";
 import { inject } from "vue";
 import DataSource from "@/dataSources/DataSource";
 
 declare interface DatasourceMap {
   [key: string]: IDatasource;
 }
-const dataSourceRegistry:Array<typeof DataSource> = [];
+declare interface DatasourceRegistryMap {
+  [key: string]:  typeof DataSource;
+}
+const dataSourceRegistry:DatasourceRegistryMap = {};
 const availableDatasources: Ref<DatasourceMap> = ref({});
 
 export function useDatasourceManager() {
@@ -30,30 +30,15 @@ export function useDatasourceManager() {
   const initDatasource = (type: string, url: string, caption: string) => {
     const id = v4();
 
-    for(let classinst of dataSourceRegistry){
-      if(type == classinst.TYPE){
-        const datasource = (new classinst(id, url, caption, EventBus) as IDatasource);
-        availableDatasources.value[id] = datasource;
-      }
-    }
-    console.log("Datasource should be inited");
-    /*if (type === "REST") {
-      const datasource = new RESTDatasource(id, url, caption);
-
+    try{
+      const classinst = dataSourceRegistry[type];
+      const datasource = (new classinst(id, url, caption, EventBus) as IDatasource);
       availableDatasources.value[id] = datasource;
+      return id;
+    }catch (e){
+        throw new TypeError(`${type} not found in registry`)
     }
-    if (type === "XMLA") {
-      const datasource = new XmlaDatasource(id, undefined, caption);
 
-      availableDatasources.value[id] = datasource;
-    }
-    if (type === "MQTT") {
-      const datasource = new MQTTDatasource(id, url, caption, EventBus);
-
-      availableDatasources.value[id] = datasource;
-    }*/
-
-    return id;
   };
 
   const getDatasource = (key) => {
@@ -65,21 +50,17 @@ export function useDatasourceManager() {
   };
 
   const updateDatasource = (key, type, caption, url) => {
-    for(let classinst of dataSourceRegistry){
-      if(type == classinst.TYPE){
-        const datasource = (new classinst(key, url, caption, EventBus) as IDatasource);
-        availableDatasources.value[key] = datasource;
-      }
+    try{
+      const classinst = dataSourceRegistry[type];
+      const datasource = (new classinst(key, url, caption, EventBus) as IDatasource);
+      availableDatasources.value[key] = datasource;
+    }catch (e){
+      throw new TypeError(`${type} not found in registry`)
     }
   };
 
   const getState = () => {
     const state = {};
-
-    // availableDatasources.value.forEach((ds) => {
-    //   state[ds.id] = ds.getState();
-    // });
-
     return JSON.stringify(state);
   };
 
@@ -87,25 +68,23 @@ export function useDatasourceManager() {
     Object.keys(state).forEach((key) => {
       const ds = state[key];
 
-      if (ds.type === "REST") {
-        const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
-
+      try{
+        const classinst = dataSourceRegistry[ds.type];
+        const datasource = (new classinst(key, ds.url, ds.caption, EventBus) as IDatasource);
         availableDatasources.value[key] = datasource;
+      }catch (e){
+        throw new TypeError(`${ds.type} not found in registry`)
       }
-      if (ds.type === "XMLA") {
-        const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
 
-        availableDatasources.value[key] = datasource;
-      }
     });
-
     console.log(availableDatasources.value);
   };
 
-  const registerDataSource = (class_ref)=>{
-    dataSourceRegistry.push(class_ref);
+  const registerDataSource = (class_ref:typeof DataSource)=>{
+    dataSourceRegistry[class_ref.TYPE]=class_ref;
   }
-  const unRegisterDataSource = (class_ref:IDatasource)=>{
+  const unRegisterDataSource = (class_ref: typeof DataSource)=>{
+    delete dataSourceRegistry[class_ref.TYPE];
     //dataSourceRegistry.push(class_ref);
   }
   const getDataSourceRegistry = ()=>{
