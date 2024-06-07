@@ -10,17 +10,20 @@
 */
 
 import mqtt from "mqtt";
+import DataSource from "@/dataSources/DataSource";
 
-export default class MQTTDatasource implements IDatasource {
+export default class MQTTDatasource extends DataSource implements IDatasource {
+  public static TYPE = "MQTT";
   public url: string;
   public id: string;
   public caption: string;
-  public type = "MQTT" as const;
+  public type = MQTTDatasource.TYPE;
 
   private _msg_parsed: any = {};
   private eventBus: any;
 
   constructor(id, url, caption, eventBus) {
+    super();
     console.log(eventBus);
     this.id = id;
     this.url = url;
