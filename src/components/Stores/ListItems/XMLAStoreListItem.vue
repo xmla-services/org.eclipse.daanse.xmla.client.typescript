@@ -104,17 +104,15 @@ const createDatasource = () => {
   dsManager.initDatasource("XMLA", "", "");
 };
 
-const updateDatasource = (index, type) => {
+const updateDatasource = (index) => {
   const datasourceToUpdate = dslist.value[index] as XMLADatasource;
   if (datasourceToUpdate) {
-    if (datasourceToUpdate.type !== type) {
-      dsManager.updateDatasource(
-        datasourceToUpdate.id,
-        type,
-        datasourceToUpdate.caption,
-        datasourceToUpdate.url,
-      );
-    }
+    dsManager.updateDatasource(
+      datasourceToUpdate.id,
+      "XMLA",
+      datasourceToUpdate.caption,
+      datasourceToUpdate.url,
+    );
   }
 };
 
