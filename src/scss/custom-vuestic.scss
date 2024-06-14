@@ -22,3 +22,20 @@ Contributors: Smart City Jena
   border: 2px solid #CDCFDB;
   border-radius: 4px;
 }
+
+.va-toast {
+  padding: 10px 0 10px 10px;
+  z-index: 9999999;
+  cursor: pointer;
+
+  &__group {
+    width: 100%;
+    margin: 0;
+  }
+
+  &__content {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
