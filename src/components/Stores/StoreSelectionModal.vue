@@ -12,8 +12,7 @@ Contributors: Smart City Jena
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
-import { ref, watch, markRaw, inject } from "vue";
-import DatasourceList from "@/components/Datasources/DatasourceList.vue";
+import { ref, watch, inject } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 
 const storeManager = useStoreManager();
@@ -123,7 +122,7 @@ defineExpose({
   }
 
   .response {
-    background-color: lightgrey;
+    background-color: var(--app-response-background);
     padding: 0.5rem;
     border-radius: 4px;
   }

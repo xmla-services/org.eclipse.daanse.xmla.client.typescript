@@ -38,7 +38,6 @@ const addNewXMLAStore = () => {
 
 <style lang="css">
 .settings-sidebar {
-  background-color: white;
   height: 100%;
   width: 100%;
 }

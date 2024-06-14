@@ -16,16 +16,11 @@ import SidebarAppSettings from "./SidebarAppSettings.vue";
 
 const props = defineProps(["modelValue", "settingsSection"]);
 
-const emit = defineEmits(["update:modelValue", "updateBackgroundColor"]);
-
-const updateBackgroundColor = (color) => {
-  emit("updateBackgroundColor", color);
-};
+const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <template>
   <va-sidebar
-    color="#ffffff"
     :modelValue="modelValue"
     animated="right"
     width="524px"
@@ -49,13 +44,13 @@ const updateBackgroundColor = (color) => {
           />
         </template>
         <template v-if="props.settingsSection?.type === 'App'">
-          <SidebarAppSettings @updateBackgroundColor="updateBackgroundColor" />
+          <SidebarAppSettings />
         </template>
       </div>
 
       <div class="settings-sidebar-actions">
         <va-button
-          class="sidebar-button-close"
+          class="sidebar-button-close mr-4"
           preset="primary"
           @click="$emit('update:modelValue', !modelValue)"
         >
@@ -79,29 +74,27 @@ const updateBackgroundColor = (color) => {
   display: flex;
   flex-direction: column;
   align-items: start;
-
-  padding-bottom: 20px;
   justify-content: space-between;
+  color: var(--app-font-color);
+  border-left: 1px solid var(--app-sidebar-border);
 }
 
 .settings-sidebar-content {
   flex-grow: 1;
   width: 100%;
+  background-color: var(--app-sidebar-settings);
 }
 
 .settings-sidebar-actions {
   display: flex;
   justify-content: flex-end;
   width: 100%;
-  margin-bottom: 12px;
-  right: 32px;
+  height: auto;
+  padding: 0 4px 32px 0;
+  background-color: var(--app-sidebar-settings);
 }
 </style>
 <style lang="scss" scoped>
-.sidebar {
-  background-color: white;
-}
-
 .sidebar-button-done {
   height: 100%;
   border: 2px solid transparent;
@@ -124,20 +117,20 @@ const updateBackgroundColor = (color) => {
   height: 100%;
   border-radius: 72px;
   border: 2px solid transparent;
-  color: #1a2d91 !important;
+  color: var(--app-secondary-button-color) !important;
   box-sizing: border-box;
 
-  --va-background-color: #fafafa !important;
+  --va-button-font-weight: 500;
+  --va-button-padding: 4.25px 10px;
+  --va-background-color-opacity: 0 !important;
 
   &:hover {
-    --va-background-color: #b0befe !important;
-    --va-background-color-opacity: 1 !important;
+    --va-background-color: var(--app-secondary-button--hover) !important;
+    --va-background-color-opacity: 0.5 !important;
   }
 
   &:active {
-    border: 2px solid #4153b5 !important;
-
-    --va-background-color: #fafafa !important;
+    border: 2px solid var(--app-secondary-button-border) !important;
   }
 }
 </style>

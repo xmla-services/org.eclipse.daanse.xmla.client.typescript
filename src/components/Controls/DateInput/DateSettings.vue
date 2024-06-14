@@ -79,8 +79,8 @@ const deleteEvent = (id: number) => {
         </template>
         <template #cell(actions)="{ rowIndex }">
           <va-button
-            preset="plain"
             icon="delete"
+            color="danger"
             @click="deleteEvent(rowIndex)"
           />
         </template>

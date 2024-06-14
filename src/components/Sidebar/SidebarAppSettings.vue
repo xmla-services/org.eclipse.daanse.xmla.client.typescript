@@ -9,13 +9,22 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, type Ref, inject, computed } from 'vue';
 
-const emit = defineEmits();
-const updateBackgroundColor = () => {
-  emit('updateBackgroundColor', innerBackground.value);
+const innerBackground = inject('backgroundColor') as string;
+const isDarkTheme: Ref<boolean> = ref(JSON.parse(localStorage.getItem('isDarkTheme')) || false);
+
+const setTheme = () => {
+  localStorage.setItem('isDarkTheme', JSON.stringify(isDarkTheme.value));
+  const htmlElement = document.documentElement;
+  htmlElement.classList.toggle('light-theme');
+  htmlElement.classList.toggle('dark-theme');
 };
-const innerBackground = ref('#fafafa');
+
+const toggleTheme = () => {
+  isDarkTheme.value = !isDarkTheme.value;
+  setTheme();
+};
 
 </script>
 
@@ -25,9 +34,26 @@ const innerBackground = ref('#fafafa');
       <h2>App settings</h2>
       <va-color-input
         v-model="innerBackground"
-        @input="updateBackgroundColor"
         label="Background color"
+        clearable
       />
+      <div class="switch-theme mt-4">
+        <va-switch
+          v-model="isDarkTheme"
+          @click="toggleTheme"
+          off-color="#ffd300"
+          style="--va-switch-checker-background-color: #252723;"
+        >
+          <template #innerLabel>
+            <div class="va-text-center">
+              <VaIcon
+                :name="isDarkTheme ? 'dark_mode' : 'light_mode'"
+              />
+            </div>
+          </template>
+        </va-switch>
+        <span class="ml-3">Switch theme</span>
+      </div>
     </div>
   </div>
 </template>
@@ -51,5 +77,15 @@ const innerBackground = ref('#fafafa');
   font-size: 24px;
   flex-grow: 1;
   margin-bottom: 32px;
+}
+
+.switch-theme {
+  display: flex;
+  width: auto;
+
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 </style>

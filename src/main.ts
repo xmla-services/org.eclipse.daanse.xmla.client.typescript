@@ -71,12 +71,18 @@ import "vuestic-ui/css";
 
 import "./scss/main.scss";
 import { router } from "@/router/router";
+import { ref } from "vue";
 
 import VueSmartWidget from "vue-smart-widget";
 
 const app = createApp(App);
 
 const pinia = createPinia();
+
+const isDarkTheme = ref(JSON.parse(localStorage.getItem('isDarkTheme')) || false);
+const htmlElement = document.documentElement;
+htmlElement.classList.add(isDarkTheme.value ? 'dark-theme' : 'light-theme');
+
 pinia.use(SOAPClient);
 app.use(pinia);
 console.log(router);

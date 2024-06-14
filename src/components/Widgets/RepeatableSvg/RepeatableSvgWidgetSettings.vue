@@ -103,13 +103,13 @@ onMounted(() => {
           class="color-input"
           :model-value="component.settings.activeItemStyles.fill"
           label="Active item fill"
-          @update:model-value="component.setSetting('fill', $event)"
+          @update:model-value="component.setSetting('activeItemStyles.fill', $event)"
         />
         <va-color-input
           class="color-input"
-          :model-value="component.settings.activeItemStyles.stroke"
+          :modelValue="component.settings.activeItemStyles.stroke"
           label="Active item stroke"
-          @update:model-value="component.setSetting('stroke', $event)"
+          @update:model-value="component.setSetting('activeItemStyles.stroke', $event)"
         />
       </div>
       <div class="colors">
@@ -117,13 +117,13 @@ onMounted(() => {
           class="color-input"
           :model-value="component.settings.defaultItemStyles.fill"
           label="Default item fill"
-          @update:model-value="component.setSetting('fill', $event)"
+          @update:model-value="component.setSetting('defaultItemStyles.fill', $event)"
         />
         <va-color-input
           class="color-input"
           :model-value="component.settings.defaultItemStyles.stroke"
           label="Default item stroke"
-          @update:model-value="component.setSetting('stroke', $event)"
+          @update:model-value="component.setSetting('defaultItemStyles.stroke', $event)"
         />
       </div>
     </div>

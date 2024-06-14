@@ -18,7 +18,17 @@ export function useSettings<Type>(props: any) {
   });
 
   const setSetting = (key, value) => {
-    settings.value[key] = value;
+    const keyArr = key.split('.');
+    let iter = settings.value;
+    
+    keyArr.forEach((key) => {
+      if (typeof iter[key] === "object") {
+        iter = iter[key]
+      }
+      else {
+        iter[key] = value;
+      }
+    });
   };
 
   return {

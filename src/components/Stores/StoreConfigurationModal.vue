@@ -12,8 +12,7 @@ Contributors: Smart City Jena
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts" setup>
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
-import { ref, watch, markRaw, nextTick } from "vue";
-import DatasourceList from "@/components/Datasources/DatasourceList.vue";
+import { ref, watch, nextTick } from "vue";
 import { useDatasourceManager } from "../../composables/datasourceManager";
 
 const field = ref("");
@@ -168,14 +167,14 @@ defineExpose({
     </template>
   </va-modal>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .field-selection-modal {
   .va-modal__container {
     width: 100%;
   }
 
   .response {
-    background-color: lightgrey;
+    background-color: var(--app-response-background);
     padding: 0.5rem;
     border-radius: 4px;
   }

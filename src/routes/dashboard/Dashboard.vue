@@ -530,12 +530,14 @@ body.no-overflow[data-v-059e0ffc] {
 <style scoped lang="scss">
 .padd {
   padding: 15px;
+  background-color: var(--app-background);
 }
 .app-layout-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   padding-left: 65px;
+  background-color: var(--app-background);
 }
 
 .main-section {

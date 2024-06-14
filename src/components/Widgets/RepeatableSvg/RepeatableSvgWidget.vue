@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<IRepeatableSVGSettingsProps>(), {
   src: "/demo/human.svg",
   activeItemStyles: (): ItemStyles => ({
     fill: "#ff0000",
-    stroke: "#FFFF00",
+    stroke: "#ffff00",
   }),
   defaultItemStyles: (): ItemStyles => ({
     fill: "#777777",

@@ -50,8 +50,7 @@ Contributors: Smart City Jena
                 :preset="isDropdownVisible || isMouseOver ? 'primary' : ''"
                 :border-color="isDropdownVisible ? '#4153b5' : ''"
                 :iconColor="isMouseOver || isActiveButton ? '#4153b5' : ''"
-                :background-opacity="isDropdownVisible ? 0 : 1"
-                color="#4153b5"
+                :color="isDropdownVisible ? '#fafafa' : '#4153b5'"
                 @mousedown="mousedown"
                 @mouseup="mouseup"
                 @mouseover="mouseover"
@@ -60,7 +59,10 @@ Contributors: Smart City Jena
                 Add
               </va-button>
             </template>
-            <va-dropdown-content class="dropdown-list">
+            <va-dropdown-content 
+              class="dropdown-list"
+              style="background-color: var(--app-dropdown-background); color: var(--app-font-color);"
+            >
               <div
                 class="dropdown-item"
                 v-for="widget of widgetOptions"
@@ -150,7 +152,6 @@ Contributors: Smart City Jena
     <SidebarSettings
       v-model="showSidebar"
       :settingsSection="settingsSection"
-      @updateBackgroundColor="updateBackgroundColor"
       class="sidebar"
     ></SidebarSettings>
     <ErrorHandlingModal ref="errorHandlingModal"/>
@@ -160,7 +161,7 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import NavBarDash from "./NavBarDash.vue";
 import DashboardControls from "@/components/Dashboard/DashboardControls.vue";
-import { getCurrentInstance, markRaw, ref, type Ref } from "vue";
+import { getCurrentInstance, markRaw, ref, type Ref, provide } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
@@ -181,7 +182,7 @@ const editEnabled = ref(false);
 const showSidebar = ref(false);
 const settingsSection = ref(null as any);
 
-const settingsBackground = ref("#fefefe");
+const backgroundColor = ref("");
 const isDropdownVisible = ref(false);
 const isActiveButton = ref(false);
 const isMouseOver = ref(false);
@@ -189,6 +190,7 @@ const layoutSettingsButtons = ref<
   Array<{ label: string; preset: string; action: () => void }>
 >([]);
 
+provide("backgroundColor", backgroundColor);
 const instance = getCurrentInstance();
 
 const openErrorModal = (data) => {
@@ -342,10 +344,6 @@ layoutSettingsButtons.value.push(
   { label: "Store List", preset: "primary", action: openStoreList },
   { label: "App settings", preset: "primary", action: openAppSettings },
 );
-
-const updateBackgroundColor = (newColor) => {
-  settingsBackground.value = newColor;
-};
 
 const openSettings = (id, wrapperId, type = "Control") => {
   const refs = instance?.refs;
@@ -722,6 +720,7 @@ body.no-overflow[data-v-059e0ffc] {
 <style scoped lang="scss">
 .padd {
   padding: 15px;
+  background-color: var(--app-background);
 }
 
 .app-layout-container {
@@ -737,7 +736,7 @@ body.no-overflow[data-v-059e0ffc] {
   display: flex;
   justify-content: space-between;
   height: 40px;
-  margin-left: 22px;
+  margin: 9px 0 0 22px;
 }
 
 .widgets-dropdown {
@@ -749,9 +748,9 @@ body.no-overflow[data-v-059e0ffc] {
   flex-direction: column;
   height: 308px;
   padding: 0;
-  -webkit-box-shadow: 0px 4px 20px 0px #bcbcc970;
-  -moz-box-shadow: 0px 4px 20px 0px #bcbcc970;
-  box-shadow: 0px 4px 20px 0px #bcbcc970;
+  -webkit-box-shadow: var(--app-dropdown-box-shadow);
+  -moz-box-shadow: var(--app-dropdown-box-shadow);
+  box-shadow: var(--app-dropdown-box-shadow);
 }
 
 .dropdown-item {
@@ -768,7 +767,8 @@ body.no-overflow[data-v-059e0ffc] {
 
 .dropdown-item:hover {
   transition: background-color 0.5s ease;
-  background-color: #b0c0fe;
+  background-color: var(--app-dropdown-background--hover);
+  color: var(--app-font-color);
 }
 
 .widgets-dropdown-button {
@@ -781,22 +781,23 @@ body.no-overflow[data-v-059e0ffc] {
   box-sizing: border-box;
 
   &:hover {
-    color: #4153b5 !important;
+    color: var(--app-dropdown-button-color--hover) !important;
 
-    --va-background-color: #b0befe !important;
+    --va-background-color: var(--app-dropdown-button-background-color--hover) !important;
     --va-background-color-opacity: 1 !important;
     --va-background-mask-opacity: 0 !important;
   }
 
   &:active {
     box-sizing: border-box;
-    border: 2px solid #4153b5 !important;
+    border: 2px solid var(--app-secondary-button-border) !important;
     border-radius: 8px;
-    color: #4153b5 !important;
+    color: var(--app-dropdown-button-color--active) !important;
 
-    --va-background-color: #fafafa !important;
+    --va-background-color: var(--app-dropdown-button-background-color--active) !important;
     --va-background-color-opacity: 1 !important;
     --va-background-mask-opacity: 0 !important;
+
   }
 }
 
@@ -815,27 +816,20 @@ body.no-overflow[data-v-059e0ffc] {
   margin-left: 12px;
   border-radius: 72px;
   border: 2px solid transparent;
-  color: #1a2d91 !important;
+  color: var(--app-secondary-button-color) !important;
   box-sizing: border-box;
 
   --va-button-font-weight: 590;
-  --va-background-color: #f3f4fd !important;
-  --va-background-color-opacity: 1 !important;
+  --va-background-color-opacity: 0 !important;
   --va-button-padding: 3px 10px;
 
   &:hover {
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 14.5px;
-
-    --va-background-color: #b0befe !important;
-    --va-background-color-opacity: 1 !important;
+    --va-background-color: var(--app-secondary-button--hover) !important;
+    --va-background-color-opacity: 0.5 !important;
   }
 
   &:active {
-    border: 2px solid #4153b5 !important;
-
-    --va-background-color: #fafafa !important;
+    border: 2px solid var(--app-secondary-button-border) !important;
   }
 
   :deep(.va-button__content) {
@@ -849,11 +843,8 @@ body.no-overflow[data-v-059e0ffc] {
   flex-grow: 1;
   gap: 1rem;
   overflow: auto;
-  background: v-bind(settingsBackground);
+  background-color: v-bind(backgroundColor);
   border-radius: 8px;
-  // -webkit-box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
-  // -moz-box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
-  // box-shadow: 0px 0px 8px 1px rgba(34, 60, 80, 0.2);
 }
 
 .dashboard-container {
@@ -913,9 +904,5 @@ body.no-overflow[data-v-059e0ffc] {
 
 .sidebar {
   z-index: 1000000;
-  // -webkit-box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
-  // -moz-box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
-  // box-shadow: -10px 0px 10px -2px rgba(34, 60, 80, 0.2);
-  border-left: 1px solid #b1b1b1;
 }
 </style>

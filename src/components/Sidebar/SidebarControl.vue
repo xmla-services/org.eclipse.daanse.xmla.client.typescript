@@ -33,6 +33,7 @@ const props = defineProps(["component"]);
   align-items: start;
   padding: 10px;
   width: 100%;
+  background-color: var(--app-sidebar-settings);
 }
 
 .sidebar-settings-title {

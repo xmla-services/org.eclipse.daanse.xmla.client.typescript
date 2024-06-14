@@ -111,7 +111,7 @@ const deleteOption = (id: number, option: string) => {
         </template>
         <template #cell(actions)="{ rowIndex }">
           <va-button
-            preset="plain"
+            color="danger"
             icon="delete"
             @click="deleteEvent(rowIndex)"
           />
