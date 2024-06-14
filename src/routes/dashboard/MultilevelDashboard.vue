@@ -14,6 +14,9 @@ Contributors: Smart City Jena
         <div
             class="app-layout-container bg grey padd"
             :class="{ editDisabled: !editEnabled }"
+            :style="
+                backgroundColor ? `--app-background: ${backgroundColor}` : ''
+            "
         >
             <div class="layout-settings">
                 <div class="buttons-list">
@@ -778,7 +781,6 @@ body.no-overflow[data-v-059e0ffc] {
 .padd {
     padding: 15px;
     background-color: var(--app-background);
-    --app-background: v-bind(backgroundColor);
 }
 
 .app-layout-container {
