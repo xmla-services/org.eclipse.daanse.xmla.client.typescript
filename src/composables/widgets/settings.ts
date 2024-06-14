@@ -31,6 +31,15 @@ export function useSettings<Type>(props: any) {
     });
   };
 
+  watch(
+    props,
+    () => {
+      Object.keys(props).forEach((key) => {
+        settings.value[key] = props[key];
+      });
+    }
+  )
+
   return {
     settings,
     setSetting,

@@ -10,17 +10,17 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface IRepeatableSVGSettingsProps {
-  src?: string;
-  activeItemStyles?: {
-    fill: string;
-    stroke: string;
-  };
-  defaultItemStyles?: {
-    fill: string;
-    stroke: string;
-  };
-  repeations?: string;
-  progress?: string;
+    src?: string;
+    activeItemStyles?: {
+        fill: string;
+        stroke: string;
+    };
+    defaultItemStyles?: {
+        fill: string;
+        stroke: string;
+    };
+    repeations?: string;
+    progress?: string;
 }
 
 import { onMounted, computed, type Ref, ref } from "vue";
@@ -34,17 +34,17 @@ import type { ItemStyles } from "@/@types/widgets";
 const settingsComponent = RepeatableSvgWidgetSettings;
 
 const props = withDefaults(defineProps<IRepeatableSVGSettingsProps>(), {
-  src: "/demo/human.svg",
-  activeItemStyles: (): ItemStyles => ({
-    fill: "#ff0000",
-    stroke: "#ffff00",
-  }),
-  defaultItemStyles: (): ItemStyles => ({
-    fill: "#777777",
-    stroke: "#777777",
-  }),
-  repeations: "4",
-  progress: "0.5",
+    src: "/demo/human.svg",
+    activeItemStyles: (): ItemStyles => ({
+        fill: "#ff0000",
+        stroke: "#FFFF00",
+    }),
+    defaultItemStyles: (): ItemStyles => ({
+        fill: "#777777",
+        stroke: "#777777",
+    }),
+    repeations: "4",
+    progress: "0.5",
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
@@ -53,114 +53,114 @@ const { getState } = useSerialization(settings);
 const svgSource: Ref<string> = ref("");
 
 onMounted(async () => {
-  if (!settings.value.src) return;
-  const req = await fetch(settings.value.src);
-  const svgObject = await req.text();
-  svgSource.value = svgObject;
+    if (!settings.value.src) return;
+    const req = await fetch(settings.value.src);
+    const svgObject = await req.text();
+    svgSource.value = svgObject;
 });
 
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  getState,
-  store,
-  setStore,
+    setSetting,
+    settings,
+    settingsComponent,
+    getState,
+    store,
+    setStore,
 });
 
 const createParsedData = (prop) => {
-  return computed(() => {
-    let processedString = String(prop);
-    const regex = /{(.*?)}/g;
-    const parts = processedString.match(regex);
+    return computed(() => {
+        let processedString = String(prop);
+        const regex = /{(.*?)}/g;
+        const parts = processedString.match(regex);
 
-    if (!parts || !data.value) {
-      return processedString;
-    }
+        if (!parts || !data.value) {
+            return processedString;
+        }
 
-    parts.forEach((element: string) => {
-      const trimmedString = element.replace("{", "").replace("}", "");
-      const dataField = trimmedString.split(".");
+        parts.forEach((element: string) => {
+            const trimmedString = element.replace("{", "").replace("}", "");
+            const dataField = trimmedString.split(".");
 
-      const res = dataField.reduce((acc: any, field) => {
-        return acc[field];
-      }, data.value);
+            const res = dataField.reduce((acc: any, field) => {
+                return acc[field];
+            }, data.value);
 
-      processedString = processedString.replace(element, res);
+            processedString = processedString.replace(element, res);
+        });
+        return processedString;
     });
-    return processedString;
-  });
 };
 
 const repeationsToNumber: Ref<number> = computed(() => {
-  return !isNaN(parseFloat(settings.value.repeations))
-    ? Math.floor(Number(settings.value.repeations))
-    : 0;
+    return !isNaN(parseFloat(settings.value.repeations))
+        ? Math.floor(Number(settings.value.repeations))
+        : 0;
 });
 
 const progressToNumber: Ref<number> = computed(() => {
-  return !isNaN(parseFloat(createParsedData(settings.value.progress).value))
-    ? Number(createParsedData(settings.value.progress).value)
-    : 0;
+    return !isNaN(parseFloat(createParsedData(settings.value.progress).value))
+        ? Number(createParsedData(settings.value.progress).value)
+        : 0;
 });
 </script>
 
 <template>
-  <div class="repeatable-svg-container">
-    <svg
-      fill="#000000"
-      version="1.1"
-      id="Layer_1"
-      xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      :viewBox="`0 0 ${100 * repeationsToNumber} 100`"
-      enable-background="new 0 0 100 100"
-      xml:space="preserve"
-    >
-      <defs>
-        <mask id="bubbleKenseo">
-          <rect
-            x="0"
-            y="0"
-            style="fill: #adadad"
-            :width="100 * repeationsToNumber * progressToNumber"
-            height="100"
-          />
-        </mask>
-      </defs>
-      <g
-        :fill="settings.defaultItemStyles.fill"
-        :stroke="settings.defaultItemStyles.stroke"
-      >
-        <g
-          v-html="svgSource"
-          v-for="index in repeationsToNumber"
-          :transform="`translate(${100 * (index - 1)}, 0)`"
-          :key="index"
-        ></g>
-      </g>
-      <g
-        mask="url(#bubbleKenseo)"
-        :fill="settings.activeItemStyles.fill"
-        :stroke="settings.activeItemStyles.stroke"
-      >
-        <g
-          v-html="svgSource"
-          v-for="index in repeationsToNumber"
-          :transform="`translate(${100 * (index - 1)}, 0)`"
-          :key="index"
-        ></g>
-      </g>
-    </svg>
-  </div>
+    <div class="repeatable-svg-container">
+        <svg
+            fill="#000000"
+            version="1.1"
+            id="Layer_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            :viewBox="`0 0 ${100 * repeationsToNumber} 100`"
+            enable-background="new 0 0 100 100"
+            xml:space="preserve"
+        >
+            <defs>
+                <mask id="bubbleKenseo">
+                    <rect
+                        x="0"
+                        y="0"
+                        style="fill: #adadad"
+                        :width="100 * repeationsToNumber * progressToNumber"
+                        height="100"
+                    />
+                </mask>
+            </defs>
+            <g
+                :fill="settings.defaultItemStyles.fill"
+                :stroke="settings.defaultItemStyles.stroke"
+            >
+                <g
+                    v-html="svgSource"
+                    v-for="index in repeationsToNumber"
+                    :transform="`translate(${100 * (index - 1)}, 0)`"
+                    :key="index"
+                ></g>
+            </g>
+            <g
+                mask="url(#bubbleKenseo)"
+                :fill="settings.activeItemStyles.fill"
+                :stroke="settings.activeItemStyles.stroke"
+            >
+                <g
+                    v-html="svgSource"
+                    v-for="index in repeationsToNumber"
+                    :transform="`translate(${100 * (index - 1)}, 0)`"
+                    :key="index"
+                ></g>
+            </g>
+        </svg>
+    </div>
 </template>
 
 <style scoped>
 .repeatable-svg-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  object-fit: contain;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    object-fit: contain;
 }
 </style>

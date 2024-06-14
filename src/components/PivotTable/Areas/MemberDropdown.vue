@@ -12,6 +12,7 @@ Contributors: Smart City Jena
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 import { v4 } from "uuid";
+import { useI18n } from 'vue-i18n';
 
 defineEmits([
   "drilldown",
@@ -22,6 +23,7 @@ defineEmits([
 ]);
 defineProps(["drillupDisabled", "propertiesShown"]);
 
+const { t } = useI18n();
 const opened = ref(false);
 const eventBus = inject("pivotTableEventBus") as TinyEmitter;
 const uid = "id" + v4();
@@ -59,7 +61,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('drilldown')"
         >
-          Drilldown
+          {{ t('PivotTable.drillDownButton') }}
         </va-button>
         <va-button
           v-if="!drillupDisabled"
@@ -69,7 +71,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('drillup')"
         >
-          Drillup
+          {{ t('PivotTable.drillUpButton') }}
         </va-button>
         <va-button
           v-if="!drillupDisabled"
@@ -79,7 +81,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('openMemberProperties')"
         >
-          Open Member Properties
+          {{ t('PivotTable.openButton') }}
         </va-button>
         <va-button
           v-if="propertiesShown"
@@ -89,7 +91,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('hideMemberProperties')"
         >
-          Hide Hierarchy Properties
+          {{ t('PivotTable.hideButton') }}
         </va-button>
         <va-button
           v-else
@@ -99,7 +101,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('showMemberProperties')"
         >
-          Show Hierarchy Properties
+          {{ t('PivotTable.showButton') }}
         </va-button>
       </va-button-group>
     </va-dropdown-content>

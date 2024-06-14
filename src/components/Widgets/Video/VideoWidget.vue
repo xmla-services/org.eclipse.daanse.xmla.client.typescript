@@ -10,8 +10,8 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface IVideoSettingsProps {
-  videoSettings?: ObjectFitSetting;
-  videoUrl?: string;
+    videoSettings?: ObjectFitSetting;
+    videoUrl?: string;
 }
 
 import { computed } from "vue";
@@ -25,69 +25,70 @@ import type { ObjectFitSetting } from "@/@types/widgets";
 const settingsComponent = VideoWidgetSettings;
 
 const props = withDefaults(defineProps<IVideoSettingsProps>(), {
-  videoSettings: () => ({
-    fit: "None",
-  }),
-  videoUrl: "",
+    videoSettings: () => ({
+        fit: "None",
+    }),
+    videoUrl: "",
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
 const { store, data, setStore } = useStore<Store>();
 const { getState } = useSerialization(settings);
 
+
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  getState,
-  store,
-  setStore,
+    setSetting,
+    settings,
+    settingsComponent,
+    getState,
+    store,
+    setStore,
 });
 
 const videoUrlParced = computed(() => {
-  let processedString = settings.value.videoUrl;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
+    let processedString = settings.value.videoUrl;
+    const regex = /{(.*?)}/g;
+    const parts = processedString.match(regex);
 
-  if (!parts || !data.value) {
+    if (!parts || !data.value) {
+        return processedString;
+    }
+
+    parts.forEach((element: string) => {
+        const trimmedString = element.replace("{", "").replace("}", "");
+        const dataField = trimmedString.split(".");
+
+        const res = dataField.reduce((acc: any, field) => {
+            return acc[field];
+        }, data.value);
+
+        processedString = processedString.replace(element, res);
+    });
     return processedString;
-  }
-
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
-
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
 });
 </script>
 
 <template>
-  <div class="container">
-    <video controls :src="videoUrlParced">
-      Your browser does not support embedded videos.
-    </video>
-  </div>
+    <div class="container">
+        <video controls :src="videoUrlParced">
+            Your browser does not support embedded videos.
+        </video>
+    </div>
 </template>
 
 <style scoped>
 .container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .container video {
-  width: 100%;
-  height: 100%;
-  border-radius: 3px;
-  object-fit: v-bind(settings.videoSettings.fit);
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    object-fit: v-bind(settings.videoSettings.fit);
 }
 </style>

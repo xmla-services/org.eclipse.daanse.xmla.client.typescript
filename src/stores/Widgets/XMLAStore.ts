@@ -244,6 +244,7 @@ export class XMLAStore implements IStore {
   }
 
   expandOnRows(member) {
+    console.log("expandOnRows", member);
     const currentMemberHierarchyItems: any[] = this.rowsExpandedMembers.filter(
       (e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
@@ -280,6 +281,7 @@ export class XMLAStore implements IStore {
   }
 
   expandOnColumns(member) {
+    console.log("expandOnColumns", member);
     const currentMemberHierarchyItems: any[] =
       this.columnsExpandedMembers.filter((e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
@@ -355,20 +357,40 @@ export class XMLAStore implements IStore {
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
-  async getData() {
+  async getData({ rows, columns, measures }) {
     try {
-      const datasource = this.datasourceManager.getDatasource(this.datasourceId);
+      const datasource = this.datasourceManager.getDatasource(
+        this.datasourceId,
+      );
 
       this.flushDrilldowns();
       this.flushExpands();
-      const body = await this.getMDXRequest({
-        showEmpty: true,
-        alignContent: "right",
+
+      const rowsMapped = rows.map((e) => {
+        return { originalItem: e };
       });
-  
+
+      const columnsMapped = columns.map((e) => {
+        return { originalItem: e };
+      });
+
+      const measuresMapped = measures.map((e) => {
+        return { originalItem: e };
+      });
+
+      const body = await this.getMDXRequest(
+        rowsMapped,
+        columnsMapped,
+        measuresMapped,
+        {
+          showEmpty: true,
+          alignContent: "right",
+        },
+      );
+
       const responce = await datasource.getData(body);
       return responce;
-    } catch(e) {
+    } catch (e) {
       return this.errorToast.handleErrorToast(e);
     }
   }
@@ -402,7 +424,7 @@ export class XMLAStore implements IStore {
     this.datasourceId = state.datasourceId;
   }
 
-  async getMDXRequest(pivotTableSettings) {
+  async getMDXRequest(rows, columns, measures, pivotTableSettings) {
     const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
     const mdxRequest = await getMdxRequest(
@@ -411,9 +433,12 @@ export class XMLAStore implements IStore {
       this.columnsDrilldownMembers,
       this.rowsExpandedMembers,
       this.columnsExpandedMembers,
-      [{ originalItem: this.row }],
-      [{ originalItem: this.column }],
-      [{ originalItem: this.measure }],
+      rows,
+      columns,
+      measures,
+      // [{ originalItem: this.row }],
+      // [{ originalItem: this.column }],
+      // [{ originalItem: this.measure }],
       pivotTableSettings,
       datasource.getProperties(),
       [],

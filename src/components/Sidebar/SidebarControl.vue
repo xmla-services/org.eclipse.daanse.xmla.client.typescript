@@ -9,13 +9,15 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 const props = defineProps(["component"]);
+const { t } = useI18n();
 </script>
 
 <template>
   <div class="sidebar-settings">
     <div class="sidebar-settings-title">
-      <h2 class="mb-2">Control settings</h2>
+      <h2 class="mb-2">{{ t('SidebarControlSettings.controlSettings') }}</h2>
     </div>
     <div class="sidebar-settings-content">
       <component

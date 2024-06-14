@@ -1,0 +1,353 @@
+{
+  "MainLayout": {
+    "loading": "Wird geladen",
+    "connect": "Verbinde dich mit dem Würfel"
+  },
+  
+  "DashboardNavigation": {
+    "designer": "Designerin",
+    "dashboard": "Armaturenbrett",
+    "multilevelDashboard": "Mehrstufiges Dashboard"
+  },
+
+  "MultilevelDashboardNavigation": {
+    "edit": "Bearbeitungsmodus",
+    "save": "Speichern",
+    "loadLayout": "Layout laden",
+    "storeList": "Store-Liste",
+    "appSettings": "App Einstellungen",
+    "addWidgetButton": "Hinzufügen"
+  },
+
+  "AppSidebarSettings": {
+    "labelAppSettings": "App Einstellungen",
+    "backgroundColor": "Hintergrundfarbe",
+    "selectedLanguage": "Ausgewählte Sprache",
+    "switchButton": "Schalten"
+
+  },
+
+  "SidebarControlSettings": {
+    "controlSettings": "Kontrolleinstellungen"
+  },
+
+  "SidebarWidgetSettings": {
+    "widgetSettings": "Widget-Einstellungen"
+  },
+
+  "SidebarSettings": {
+    "closeButton": "Schließen",
+    "doneButton": "Erledigt"
+  },
+
+  "SidebarStoreSettings": {
+    "storesTitle": "Datenstores",
+    "addNewStore": "Hinzufügen",
+    "addNewXMLAStore": "Hinzufügen XMLA"
+  },
+
+  "SidebarStoreList": {
+    "newStore": "Neues Geschäft",
+    "caption": "Beschriftung",
+    "dataEndpoint": "Datenendpunkt",
+    "dataSourcesTitle": "Datenquellen",
+    "noAvailableStores": "Keine verfügbaren Geschäfte",
+    "addDatasourceButton": "Datenquelle hinzufügen",
+    "storeListItem": {
+      "params": "Parameter",
+      "events": "Ereignisse",
+      "addEventButton": "Ereignis hinzufügen"
+    },
+    "XMLAStoreListItem": {
+      "catalog": "Katalog",
+      "cube": "Würfel",
+      "rowsHierarchy": "Zeilenhierarchie",
+      "colsHierarchy:": "Spaltenhierarchie",
+      "measure": "Maßnahme"
+    },
+    "dataTable": {
+      "caption": "Beschriftung",
+      "type": "Typ",
+      "url": "URL",
+      "name": "Name",
+      "value": "Wert"
+    }
+  },
+
+  "StoreConfigurationModal": {
+    "datasourceSelection": "Datenquellenauswahl",
+    "addNew": "Neue hinzufügen",
+    "okButton": "Ok",
+    "createButton": "Erstellen",
+    "cancelButton": "Abbrechen",
+    "datasourceCaptionLabel": "Beschriftung der Datenquelle",
+    "datasourceURLLabel": "Datenquellen-URL",
+    "datasourceTypeLabel": "Datenquelle-Typ"
+  },
+
+  "StoreSelectionModal": {
+    "storeSelection": "Speicher-Auswahl",
+    "createNewStore": "Neuen Speicher erstellen",
+    "createButton": "Erstellen",
+    "selectButton": "Auswählen",
+    "selectExisting": "Oder wählen Sie einen vorhandenen aus"
+  },
+
+  "LayoutMovingButtons": {
+    "moveUp": "Nach oben verschieben",
+    "moveDown": "Nach unten verschieben",
+    "moveToTop": "Nach oben bringen",
+    "moveToBottom": "Nach unten bringen"
+  },
+
+  "Options": {
+    "cover": "Cover",
+    "contain": "Contain",
+    "stretch": "Stretch",
+    "fill": "Fill",
+    "none": "None"
+  },
+
+  "Widgets": {
+    "selectStore": "Speicher auswählen",
+    "storeSettingsTitle": "Speichereinstellungen",
+    "ImageWidget": "Bild Widget",
+    "TextWidget": "Text Widget",
+    "SvgWidget": "SVG Widget",
+    "RepeatableSvgWidget": "Wiederholbares SVG-Widget",
+    "ProgressWidget": "Fortschritts Widget",
+    "VideoWidget": "Video Widget",
+    "IconWidget": "Icon Widget",
+    "RichTextWidget": "Rich Text Widget",
+    "TableWidget": "Tabellen Widget",
+    "PivotTableWidget": "Pivot Tabelle Widget",
+    "SwitchControl": "Schalter Steuerung",
+    "SelectControl": "Auswahl Steuerung",
+    "DateControl": "Datums Steuerung",
+    "TimeControl": "Zeit Steuerung",
+    "ColorControl": "Farb Steuerung",
+    "ButtonControl": "Button Steuerung",
+    "InputControl": "Eingabe Steuerung"
+  },
+
+  "Controls": {
+    "eventsList": "Events list",
+    "addButton": "Add event"
+  },
+
+  "ImageWidget": {
+    "title": "Image widget settings",
+    "imageUrl": "Image src",
+    "addButton": "Add image",
+    "imageFit": "Fit",
+    "imageDiashowInterval": "Diashow interval"
+  },
+
+  "TextWidget": {
+    "title": "Text widget settings",
+    "label": "Title",
+    "fontSize": "Font Size",
+    "fontColor": "Font Color"
+  },
+
+  "SvgWidget": {
+    "title": "SVG widget settings",
+    "svgSrc": "SVG src",
+    "addButton": "Add items"
+  },
+
+  "RepeatableSvgWidget": {
+    "title": "Repeatable SVG widget settings",
+    "svgSrc": "Svg src",
+    "repeations": "Repeations",
+    "progress": "Progress",
+    "activeItemFill": "Active item fill",
+    "activeItemStroke": "Active item stroke",
+    "defaultItemFill": "Default item fill",
+    "defaultItemStroke": "Default item stroke"
+  },
+
+  "ProgressWidget": {
+    "title": "Progress widget settings",
+    "progress": "Progress",
+    "fillColor": "Progress fill color",
+    "backgroundColor": "Progress background color",
+    "isVertical": "Vertical",
+    "isGradient": "Gradient",
+    "addButton": "Add color",
+    "rotation": "Rotation"
+  },
+
+  "VideoWidget": {
+    "title": "Video widget settings",
+    "videoUrl": "Video url",
+    "videoFit": "Fit"
+  },
+
+  "IconWidget": {
+    "title": "Icon widget settings",
+    "iconSearch": "Search icon",
+    "iconFilled": "Icon filled",
+    "iconColor": "Icon color",
+    "iconSize": "Icon size",
+    "strokeWeight": "Stroke weight",
+    "opticSize": "Optic size",
+    "grade": "Grade"
+  },
+
+  "RichTextWidget": {
+    "title": "Rich text widget settings",
+    "bold": "Bold",
+    "italic": "italic",
+    "strike": "strike",
+    "underline": "underline",
+    "code": "code",
+    "clearMarks": "clear marks",
+    "clearNodes": "clear nodes",
+    "paragraph": "paragraph",
+    "bulletList": "bullet list",
+    "orderedList": "ordered list",
+    "codeBlock": "code block",
+    "blockQuote": "block quote",
+    "horizontalRule": "horizontal rule",
+    "hardBreak": "hard break",
+    "undo": "undo",
+    "redo": "redo" 
+  },
+
+  "TableWidget": {
+
+  },
+
+  "PivotTableWidget": {
+    "selectCatalog": "Select catalog",
+    "selectCube": "Select cube",
+    "mdx": "MDX"
+  },
+
+  "WidgetWrapper": {
+    "title": "Title",
+    "label": "Title",
+    "fontSize": "Title Font size",
+    "fontColor": "Font Color",
+    "background": "Background",
+    "backgroundColor": "Background Color",
+    "backgroundColorTrancparency": "Shadow Color Transparency",
+    "border": "Border",
+    "borderSize": "Border Size",
+    "borderColor": "Border Color",
+    "borderRadius": "Border Radius",
+    "fullScreen": "Full Screen",
+    "showFullScreen": "Show fullscreen button",
+    "shadow": "Shadow",
+    "shadowX": "Shadow x",
+    "shadowY": "Shadow y",
+    "shadowBlur": "Shadow blur",
+    "shadowColorTransparency": "Shadow Color Transparency",
+    "transparence": "Transparence",
+    "transparency": "Transparency"
+  },
+
+  "SwitchControl": {
+    "label": "Label text"
+  },
+
+  "SelectControl": {
+    "label": "Label text",
+    "optionsList": "Options list",
+    "addOptionButton": "Add option",
+    "option": "Option"
+  },
+
+  "DateControl": {
+    "label": "Label text"
+  },
+
+  "TimeControl": {
+    "label": "Label text"
+  },
+
+  "ColorControl": {
+    "label": "Label text"
+  },
+
+  "ButtonControl": {
+    "label": "Label text"
+  },
+
+  "InputControl": {
+    "label": "Label text"
+  },
+
+  "DataSource": {
+    "dataSource": "Datasources",
+    "withoutDataSource": "No datasource available"
+  },
+
+  "Modals": {
+    "okButton": "Ok!",
+    "cancelButton": "Cancel",
+    "confirmButton": "Confirm",
+    "saveButton": "Save button"
+  },
+
+  "CatalogSelectionModal": {
+    "selectCatalogAndCube": "Select catalog and cube:"
+  },
+
+  "CellPropertiesModal": {
+    "cellProperties": "Cell properties",
+    "property": "Property",
+    "value": "Value"
+  },
+
+  "DrillThroughModal": {
+    "dataReturned": "Data returned for cell:"
+  },
+
+  "FilterModal": {
+    "enableFilters": "Enable any filters:",
+    "currentlySelection": "Currently selected:",
+    "resetSelection": "Reset selection"
+  },
+
+  "MemberPropertiesModal": {
+    "memberProperties": "Member properties",
+    "property": "Property",
+    "value": "Value"
+  },
+
+  "PivotTableSettingsModal": {
+    "pivotTableSettings": "Pivot table settings",
+    "pivotTableData": "Pivot Table data",
+    "cellStyles": "Cell styles"
+  },
+
+  "ServerSelectionModal": {
+    "serverUrl": "Enter server url:"
+  },
+
+  "PivotTable": {
+    "openCellPropertiesButton": "Open Cell Properties",
+    "drillthroughButton": "Drillthrough",
+    "drillDownButton": "Drilldown",
+    "drillUpButton": "Drillup",
+    "openButton": "Open Member Properties",
+    "hideButton": "Hide Hierarchy Properties",
+    "showButton": "Show Hierarchy Properties"
+  },
+
+  "QueryDesigner": {
+    "updateButton": "Update",
+    "filters": "Filters",
+    "columns": "Columns",
+    "rows": "Rows",
+    "data": "Data"
+  },
+
+  "Routes": {
+    "addWidgetButton": "Add widget",
+    "loading": "Loading...",
+    "addRestDatasourceButton": "Add REST datasource"
+  }
+}

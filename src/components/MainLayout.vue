@@ -9,9 +9,11 @@ Contributors: Smart City Jena
 
 -->
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import Navbar from "./NavBar.vue";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 
+const { t } = useI18n();
 const appSettings = useAppSettingsStore();
 const layout = "vertical";
 
@@ -45,12 +47,12 @@ const getLeftWidth = () => {
       </va-split>
     </div>
     <div v-else class="helper">
-      <h2>Connect to the cube</h2>
+      <h2>{{ t('MainLayout.connect') }}</h2>
     </div>
     <va-modal v-model="appSettings.loading" no-dismiss>
       <template #content>
         <div class="my-2 mx-4">
-          <div class="mb-4">Loading</div>
+          <div class="mb-4">{{ t('MainLayout.loading') }}</div>
           <va-progress-circle indeterminate />
         </div>
       </template>

@@ -11,10 +11,13 @@ Contributors: Smart City Jena
 
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { ref, watch, inject } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 
+const { t } = useI18n();
 const storeManager = useStoreManager();
 const field = ref("");
 const options = [];
@@ -89,14 +92,14 @@ defineExpose({
     @ok="ok"
   >
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Store selection:</va-card-title>
+      <va-card-title class="va-h6">{{ t('StoreSelectionModal.storeSelection') }}:</va-card-title>
       <va-card-content>
         <div class="mb-4">
-          <h4 class="mb-2">Create new store:</h4>
-          <va-button @click="createNew">Create</va-button>
+          <h4 class="mb-2">{{ t('StoreSelectionModal.createNewStore') }}:</h4>
+          <va-button @click="createNew">{{ t('StoreSelectionModal.createButton') }}</va-button>
         </div>
         <div class="mb-4">
-          <h4 class="mb-2">Or select existing one:</h4>
+          <h4 class="mb-2">{{ t('StoreSelectionModal.selectExisting') }}:</h4>
           <div class="mb-2">
             <va-select
               v-model="selectedStore"
@@ -106,7 +109,7 @@ defineExpose({
           </div>
           <div>
             <va-button @click="select" :disabled="!selectedStore"
-              >Select</va-button
+              >{{ t('StoreSelectionModal.selectButton') }}</va-button
             >
           </div>
         </div>

@@ -13,10 +13,12 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { ref, watch } from "vue";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: "ServerSelectionModal",
   setup() {
+    const { t } = useI18n();
     const serverUrl = ref("");
     const reset = () => {
       serverUrl.value = "";
@@ -44,6 +46,7 @@ export default {
     });
 
     return {
+      t,
       serverUrl,
       isOpened,
       run,
@@ -57,7 +60,7 @@ export default {
 <template>
   <va-modal :modelValue="isOpened" no-padding class="server-url-modal" @ok="ok">
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Enter server url:</va-card-title>
+      <va-card-title class="va-h6">{{ t('ServerSelectionModal.serverUrl') }}</va-card-title>
       <va-card-content>
         <va-input
           class="mb-2 server-url-input"
@@ -66,7 +69,7 @@ export default {
         />
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok">Ok!</va-button>
+        <va-button @click="ok">{{ t('Modals.okButton') }}</va-button>
       </va-card-actions>
     </template>
   </va-modal>
