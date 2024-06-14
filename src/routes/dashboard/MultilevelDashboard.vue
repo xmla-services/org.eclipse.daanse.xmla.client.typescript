@@ -777,6 +777,8 @@ body.no-overflow[data-v-059e0ffc] {
 <style scoped lang="scss">
 .padd {
     padding: 15px;
+    background-color: var(--app-background);
+    --app-background: v-bind(backgroundColor);
 }
 
 .app-layout-container {
