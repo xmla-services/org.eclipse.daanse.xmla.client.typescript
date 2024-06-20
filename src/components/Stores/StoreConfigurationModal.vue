@@ -11,11 +11,12 @@ Contributors: Smart City Jena
 
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
-import { ref, watch, markRaw, nextTick } from "vue";
-import DatasourceList from "@/components/Datasources/DatasourceList.vue";
+import { ref, watch, nextTick } from "vue";
 import { useDatasourceManager } from "../../composables/datasourceManager";
 
+const { t } = useI18n();
 const field = ref("");
 const options = [];
 const requestResult = ref("");
@@ -101,7 +102,7 @@ defineExpose({
     @ok="ok"
   >
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Datasource selection:</va-card-title>
+      <va-card-title class="va-h6">{{ t('StoreConfigurationModal.datasourceSelection') }}:</va-card-title>
       <va-card-content>
         <template v-if="showCreateNew">
           <div class="mt-4 mb-4">
@@ -109,40 +110,40 @@ defineExpose({
               <va-input
                 v-model="datasource_caption"
                 type="text"
-                label="Datasource caption"
+                :label="t('StoreConfigurationModal.datasourceCaptionLabel')"
               />
             </div>
             <div class="mb-2">
               <va-select
                 :options="['REST', 'XMLA','MQTT']"
                 v-model="datasource_type"
-                label="Datasource type"
+                :label="t('StoreConfigurationModal.datasourceTypeLabel')"
               />
             </div>
             <div>
               <va-input
                 v-model="datasource_url"
                 type="text"
-                label="Datasource URL"
+                :label="t('StoreConfigurationModal.datasourceURLLabel')"
               />
             </div>
           </div>
         </template>
         <template v-else>
-          <va-button @click="showCreateNew = true">Add new</va-button>
+          <va-button @click="showCreateNew = true">{{ t('StoreConfigurationModal.addNew') }}</va-button>
           <div v-if="showCreateNew" class="mt-4 mb-4">
             <div class="mb-2">
               <va-input
                 v-model="datasource_caption"
                 type="text"
-                label="Datasource caption"
+                :label="t('StoreConfigurationModal.datasourceCaptionLabel')"
               />
             </div>
             <div>
               <va-select
                 :options="['REST', 'XMLA','MQTT']"
                 v-model="datasource_type"
-                label="Datasource type"
+                :label="t('StoreConfigurationModal.datasourceTypeLabel')"
               />
             </div>
           </div>
@@ -157,25 +158,25 @@ defineExpose({
         </template>
       </va-card-content>
       <va-card-actions v-if="!showCreateNew">
-        <va-button @click="ok" :disabled="!selectedItems.length">Ok!</va-button>
+        <va-button @click="ok" :disabled="!selectedItems.length">{{ t('StoreConfigurationModal.OkButton') }}!</va-button>
       </va-card-actions>
       <va-card-actions v-else>
-        <va-button @click="createNewDatasource" class="mr-2">Create</va-button>
+        <va-button @click="createNewDatasource" class="mr-2">{{ t('StoreConfigurationModal.createButton') }}</va-button>
         <va-button @click="showCreateNew = false" preset="primary"
-          >Cancel</va-button
+          >{{ t('StoreConfigurationModal.cancelButton') }}</va-button
         >
       </va-card-actions>
     </template>
   </va-modal>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .field-selection-modal {
   .va-modal__container {
     width: 100%;
   }
 
   .response {
-    background-color: lightgrey;
+    background-color: var(--app-response-background);
     padding: 0.5rem;
     border-radius: 4px;
   }

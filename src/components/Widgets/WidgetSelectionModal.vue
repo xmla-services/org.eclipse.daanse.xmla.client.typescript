@@ -115,7 +115,7 @@ export default {
   }
 
   .response {
-    background-color: lightgrey;
+    background-color: var(--app-response-background);
     padding: 0.5rem;
     border-radius: 4px;
   }

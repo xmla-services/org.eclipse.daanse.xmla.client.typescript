@@ -9,11 +9,13 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import { useStoreManager } from "../../composables/storeManager";
 import { onMounted, ref, watch } from "vue";
 import StoreListItem from "./ListItems/StoreListItem.vue";
 import XMLAStoreListItem from "./ListItems/XMLAStoreListItem.vue";
 
+const { t } = useI18n();
 const storeManager = useStoreManager();
 const map = storeManager.getStoreList();
 const list = ref([] as IStore[]);
@@ -47,7 +49,7 @@ onMounted(() => {
         </template>
       </div>
     </template>
-    <template v-else> No stores available </template>
+    <template v-else>{{ t('SidebarStoreList.noAvailableStores') }}</template>
   </va-list>
 </template>
 

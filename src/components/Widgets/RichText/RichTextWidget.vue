@@ -10,7 +10,7 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface IRichTextEditorSettingsProps {
-  editor?: string;
+    editor?: string;
 }
 
 import { computed } from "vue";
@@ -23,7 +23,7 @@ import RichTextWidgetSettings from "./RichTextWidgetSettings.vue";
 const settingsComponent = RichTextWidgetSettings;
 
 const props = withDefaults(defineProps<IRichTextEditorSettingsProps>(), {
-  editor: "",
+    editor: "",
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
@@ -31,83 +31,83 @@ const { store, data, setStore } = useStore<Store>();
 const { getState } = useSerialization(settings);
 
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  getState,
-  store,
-  setStore,
+    setSetting,
+    settings,
+    settingsComponent,
+    getState,
+    store,
+    setStore,
 });
 
 const parsedEditorText = computed(() => {
-  let processedString = settings.value.editor;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
+    let processedString = settings.value.editor;
+    const regex = /{(.*?)}/g;
+    const parts = processedString.match(regex);
 
-  if (!parts || !data.value) return processedString;
+    if (!parts || !data.value) return processedString;
 
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
+    parts.forEach((element: string) => {
+        const trimmedString = element.replace("{", "").replace("}", "");
+        const dataField = trimmedString.split(".");
 
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
+        const res = dataField.reduce((acc: any, field) => {
+            return acc[field];
+        }, data.value);
+        processedString = processedString.replace(element, res);
+    });
+    return processedString;
 });
 </script>
 
 <template>
-  <div class="text-container">
-    <div class="editor-content" v-html="parsedEditorText" />
-  </div>
+    <div class="text-container">
+        <div class="editor-content" v-html="parsedEditorText" />
+    </div>
 </template>
 
 <style lang="scss">
 .text-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  gap: 1rem;
-  align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 .editor-content {
-  width: 100%;
-  height: 100%;
-  overflow-wrap: anywhere;
+    width: 100%;
+    height: 100%;
+    overflow-wrap: anywhere;
 
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
 
-  h2 {
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-  }
+    h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
 
-  h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
+    h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
 
-  h4 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-  }
+    h4 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
 
-  h5 {
-    font-size: 1.11rem;
-    margin-bottom: 1rem;
-  }
+    h5 {
+        font-size: 1.11rem;
+        margin-bottom: 1rem;
+    }
 
-  h6 {
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
+    h6 {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
 }
 </style>

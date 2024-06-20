@@ -20,7 +20,7 @@ const routes = [
   {
     path: "/multilevel-dashboard",
     component: MultilevelDashboard,
-    name: "multilevelDashboard",
+    name: "multilevel-dashboard",
   },
 ] as any;
 

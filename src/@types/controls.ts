@@ -8,6 +8,13 @@
   Contributors: Smart City Jena
 
 */
+
+/**
+ * Describes an event item with a name and trigger.
+ * @interface EventItem - The interface name
+ * @property {string} name - The event name
+ * @property {string} trigger - The event that trigger the event
+ */
 export interface EventItem {
   name: string;
   trigger: string;

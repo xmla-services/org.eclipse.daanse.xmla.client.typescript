@@ -10,37 +10,39 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface IRepeatableSVGSettings {
-  src: string;
-  activeItemStyles: {
-    fill: string;
-    stroke: string;
-  };
-  defaultItemStyles: {
-    fill: string;
-    stroke: string;
-  };
-  repeations: string;
-  progress: string;
+    src: string;
+    activeItemStyles: {
+        fill: string;
+        stroke: string;
+    };
+    defaultItemStyles: {
+        fill: string;
+        stroke: string;
+    };
+    repeations: string;
+    progress: string;
 }
 
 export interface IRepeatableSVGComponent {
-  store: Store | XMLAStore;
-  settings: IRepeatableSVGSettings;
-  setSetting: (key: string, value: any) => void;
-  setStore: (store: Store | XMLAStore) => void;
+    store: Store | XMLAStore;
+    settings: IRepeatableSVGSettings;
+    setSetting: (key: string, value: any) => void;
+    setStore: (store: Store | XMLAStore) => void;
 }
 
+import { useI18n } from "vue-i18n";
 import { ref, type Ref, onMounted } from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import type { Store } from "@/stores/Widgets/Store";
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
 import type { CollapseState } from "@/@types/widgets";
 
+const { t } = useI18n();
 const { component } = defineProps<{ component: IRepeatableSVGComponent }>();
 
 const opened: Ref<CollapseState> = ref({
-  widgetSection: false,
-  storeSection: false,
+    widgetSection: false,
+    storeSection: false,
 });
 
 const storeManager = useStoreManager();
@@ -48,121 +50,124 @@ const stores: Ref<any[]> = ref([]) as Ref<any[]>;
 const requestResult: Ref<string> = ref("");
 
 const getStores = () => {
-  const storeList = storeManager.getStoreList();
+    const storeList = storeManager.getStoreList();
 
-  stores.value = Array.from(storeList.value, function (entry) {
-    return { ...entry[1] };
-  });
+    stores.value = Array.from(storeList.value, function (entry) {
+        return { ...entry[1] };
+    });
 };
 
 const getData = async () => {
-  const store = component.store as Store;
+    const store = component.store as Store;
 
-  const data = await store.getData();
-  requestResult.value = JSON.stringify(data, null, 2);
+    const data = await store.getData();
+    requestResult.value = JSON.stringify(data, null, 2);
 };
 
 const updateStore = (storeId) => {
-  const store = storeManager.getStore(storeId) as Store;
-  component.setStore(store);
-  console.log(component);
-  getData();
+    const store = storeManager.getStore(storeId) as Store;
+    component.setStore(store);
+    console.log(component);
+    getData();
 };
 
 onMounted(() => {
-  getStores();
-  if (component.store) {
-    getData();
-  }
+    getStores();
+    if (component.store) {
+        getData();
+    }
 });
 </script>
 
 <template>
-  <va-collapse
-    v-model="opened.widgetSection"
-    header="Repeatable SVG  widget settings"
-  >
-    <div class="settings-container">
-      <va-input
-        :model-value="component.settings.src"
-        label="src"
-        @update:model-value="component.setSetting('src', $event)"
-      />
-      <va-input
-        :model-value="component.settings.repeations"
-        label="repeations"
-        @update:model-value="component.setSetting('repeations', $event)"
-      />
-      <va-input
-        :model-value="component.settings.progress"
-        label="progress"
-        @update:model-value="component.setSetting('progress', $event)"
-      />
-      <div class="colors">
-        <va-color-input
-          class="color-input"
-          :model-value="component.settings.activeItemStyles.fill"
-          label="Active item fill"
-          @update:model-value="component.setSetting('fill', $event)"
-        />
-        <va-color-input
-          class="color-input"
-          :model-value="component.settings.activeItemStyles.stroke"
-          label="Active item stroke"
-          @update:model-value="component.setSetting('stroke', $event)"
-        />
-      </div>
-      <div class="colors">
-        <va-color-input
-          class="color-input"
-          :model-value="component.settings.defaultItemStyles.fill"
-          label="Default item fill"
-          @update:model-value="component.setSetting('fill', $event)"
-        />
-        <va-color-input
-          class="color-input"
-          :model-value="component.settings.defaultItemStyles.stroke"
-          label="Default item stroke"
-          @update:model-value="component.setSetting('stroke', $event)"
-        />
-      </div>
-    </div>
-  </va-collapse>
-
-  <va-collapse v-model="opened.storeSection" header="Store settings">
-    <div class="settings-container">
-      <div>
-        <h3 class="mb-2">Select store</h3>
-        <div class="mb-2" v-for="store in stores" :key="store.id">
-          <va-radio
-            :model-value="component.store?.id"
-            @update:model-value="updateStore"
-            :option="{
-              text: `${store.caption} ${store.id}`,
-              id: store.id,
-            }"
-            value-by="id"
-            name="store-radio-group"
-          />
+    <va-collapse
+        v-model="opened.widgetSection"
+        :header="t('RepeatableSvgWidget.title')"
+    >
+        <div class="settings-container">
+            <va-input
+                :model-value="component.settings.src"
+                :label="t('RepeatableSvgWidget.label')"
+                @update:model-value="component.setSetting('src', $event)"
+            />
+            <va-input
+                :model-value="component.settings.repeations"
+                :label="t('RepeatableSvgWidget.repeations')"
+                @update:model-value="component.setSetting('repeations', $event)"
+            />
+            <va-input
+                :model-value="component.settings.progress"
+                :label="t('RepeatableSvgWidget.progress')"
+                @update:model-value="component.setSetting('progress', $event)"
+            />
+            <div class="colors">
+                <va-color-input
+                    class="color-input"
+                    :model-value="component.settings.activeItemStyles.fill"
+                    :label="t('RepeatableSvgWidget.activeItemFill')"
+                    @update:model-value="component.setSetting('fill', $event)"
+                />
+                <va-color-input
+                    class="color-input"
+                    :model-value="component.settings.activeItemStyles.stroke"
+                    :label="t('RepeatableSvgWidget.activeItemStroke')"
+                    @update:model-value="component.setSetting('stroke', $event)"
+                />
+            </div>
+            <div class="colors">
+                <va-color-input
+                    class="color-input"
+                    :model-value="component.settings.defaultItemStyles.fill"
+                    :label="t('RepeatableSvgWidget.defaultItemFill')"
+                    @update:model-value="component.setSetting('fill', $event)"
+                />
+                <va-color-input
+                    class="color-input"
+                    :model-value="component.settings.defaultItemStyles.stroke"
+                    :label="t('RepeatableSvgWidget.defaultItemStroke')"
+                    @update:model-value="component.setSetting('stroke', $event)"
+                />
+            </div>
         </div>
-        <pre class="response">{{ requestResult }}</pre>
-      </div>
-    </div>
-  </va-collapse>
+    </va-collapse>
+
+    <va-collapse
+        v-model="opened.storeSection"
+        :header="t('Widgets.storeSettingsTitle')"
+    >
+        <div class="settings-container">
+            <div>
+                <h3 class="mb-2">{{ t("Widgets.selectStore") }}</h3>
+                <div class="mb-2" v-for="store in stores" :key="store.id">
+                    <va-radio
+                        :model-value="component.store?.id"
+                        @update:model-value="updateStore"
+                        :option="{
+                            text: `${store.caption} ${store.id}`,
+                            id: store.id,
+                        }"
+                        value-by="id"
+                        name="store-radio-group"
+                    />
+                </div>
+                <pre class="response">{{ requestResult }}</pre>
+            </div>
+        </div>
+    </va-collapse>
 </template>
 
 <style scoped>
 .settings-container {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
 }
 .colors {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 .color-input {
-  width: 49%;
+    width: 49%;
 }
 </style>

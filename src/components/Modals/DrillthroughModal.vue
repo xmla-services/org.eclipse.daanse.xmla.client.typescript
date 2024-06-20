@@ -16,10 +16,12 @@ import { useAppSettingsStore } from "@/stores/AppSettings";
 import { getDrillthroughRequest } from "@/utils/MdxRequests/Drillthrough";
 import { computed } from "vue";
 import { ref, type Ref } from "vue";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: "DrillthroughModal",
   setup() {
+    const { t } = useI18n();
     const drillthroughContent = ref([]) as Ref<any[]>;
     const appSettings = useAppSettingsStore();
     const api = appSettings.getApi();
@@ -61,6 +63,7 @@ export default {
     const { isOpened, run, close } = usePromisifiedModal(reset, opened);
 
     return {
+      t,
       drillthroughContent,
       isOpened,
       run,
@@ -86,7 +89,7 @@ export default {
     @ok="ok"
   >
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Data returned for cell: </va-card-title>
+      <va-card-title class="va-h6">{{ t('DrillThroughModal.dataReturned') }}</va-card-title>
       <va-card-content>
         <va-data-table
           loading
@@ -98,7 +101,7 @@ export default {
         ></va-data-table>
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok">Close</va-button>
+        <va-button @click="ok">{{ t('Modals.cancelButton') }}</va-button>
       </va-card-actions>
     </template>
   </va-modal>

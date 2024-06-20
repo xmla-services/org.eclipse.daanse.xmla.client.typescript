@@ -10,11 +10,11 @@ Contributors: Smart City Jena
 -->
 <script setup lang="ts">
 export interface ISelectSettingsProps {
-  label?: string;
-  options?: string[];
-  selectedValue?: string;
-  availableEvents?: string[];
-  events?: EventItem[];
+    label?: string;
+    options?: string[];
+    selectedValue?: string;
+    availableEvents?: string[];
+    events?: EventItem[];
 }
 
 import { inject } from "vue";
@@ -27,60 +27,60 @@ const EventBus = inject("customEventBus") as any;
 const settingsComponent = SelectSettings;
 
 const props = withDefaults(defineProps<ISelectSettingsProps>(), {
-  label: "Test",
-  options: (): string[] => ["Test"],
-  selectedValue: "",
-  availableEvents: (): string[] => ["Click", "Clear", "Scroll Bottom"],
-  events: (): EventItem[] => [
-    {
-      name: "Next page",
-      trigger: "Click",
-    },
-  ],
+    label: "Test",
+    options: (): string[] => ["Test"],
+    selectedValue: "",
+    availableEvents: (): string[] => ["Click", "Clear", "Scroll Bottom"],
+    events: (): EventItem[] => [
+        {
+            name: "Next page",
+            trigger: "Click",
+        },
+    ],
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
 const { getState } = useSerialization(settings);
 
 const click = () => {
-  settings.value.events.forEach((e: EventItem) => {
-    if (e.trigger === "Click") {
-      console.log(`${e.name} emited`);
-      EventBus.emit(e.name, settings.value.selectedValue);
-    }
-  });
+    settings.value.events.forEach((e: EventItem) => {
+        if (e.trigger === "Click") {
+            console.log(`${e.name} emited`);
+            EventBus.emit(e.name, settings.value.selectedValue);
+        }
+    });
 };
 
 const clear = () => {
-  settings.value.events.forEach((e: EventItem) => {
-    if (e.trigger === "Clear") {
-      console.log(`${e.name} emited`);
-      EventBus.emit(e.name, settings.value.selectedValue);
-    }
-  });
+    settings.value.events.forEach((e: EventItem) => {
+        if (e.trigger === "Clear") {
+            console.log(`${e.name} emited`);
+            EventBus.emit(e.name, settings.value.selectedValue);
+        }
+    });
 };
 
 const scrollBottom = () => {
-  settings.value.events.forEach((e: EventItem) => {
-    if (e.trigger === "Scroll Bottom") {
-      console.log(`${e.name} emited`);
-      EventBus.emit(e.name);
-    }
-  });
+    settings.value.events.forEach((e: EventItem) => {
+        if (e.trigger === "Scroll Bottom") {
+            console.log(`${e.name} emited`);
+            EventBus.emit(e.name);
+        }
+    });
 };
 
 defineExpose({ setSetting, settings, settingsComponent, getState });
 </script>
 
 <template>
-  <va-select
-    :model-value="settings.selectedValue"
-    :label="settings.label"
-    :options="settings.options"
-    placeholder="Select an option"
-    @update:modelValue="click"
-    @clear="clear"
-    @scrollBottom="scrollBottom"
-    clearable
-  />
+    <va-select
+        :model-value="settings.selectedValue"
+        :label="settings.label"
+        :options="settings.options"
+        placeholder="Select an option"
+        @update:modelValue="click"
+        @clear="clear"
+        @scrollBottom="scrollBottom"
+        clearable
+    />
 </template>

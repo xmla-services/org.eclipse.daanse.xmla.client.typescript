@@ -18,11 +18,29 @@ $bs-gradient-orange:#e9550c;
 $bs-daanse-orange:#F49423;
 
 $bs-grey:#efefef;
-$bs-white: #fff;
+$bs-light-grey: #d3d3d3;
+$bs-light-silver: #d1d1d1;
+$bs-dark-grey: #656565;
+$bs-dark-blue: #1a2d91; 
+$bs-royal-blue: #4153b5;
+$bs-pale-cornflower-blue: #b0befe;
+$bs-white-smoke: #fafafa;
+$bs-black: #000000;
+$bs-eerie-black: #1a1a1a;
+$bs-soft-dark: #242424;
+$bs-white: #ffffff;
+$bs-ghost-white: #f3f4fd;
+$bs-transparent: transparent;
 
 $bs-text-light: #fff;
 $bs-text-dark: #343a40;
 $bs-text-grey: #868585;
+
+//light theme colors
+$bs-box-shadow-light: 0px 4px 20px 0px rgb(130 130 145 / 44%);
+
+//dark theme colors
+$bs-box-shadow-dark: 0px 4px 20px 0px rgb(0 0 0 / 44%);
 
 :root{
   --bs-blue: #{$bs-blue};
@@ -32,4 +50,68 @@ $bs-text-grey: #868585;
   --bs-text-grey: #{$bs-text-grey};
   --bs--grey: #{$bs-grey};
   --va-primary: #{$bs-blue};
+}
+
+:root.light-theme {
+  --app-background: #{$bs-white-smoke};
+  --app-sidebar-navigation: #{$bs-white-smoke};
+  --app-sidebar-settings: #{$bs-white-smoke};
+  --app-sidebar-border: #{$bs-light-silver};
+  --app-font-color: #{$bs-blue};
+  --app-icon-color: #{$bs-blue};
+  --app-font-color--active: #{$bs-white};
+  --app-icon-color--active: #{$bs-white};
+  --app-font-color--hover: #{$bs-blue};
+  --app-icon-color--hover: #{$bs-blue};
+  --app-dropdown-background: #{$bs-white-smoke};
+  --app-dropdown-background--hover: #{$bs-pale-cornflower-blue};
+  --app-dropdown-box-shadow: #{$bs-box-shadow-light};
+  --app-dropdown-button-background-color--hover: #{$bs-pale-cornflower-blue};
+  --app-dropdown-button-color--hover: #{$bs-royal-blue};
+  --app-dropdown-button-background-color--active: #{$bs-white};
+  --app-dropdown-button-color--active: #{$bs-royal-blue};
+  --app-image-item-background: #{$bs-white-smoke};
+  --app-image-list-background: #{$bs-white-smoke};
+  --app-response-background: #{$bs-light-grey};
+  --app-button-background: #{$bs-ghost-white};
+  // --app-primary-button-color: #{};
+  // --app-primary-button--hover: #{};
+  // --app-primary-button--active: #{};
+  --app-secondary-button-color: #{$bs-dark-blue};
+  --app-secondary-button--hover: #{$bs-pale-cornflower-blue};
+  --app-secondary-button--active: #{$bs-white};
+  --app-secondary-button-border: #{$bs-royal-blue};
+  --va-primary: #{$bs-blue};
+}
+
+:root.dark-theme {
+  --app-background: #{$bs-eerie-black};
+  --app-sidebar-navigation: #{$bs-soft-dark};
+  --app-sidebar-settings: #{$bs-soft-dark};
+  --app-sidebar-border: #{$bs-dark-grey};
+  --app-font-color: #{$bs-white};
+  --app-icon-color: #{$bs-white};
+  --app-font-color--active: #{$bs-white};
+  --app-icon-color--active: #{$bs-white};
+  --app-font-color--hover: #{$bs-white};
+  --app-icon-color--hover: #{$bs-white};
+  --app-dropdown-background: #{$bs-soft-dark};
+  --app-dropdown-background--hover: #{$bs-blue};
+  --app-dropdown-box-shadow: #{$bs-box-shadow-dark};
+  --app-dropdown-button-background-color--hover: #{$bs-pale-cornflower-blue};
+  --app-dropdown-button-color--hover: #{$bs-royal-blue};
+  --app-dropdown-button-background-color--active: #{$bs-transparent};
+  --app-dropdown-button-color--active: #{$bs-royal-blue};
+  --app-image-item-background: #{$bs-box-shadow-dark};
+  --app-image-list-background: #{$bs-box-shadow-dark};
+  --app-response-background: #{$bs-dark-grey};
+  --app-button-background: #{$bs-ghost-white};
+  // --app-primary-button-color: #{};
+  // --app-primary-button--hover: #{};
+  // --app-primary-button--active: #{};
+  --app-secondary-button-color: #{$bs-white};
+  --app-secondary-button--hover: #{$bs-dark-grey};
+  --app-secondary-button--active: #{$bs-dark-grey};
+  --app-secondary-button-border: #{$bs-royal-blue};
+  --va-primary: #{$bs-white};
 }

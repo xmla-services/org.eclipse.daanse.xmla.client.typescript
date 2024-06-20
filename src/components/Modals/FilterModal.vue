@@ -14,11 +14,13 @@ Contributors: Smart City Jena
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { ref } from "vue";
 import FilterTreeView from "../Filters/FilterTreeView.vue";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: "ServerSelectionModal",
   emits: ["setFilters"],
   setup() {
+    const { t } = useI18n();
     const filterConfigured = ref({});
     const rootHierarchy = ref({});
     const reset = () => {
@@ -96,6 +98,7 @@ export default {
     };
 
     return {
+      t,
       filterConfigured,
       isOpened,
       run,
@@ -129,7 +132,7 @@ export default {
     fixed-layout
   >
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Enable any filters:</va-card-title>
+      <va-card-title class="va-h6">{{ t('FilterModal.enableFilters') }}</va-card-title>
       <va-card-content>
         <Suspense>
           <FilterTreeView
@@ -141,15 +144,15 @@ export default {
       </va-card-content>
       <va-card-actions class="actions">
         <div class="action-buttons">
-          <va-button @click="ok" color="primary">Confirm</va-button>
-          <va-button @click="cancel" color="secondary">Cancel</va-button>
+          <va-button @click="ok" color="primary">{{ t('Modals.confirmButton') }}</va-button>
+          <va-button @click="cancel" color="secondary">{{ t('Modals.cancelButton') }}</va-button>
         </div>
         <div
           v-if="!multipleChoise && currentlySelected && currentlySelected.id"
         >
-          <div>Currently selected: {{ currentlySelected.Caption }}</div>
+          <div>{{ t('FilterModal.currentlySelection') }} {{ currentlySelected.Caption }}</div>
           <div class="reset-button" @click="resetSelection">
-            Reset selection
+            {{ t('FilterModal.resetSelection') }}
           </div>
         </div>
       </va-card-actions>

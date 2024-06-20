@@ -10,13 +10,13 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface IProgressSettingsProps {
-  progress?: string;
-  fillColor?: string;
-  gradientColor?: string;
-  backgroundColor?: string;
-  isGradient?: boolean;
-  isVertical?: boolean;
-  rotation?: number;
+    progress?: string;
+    fillColor?: string;
+    gradientColor?: string;
+    backgroundColor?: string;
+    isGradient?: boolean;
+    isVertical?: boolean;
+    rotation?: number;
 }
 
 import { computed } from "vue";
@@ -29,13 +29,13 @@ import type { Store } from "@/stores/Widgets/Store";
 const settingsComponent = ProgressWidgetSettings;
 
 const props = withDefaults(defineProps<IProgressSettingsProps>(), {
-  progress: "0.5",
-  fillColor: "#00FF00",
-  gradientColor: "#00FF00 0, #FAFAFA 85%",
-  backgroundColor: "#d3d3d3",
-  isGradient: false,
-  isVertical: false,
-  rotation: 90,
+    progress: "0.5",
+    fillColor: "#00FF00",
+    gradientColor: "#00FF00 0, #FAFAFA 85%",
+    backgroundColor: "#d3d3d3",
+    isGradient: false,
+    isVertical: false,
+    rotation: 90,
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
@@ -43,118 +43,118 @@ const { store, data, setStore } = useStore<Store>();
 const { getState } = useSerialization(settings);
 
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  getState,
-  store,
-  setStore,
+    setSetting,
+    settings,
+    settingsComponent,
+    getState,
+    store,
+    setStore,
 });
 
 const parsedProgress = computed(() => {
-  if (!isNaN(parseFloat(settings.value.progress)))
-    return `${(parseFloat(settings.value.progress) * 100).toFixed(2)}%`;
+    if (!isNaN(parseFloat(settings.value.progress)))
+        return `${(parseFloat(settings.value.progress) * 100).toFixed(2)}%`;
 
-  let processedString = settings.value.progress;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
+    let processedString = settings.value.progress;
+    const regex = /{(.*?)}/g;
+    const parts = processedString.match(regex);
 
-  if (!parts || !data.value) return processedString;
+    if (!parts || !data.value) return processedString;
 
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
+    parts.forEach((element: string) => {
+        const trimmedString = element.replace("{", "").replace("}", "");
+        const dataField = trimmedString.split(".");
 
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
+        const res = dataField.reduce((acc: any, field) => {
+            return acc[field];
+        }, data.value);
 
-    processedString = processedString.replace(element, res);
-  });
+        processedString = processedString.replace(element, res);
+    });
 
-  return !isNaN(parseFloat(processedString))
-    ? parseFloat(processedString) > 100
-      ? "100%"
-      : `${processedString}%`
-    : `${processedString}%`;
+    return !isNaN(parseFloat(processedString))
+        ? parseFloat(processedString) > 100
+            ? "100%"
+            : `${processedString}%`
+        : `${processedString}%`;
 });
 
 const backgroundProgressColor = computed(() => {
-  return settings.value.isGradient
-    ? `linear-gradient(${settings.value.rotation}deg, ${settings.value.gradientColor})`
-    : `${settings.value.fillColor}`;
+    return settings.value.isGradient
+        ? `linear-gradient(${settings.value.rotation}deg, ${settings.value.gradientColor})`
+        : `${settings.value.fillColor}`;
 });
 
 const transition = computed(() => {
-  return settings.value.isVertical ? "height .7s ease" : "width .7s ease";
+    return settings.value.isVertical ? "height .7s ease" : "width .7s ease";
 });
 
 const verticalPositionFiller = computed(() => {
-  return settings.value.isVertical
-    ? `${parseFloat(parsedProgress.value)}%`
-    : "35px";
+    return settings.value.isVertical
+        ? `${parseFloat(parsedProgress.value)}%`
+        : "35px";
 });
 
 const horizontalPositionFiller = computed(() => {
-  return !settings.value.isVertical
-    ? `${parseFloat(parsedProgress.value)}%`
-    : "35px";
+    return !settings.value.isVertical
+        ? `${parseFloat(parsedProgress.value)}%`
+        : "35px";
 });
 
 const verticalPositionBackground = computed(() => {
-  return settings.value.isVertical ? "35px" : "100%";
+    return settings.value.isVertical ? "35px" : "100%";
 });
 
 const horizontalPositionBackground = computed(() => {
-  return !settings.value.isVertical ? "35px" : "100%";
+    return !settings.value.isVertical ? "35px" : "100%";
 });
 </script>
 
 <template>
-  <div class="container">
-    <div class="progress">
-      <span>{{ parsedProgress }}</span>
-      <div class="progress-percent"></div>
+    <div class="container">
+        <div class="progress">
+            <span>{{ parsedProgress }}</span>
+            <div class="progress-percent"></div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
 .container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .progress {
-  width: v-bind(verticalPositionBackground);
-  height: v-bind(horizontalPositionBackground);
-  background: v-bind(settings.backgroundColor);
-  border-radius: 10px;
-  display: flex;
-  align-items: end;
-  position: relative;
+    width: v-bind(verticalPositionBackground);
+    height: v-bind(horizontalPositionBackground);
+    background: v-bind(settings.backgroundColor);
+    border-radius: 10px;
+    display: flex;
+    align-items: end;
+    position: relative;
 }
 
 .progress-percent {
-  height: v-bind(verticalPositionFiller);
-  width: v-bind(horizontalPositionFiller);
-  background: v-bind(backgroundProgressColor);
-  transition: v-bind(transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
+    height: v-bind(verticalPositionFiller);
+    width: v-bind(horizontalPositionFiller);
+    background: v-bind(backgroundProgressColor);
+    transition: v-bind(transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
 }
 
 span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-weight: 600;
-  z-index: 1000;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    z-index: 1000;
 }
 </style>

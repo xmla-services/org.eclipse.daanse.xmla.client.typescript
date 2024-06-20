@@ -14,11 +14,16 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 import TextWidget from "@/components/Widgets/Text/TextWidget.vue";
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
-const meta = {
+const meta: Meta<typeof TextWidget> = {
   title: "Widget/StaticWidgets/Text",
   component: TextWidget,
   tags: ["autodocs"],
-} as Meta<typeof TextWidget>;
+  decorators: [
+    () => ({
+      template: '<div style="width: 300px; height: 300px; background-color: #fafafa; color: black;"><story /></div>',
+    }),
+  ],
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -29,12 +34,13 @@ type Story = StoryObj<typeof meta>;
  */
 export const Primary: Story = {
   args: {
-    text: "Qwe",
-    fontSize: 24,
-    fontColor: "white",
-    fontWeight: "bold",
+    text: "Test text",
+    fontSize: 12,
+    fontColor: "#000",
+    fontWeight: "normal",
+    fontStyle: "normal",
     textDecoration: "None",
-    horizontalAlign: "Center",
-    verticalAlign: "Center",
+    horizontalAlign: "Left",
+    verticalAlign: "Top",
   },
 };

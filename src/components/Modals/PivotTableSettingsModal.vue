@@ -14,10 +14,12 @@ Contributors: Smart City Jena
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { usePivotTableStore } from "@/stores/PivotTable";
 import { ref } from "vue";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: "PivotTableSettingsModal",
   setup() {
+    const { t } = useI18n();
     const pivotTableStore = usePivotTableStore();
     const { isOpened, run, close } = usePromisifiedModal(() => {});
 
@@ -32,6 +34,7 @@ export default {
     ]
 
     return {
+      t,
       isOpened,
       run,
       close,
@@ -53,10 +56,10 @@ export default {
 <template>
   <va-modal :modelValue="isOpened" no-padding class="server-url-modal" @ok="ok">
     <template #content="{ ok }">
-      <va-card-title><h6 class="va-h6">Pivot table settings</h6></va-card-title>
+      <va-card-title><h6 class="va-h6">{{ t('PivotTableSettingsModal.pivotTableSettings') }}</h6></va-card-title>
       <va-card-content>
         <div class="mt-3">
-          <div class="va-title mb-3">Pivot Table data</div>
+          <div class="va-title mb-3">{{ t('PivotTableSettingsModal.pivotTableData') }}</div>
           <va-checkbox
             v-model="showEmpty"
             label="Show empty rows/columns"
@@ -64,7 +67,7 @@ export default {
           <va-divider class="pt-3" />
         </div>
         <div class="mt-5 mb-3">
-          <div class="va-title mb-3">Cell styles</div>
+          <div class="va-title mb-3">{{ t('PivotTableSettingsModal.cellStyles') }}</div>
           <va-select
             v-model="alignContent"
             label="Align value in cells"
@@ -74,7 +77,7 @@ export default {
         </div>
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok" >Save</va-button>
+        <va-button @click="ok" >{{ t('Modals.okButton') }}</va-button>
       </va-card-actions>
     </template>
   </va-modal>

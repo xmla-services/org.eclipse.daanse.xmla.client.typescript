@@ -11,7 +11,9 @@ Contributors: Smart City Jena
 <script lang="ts" setup>
 import { useDatasourceManager } from "../../composables/datasourceManager";
 import { ref, watch } from "vue";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const items = ref(["Item 1", "Item 2", "Item 3", "Item 4"]);
 
 const dsManager = useDatasourceManager();
@@ -31,7 +33,7 @@ watch(
 
 <template>
   <va-list>
-    <va-list-label> Datasources </va-list-label>
+    <va-list-label>{{ t('DataSource.dataSource') }}</va-list-label>
     <template v-if="list.length">
       <va-list-item
         v-for="(item, index) in list"
@@ -48,7 +50,7 @@ watch(
         </va-list-item-section>
       </va-list-item>
     </template>
-    <template v-else> No datasource available </template>
+    <template v-else>{{ t('DataSource.withoutDataSource') }}</template>
   </va-list>
 </template>
 

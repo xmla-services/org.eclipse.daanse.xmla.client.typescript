@@ -20,7 +20,6 @@ import PivotTable from "./PivotTable";
 import RowsArea from "../../PivotTable/Areas/RowsArea.vue";
 import ColumnsArea from "../../PivotTable/Areas/ColumnsArea.vue";
 import CellsArea from "../../PivotTable/Areas/CellsArea.vue";
-// import DrillthroughModal from "../../Modals/DrillthroughModal.vue";
 import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
 
@@ -35,34 +34,31 @@ const EventBus = inject("customEventBus") as any;
 
 const storeId = ref("");
 
-const cube = ref(null as any);
-const catalog = ref(null as any);
-
-const sampleMdx = `
-SELECT
-Hierarchize(AddCalculatedMembers({[Store].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME,[Store].[Store Name].[Store Type],[Store].[Store Name].[Store Manager],[Store].[Store Name].[Store Sqft],[Store].[Store Name].[Grocery Sqft],[Store].[Store Name].[Frozen Sqft],[Store].[Store Name].[Meat Sqft],[Store].[Store Name].[Has coffee bar],[Store].[Store Name].[Street address] ON 1,
-
-Hierarchize(AddCalculatedMembers({[Gender].[(All)].members})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME ON 0
-FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS
-`;
-
-const mdx = ref(sampleMdx);
+const rowsHierarchies = ref([] as MDSchemaHierarchy[]);
+const colsHierarchies = ref([] as MDSchemaHierarchy[]);
+const measures = ref([] as MDSchemaMeasure[]);
 
 watch(storeId, () => {
   getData();
 });
 
-watch(catalog, () => {
-  getData();
-});
+watch(
+  () => [rowsHierarchies.value, colsHierarchies.value, measures.value],
+  () => {
+    getData();
+  },
+  { deep: true },
+);
 
-watch(cube, () => {
-  getData();
-});
-
-watch(mdx, () => {
-  getData();
-});
+const setSetting = (setting: string, data: any) => {
+  if (setting === "rows") {
+    rowsHierarchies.value = data;
+  } else if (setting === "cols") {
+    colsHierarchies.value = data;
+  } else if (setting === "measures") {
+    measures.value = data;
+  }
+};
 
 const updateFn = async () => {
   await getPivotTableData();
@@ -83,9 +79,7 @@ watch(storeId, (newVal, oldVal) => {
 defineExpose({
   settingsComponent,
   storeId,
-  mdx,
-  catalog,
-  cube,
+  setSetting,
 });
 
 // Pivot table logic
@@ -221,7 +215,11 @@ const totalContentSize = computed(() => {
 const getPivotTableData = debounce(async () => {
   const store = storeManager.getStore(storeId.value) as unknown as XMLAStore;
 
-  const mdxResponce = await store.getData();
+  const mdxResponce = await store.getData({
+    rows: rowsHierarchies.value,
+    columns: colsHierarchies.value,
+    measures: measures.value,
+  });
   console.log(mdxResponce);
   // const properties = (await metadataStorage.getMetadataStorage()).properties;
   // console.log(properties);

@@ -58,13 +58,14 @@ export function useDatasourceManager() {
   };
 
   const updateDatasource = (key, type, caption, url) => {
+    console.log("Datasource should be updated", key, type, caption, url);
     if (type === "REST") {
       const datasource = new RESTDatasource(key, url, caption);
 
       availableDatasources.value[key] = datasource;
     }
     if (type === "XMLA") {
-      const datasource = new XmlaDatasource(key, undefined, caption);
+      const datasource = new XmlaDatasource(key, url, caption);
 
       availableDatasources.value[key] = datasource;
     }
