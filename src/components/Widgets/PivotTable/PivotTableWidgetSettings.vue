@@ -14,6 +14,7 @@ import { useStoreManager } from "@/composables/storeManager";
 import MeasureSelectionModal from "@/components/Modals/MeasureSelectionModal.vue";
 import AxisSelectionModal from "@/components/Modals/AxisSelectionModal.vue";
 import { useI18n } from "vue-i18n";
+import FilterSelectionModal from "@/components/Modals/FilterSelectionModal.vue";
 
 const { t } = useI18n();
 const storeSelectionOpened = ref(false);
@@ -22,11 +23,13 @@ const storeId = ref(props.component.storeId);
 const storeManager = useStoreManager();
 
 const selectedMeasures = ref([] as MDSchemaMeasure[]);
-const selectedRows = ref([] as MDSchemaHierarchy[]);
-const selectedCols = ref([] as MDSchemaHierarchy[]);
+const selectedRows = ref([] as ConfiguredHierarchy[]);
+const selectedCols = ref([] as ConfiguredHierarchy[]);
+const selectedFilters = ref([] as ConfiguredHierarchy[]);
 
 const measureSelectionModal = ref() as Ref<any>;
 const axisSelectionModal = ref() as Ref<any>;
+const filterSelectionModal = ref() as Ref<typeof FilterSelectionModal>;
 
 let stores = ref([]) as Ref<any[]>;
 
@@ -62,8 +65,10 @@ const openAxisSelectionModal = async (axis, store) => {
 
     if (axis === "rows") {
         selectedRows.value = selectedHierarchies;
-    } else {
+    } else if (axis === "cols") {
         selectedCols.value = selectedHierarchies;
+    } else if (axis === "filters") {
+        selectedFilters.value = selectedHierarchies;
     }
 };
 
@@ -77,14 +82,88 @@ const removeFromAxis = (axis, hierarchyUniqueName) => {
     if (axis === "rows") {
         selectedRows.value = selectedRows.value.filter(
             (hierarchy) =>
-                hierarchy.HIERARCHY_UNIQUE_NAME !== hierarchyUniqueName,
+                hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
+                hierarchyUniqueName,
         );
-    } else {
+    } else if (axis === "cols") {
         selectedCols.value = selectedCols.value.filter(
             (hierarchy) =>
-                hierarchy.HIERARCHY_UNIQUE_NAME !== hierarchyUniqueName,
+                hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
+                hierarchyUniqueName,
+        );
+    } else if (axis === "filters") {
+        selectedFilters.value = selectedFilters.value.filter(
+            (hierarchy) =>
+                hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
+                hierarchyUniqueName,
         );
     }
+};
+
+const openFiltersModal = async (store, axis, id) => {
+    console.log("openFiltersModal", axis, id);
+    const storeObj = storeManager.getStore(store.id);
+
+    if (axis === "rows") {
+        const selectedHierarchy = selectedRows.value.find(
+            (hierarchy) => hierarchy.id === id,
+        );
+
+        const filtersCongig = await filterSelectionModal.value.run({
+            store: storeObj,
+            element: selectedHierarchy,
+        });
+
+        if (selectedHierarchy) {
+            selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
+            selectedHierarchy.filters.multipleChoise =
+                filtersCongig.filters.multipleChoise;
+            selectedHierarchy.filters.selectedItem =
+                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.originalItem =
+                filtersCongig.filters.originalItem;
+        }
+    } else if (axis === "cols") {
+        const selectedHierarchy = selectedCols.value.find(
+            (hierarchy) => hierarchy.id === id,
+        );
+
+        const filtersCongig = await filterSelectionModal.value.run({
+            store: storeObj,
+            element: selectedHierarchy,
+        });
+
+        if (selectedHierarchy) {
+            selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
+            selectedHierarchy.filters.multipleChoise =
+                filtersCongig.filters.multipleChoise;
+            selectedHierarchy.filters.selectedItem =
+                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.originalItem =
+                filtersCongig.filters.originalItem;
+        }
+    } else if (axis === "filters") {
+        const selectedHierarchy = selectedFilters.value.find(
+            (hierarchy) => hierarchy.id === id,
+        );
+
+        const filtersCongig = await filterSelectionModal.value.run({
+            store: storeObj,
+            element: selectedHierarchy,
+        });
+
+        if (selectedHierarchy) {
+            selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
+            selectedHierarchy.filters.multipleChoise =
+                filtersCongig.filters.multipleChoise;
+            selectedHierarchy.filters.selectedItem =
+                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.originalItem =
+                filtersCongig.filters.originalItem;
+        }
+    }
+
+    console.log(selectedRows.value);
 };
 
 watch(
@@ -94,17 +173,28 @@ watch(
     },
     { deep: true },
 );
+
 watch(
     selectedRows,
     () => {
         props.component.setSetting("rows", selectedRows.value);
+        console.log("watcher", selectedRows.value);
     },
     { deep: true },
 );
+
 watch(
     selectedCols,
     () => {
         props.component.setSetting("cols", selectedCols.value);
+    },
+    { deep: true },
+);
+
+watch(
+    selectedFilters,
+    () => {
+        props.component.setSetting("filters", selectedFilters.value);
     },
     { deep: true },
 );
@@ -117,6 +207,12 @@ onMounted(() => {
 <template>
     <div class="mt-4 mb-4">
         <va-collapse v-model="storeSelectionOpened" header="Request settings">
+            <VaCheckbox
+                :model-value="component.settings.sync"
+                class="mb-4"
+                label="Sync state (Expands and drillthroughs)"
+                @update:model-value="component.setSetting('sync', $event)"
+            />
             <div class="settings-container">
                 <va-divider class="pad_bottom" orientation="left">
                     <span class="px-2">{{ t("Widgets.selectStore") }}</span>
@@ -148,10 +244,53 @@ onMounted(() => {
                                         icon="add"
                                         preset="secondary"
                                         round
-                                        disabled
+                                        @click="
+                                            openAxisSelectionModal(
+                                                'filters',
+                                                store,
+                                            )
+                                        "
                                     />
                                 </div>
-                                <div class="query_designer-area"></div>
+                                <div class="query_designer-area">
+                                    <div
+                                        v-for="item in selectedFilters"
+                                        :key="item.id"
+                                        class="query_designer-area-item"
+                                    >
+                                        <div>
+                                            {{ item.caption }}
+                                        </div>
+                                        <VaButton
+                                            icon="filter_list"
+                                            preset="secondary"
+                                            round
+                                            :color="
+                                                item.filters.enabled
+                                                    ? '#4CAF50'
+                                                    : ''
+                                            "
+                                            @click="
+                                                openFiltersModal(
+                                                    store,
+                                                    'filters',
+                                                    item.id,
+                                                )
+                                            "
+                                        />
+                                        <VaButton
+                                            icon="remove"
+                                            preset="secondary"
+                                            round
+                                            @click="
+                                                removeFromAxis(
+                                                    'filters',
+                                                    item.id,
+                                                )
+                                            "
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <div class="query_designer-area-header">
@@ -171,21 +310,35 @@ onMounted(() => {
                                 <div class="query_designer-area">
                                     <div
                                         v-for="item in selectedRows"
-                                        :key="item.HIERARCHY_UNIQUE_NAME"
+                                        :key="item.id"
                                         class="query_designer-area-item"
                                     >
                                         <div>
-                                            {{ item.HIERARCHY_NAME }}
+                                            {{ item.caption }}
                                         </div>
+                                        <VaButton
+                                            icon="filter_list"
+                                            preset="secondary"
+                                            round
+                                            :color="
+                                                item.filters.enabled
+                                                    ? '#4CAF50'
+                                                    : ''
+                                            "
+                                            @click="
+                                                openFiltersModal(
+                                                    store,
+                                                    'rows',
+                                                    item.id,
+                                                )
+                                            "
+                                        />
                                         <VaButton
                                             icon="remove"
                                             preset="secondary"
                                             round
                                             @click="
-                                                removeFromAxis(
-                                                    'rows',
-                                                    item.HIERARCHY_UNIQUE_NAME,
-                                                )
+                                                removeFromAxis('rows', item.id)
                                             "
                                         />
                                     </div>
@@ -209,21 +362,35 @@ onMounted(() => {
                                 <div class="query_designer-area">
                                     <div
                                         v-for="item in selectedCols"
-                                        :key="item.HIERARCHY_UNIQUE_NAME"
+                                        :key="item.id"
                                         class="query_designer-area-item"
                                     >
                                         <div>
-                                            {{ item.HIERARCHY_NAME }}
+                                            {{ item.caption }}
                                         </div>
+                                        <VaButton
+                                            icon="filter_list"
+                                            preset="secondary"
+                                            round
+                                            :color="
+                                                item.filters.enabled
+                                                    ? '#4CAF50'
+                                                    : ''
+                                            "
+                                            @click="
+                                                openFiltersModal(
+                                                    store,
+                                                    'cols',
+                                                    item.id,
+                                                )
+                                            "
+                                        />
                                         <VaButton
                                             icon="remove"
                                             preset="secondary"
                                             round
                                             @click="
-                                                removeFromAxis(
-                                                    'cols',
-                                                    item.HIERARCHY_UNIQUE_NAME,
-                                                )
+                                                removeFromAxis('cols', item.id)
                                             "
                                         />
                                     </div>
@@ -268,6 +435,7 @@ onMounted(() => {
                     <Teleport to="body">
                         <MeasureSelectionModal ref="measureSelectionModal" />
                         <AxisSelectionModal ref="axisSelectionModal" />
+                        <FilterSelectionModal ref="filterSelectionModal" />
                     </Teleport>
                 </div>
             </div>

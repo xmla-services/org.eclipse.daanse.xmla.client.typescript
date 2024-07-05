@@ -86,7 +86,7 @@ Contributors: Smart City Jena
                                 :key="widget"
                                 @click="addSelectedWidget(widget)"
                             >
-                                <div @click="addSelectedWidget(widget)">
+                                <div>
                                     {{ t(`Widgets.${widget}`) }}
                                 </div>
                             </div>
