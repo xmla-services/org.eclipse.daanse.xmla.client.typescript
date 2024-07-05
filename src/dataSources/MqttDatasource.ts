@@ -34,7 +34,7 @@ export default class MQTTDatasource extends DataSource implements IDatasource {
       const client = mqtt.connect(this.url, {
         port: 8081,
         username: "iwoms",
-        password: "b2952fa553ad3ac2",
+        password: "",
       });
       client.on("connect", () => {
         console.log("connected");

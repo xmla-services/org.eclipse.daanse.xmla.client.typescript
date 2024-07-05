@@ -12,31 +12,29 @@ Contributors: Smart City Jena
 import { useI18n } from "vue-i18n";
 import StoreList from "@/components/Stores/StoreList.vue";
 import { useStoreManager } from "@/composables/storeManager";
-import { inject, ref } from "vue";
+import {computed, inject, ref} from "vue";
 
 const { t } = useI18n();
 const EventBus = inject("customEventBus") as any;
 const storeManager = useStoreManager();
 
 const isDropdownVisible = ref(false);
-const addNewStore = () => {
-  storeManager.initStore("New store", EventBus);
-};
+
+const storeList = computed(()=>{
+
+   console.log(storeManager.getStoreTypes());
+   return {}
+})
+
 
 const addSelectedStore = (store: string) => {
-    if (store === "XMLA") {
+
         storeManager.initStore(
             t("SidebarStoreList.newStore"),
             EventBus,
-            "XMLA",
+            store,
         );
-    } else {
-        storeManager.initStore(
-            t("SidebarStoreList.newStore"),
-            EventBus,
-            "REST",
-        );
-    }
+
 };
 
 </script>
@@ -63,7 +61,7 @@ const addSelectedStore = (store: string) => {
                 <va-dropdown-content class="dropdown-list">
                     <div
                         class="dropdown-item"
-                        v-for="store of ['XMLA', 'REST']"
+                        v-for="store of storeManager.getStoreTypes()"
                         :key="store"
                         @click="addSelectedStore(store)"
                     >

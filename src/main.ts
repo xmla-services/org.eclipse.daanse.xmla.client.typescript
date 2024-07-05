@@ -97,11 +97,12 @@ const i18n = createI18n({
 app.use(i18n);
 
 const isDarkTheme = ref(
-    JSON.parse(localStorage.getItem("isDarkTheme")) || false,
+    JSON.parse(localStorage?.getItem("isDarkTheme")??'false'),
 );
 const htmlElement = document.documentElement;
 htmlElement.classList.add(isDarkTheme.value ? "dark-theme" : "light-theme");
 
+//@ts-ignore
 pinia.use(SOAPClient);
 app.use(pinia);
 app.use(router);
@@ -187,6 +188,7 @@ useDatasourceManager().registerDataSource(MQTTDatasource);
 
 useStoreManager().registerStoreType(XMLAStore);
 useStoreManager().registerStoreType(Store);
+
 
 app.mount("#app");
 export default app;

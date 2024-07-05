@@ -1,6 +1,8 @@
 import {useDatasourceManager} from "@/composables/datasourceManager";
+import type {IStore} from "mqtt";
+import EventBus from "@/plugins/EventBus";
 
-export default class BaseStore implements IStore {
+export default abstract class BaseStore {
 
     public caption: string;
     public events: IStoreEvents[] = [];
@@ -13,7 +15,6 @@ export default class BaseStore implements IStore {
         this.caption = caption;
     }
 
-    getData(): Promise<any> {
-        return Promise.resolve(undefined);
-    }
+
+
 }

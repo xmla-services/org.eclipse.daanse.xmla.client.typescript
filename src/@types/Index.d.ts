@@ -29,7 +29,7 @@ interface IStore {
   datasourceId: string | null;
   setDatasource: (datasourceId: string) => void;
   getDatasource: (datasourceId: string) => IDatasource;
-  getData: () => Promise<any>;
+  getData: (...args) => Promise<any>;
   setOptions: (options: IStoreParams) => void;
 }
 
