@@ -150,6 +150,7 @@ const getData = async () => {
 onMounted(async () => {
   await getData();
 });
+
 </script>
 
 <template>

@@ -60,6 +60,7 @@ export const widgetNames = [
   { name: "RichTextWidget", label: "Rich Text Widget" },
   { name: "TableWidget", label: "Table Widget" },
   { name: "PivotTableWidget", label: "Pivot Table Widget" },
+
   // Controls
   { name: "SwitchControl", label: "Switch Control" },
   { name: "SelectControl", label: "Select Control" },

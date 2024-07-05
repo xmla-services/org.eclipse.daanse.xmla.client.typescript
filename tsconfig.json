@@ -12,6 +12,8 @@
     //"target": "node",
     "module": "esnext",
     "strict": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "references": [
     {

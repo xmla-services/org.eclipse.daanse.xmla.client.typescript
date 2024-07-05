@@ -11,10 +11,11 @@
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
+import BaseStore from "@/stores/Widgets/BaseStore";
 import { useErrorHandler } from "@/composables/dashboard/errorToast";
-export class Store implements IStore {
-  public caption: string;
-  public id: string;
+
+export class Store extends BaseStore implements IStore {
+  public static readonly TYPE = 'REST';
   private datasourceManager: any;
   private eventBus: EventBus;
 
@@ -27,11 +28,10 @@ export class Store implements IStore {
   private runtimeParams: IStoreParams = {};
   private errorToast: any;
 
-  public type = "REST" as const;
+  public type = Store.TYPE;
 
   constructor(id: string, caption: string, eventBus: EventBus) {
-    this.id = id;
-    this.caption = caption;
+    super(id,caption,eventBus);
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
     this.requestTemplate = "/products/{pageNum}";
@@ -74,7 +74,7 @@ export class Store implements IStore {
       let requestTemplate = this.requestTemplate;
 
       const paramsList = Object.keys(this.params);
-  
+
       paramsList.forEach((e) => {
         console.log(e);
         requestTemplate = requestTemplate.replace(
@@ -82,14 +82,14 @@ export class Store implements IStore {
           this.runtimeParams[e],
         );
       });
-  
+
       const datasource = this.datasourceManager.getDatasource(this.datasourceId);
       const json = (await datasource?.getData(requestTemplate)) as string;
-  
+
       return json;
     } catch(e) {
       return this.errorToast.handleErrorToast(e);
-    }    
+    }
   }
 
   reset(): void {
