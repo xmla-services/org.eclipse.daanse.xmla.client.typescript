@@ -11,15 +11,15 @@
 
 import type { Meta, StoryObj } from "@storybook/vue3";
 
-import TextWidget from "@/components/Widgets/Svg/SvgWidget.vue";
-import Svg from '@/../public/demo/test.svg';
+import SvgWidget from "@/components/Widgets/Svg/SvgWidget.vue";
+import Svg from '@/../demo/test.svg';
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
-const meta = {
+const meta: Meta<typeof SvgWidget> = {
   title: "Widget/StaticWidgets/Svg",
-  component: TextWidget,
+  component: SvgWidget,
   tags: ["autodocs"],
-} as Meta<typeof TextWidget>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -35,14 +35,17 @@ export const Primary: Story = {
       primary: {
         stroke: "#fff",
         fill: "#000",
+        strokeWidth: "5px",
       },
       secondary: {
         stroke: "#ffffff",
         fill: "#ff0000",
+        strokeWidth: "3px",
       },
       ternary: {
         stroke: "#aaaaff",
         fill: "#ffff00",
+        strokeWidth: "2px",
       },
     },
   },

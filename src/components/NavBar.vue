@@ -131,7 +131,7 @@ export default {
 };
 </script>
 <template>
-  <va-navbar color="primary" class="mb-3 high_index">
+  <va-navbar color="primary" class="high_index">
     <template #left>
       <va-navbar-item class="logo">
         <div class="white triangle"></div>

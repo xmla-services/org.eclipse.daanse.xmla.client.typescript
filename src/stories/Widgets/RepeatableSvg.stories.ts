@@ -12,14 +12,14 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 
 import RepeatableSvgWidget from "@/components/Widgets/RepeatableSvg/RepeatableSvgWidget.vue";
-import Svg from "@/../public/demo/human.svg";
+import Svg from "@/../demo/human.svg";
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
-const meta = {
+const meta: Meta<typeof RepeatableSvgWidget> = {
   title: "Widget/StaticWidgets/RepeatableSvg",
   component: RepeatableSvgWidget,
   tags: ["autodocs"],
-} as Meta<typeof RepeatableSvgWidget>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -39,7 +39,7 @@ export const Primary: Story = {
       fill: "#777",
       stroke: "#777",
     },
-    repeations: 3,
-    progress: 0.3,
+    repeations: "3",
+    progress: "0.3",
   },
 };

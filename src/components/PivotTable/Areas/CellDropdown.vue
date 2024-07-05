@@ -12,9 +12,11 @@ Contributors: Smart City Jena
 import type { TinyEmitter } from "tiny-emitter";
 import { inject, ref, watch } from "vue";
 import { v4 } from "uuid";
+import { useI18n } from 'vue-i18n';
 
 defineEmits(["openCellProperties", "drillthrough"]);
 
+const { t } = useI18n();
 const opened = ref(false);
 const eventBus = inject("pivotTableEventBus") as TinyEmitter;
 const uid = "id" + v4();
@@ -52,7 +54,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('openCellProperties')"
         >
-          Open Cell Properties
+          {{ t('PivotTable.openCellPropertiesButton') }}
         </va-button>
         <va-button
           preset="plain"
@@ -61,7 +63,7 @@ watch(opened, () => {
           :hover-opacity="0.5"
           @click="$emit('drillthrough')"
         >
-          Drillthrough
+        {{ t('PivotTable.drillthroughButton') }}
         </va-button>
       </va-button-group>
     </va-dropdown-content>

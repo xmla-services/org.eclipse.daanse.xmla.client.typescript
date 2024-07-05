@@ -23,7 +23,7 @@ export interface ImageGalleryItem {
   url: string;
 }
 
-export interface ImageSettings {
+export interface GallerySettings {
   fit: string;
   diashowInterval: number;
 }

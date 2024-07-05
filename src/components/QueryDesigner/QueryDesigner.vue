@@ -17,9 +17,11 @@ import type {
 import { ref } from "vue";
 import draggable from "vuedraggable";
 import FilterModal from "../Modals/FilterModal.vue";
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
+    const { t } = useI18n();
     const queryDesignerStore = useQueryDesignerStore();
     const addedOperationCache = ref({
       area: "filters" as "rows" | "columns" | "filters",
@@ -29,6 +31,7 @@ export default {
     });
 
     return {
+      t,
       queryDesignerStore,
       addedOperationCache,
     };
@@ -269,12 +272,12 @@ export default {
           v-model="queryDesignerStore.manualUpdate"
           label="Manually update layout"
         />
-        <va-button>Update</va-button>
+        <va-button>{{ t('QueryDesigner.updateButton') }}</va-button>
       </div>
     </div>
     <div class="areas">
       <div class="queryDesignerArea">
-        <div class="va-title">Filters</div>
+        <div class="va-title">{{ t('QueryDesigner.filters') }}</div>
         <div class="queryDesingnerArea_container">
           <draggable
             class="dragArea list-group"
@@ -309,7 +312,7 @@ export default {
         </div>
       </div>
       <div class="queryDesignerArea">
-        <div class="va-title">Columns</div>
+        <div class="va-title">{{ t('QueryDesigner.columns') }}</div>
         <div class="queryDesingnerArea_container">
           <draggable
             class="dragArea list-group"
@@ -345,7 +348,7 @@ export default {
         </div>
       </div>
       <div class="queryDesignerArea">
-        <div class="va-title">Rows</div>
+        <div class="va-title">{{ t('QueryDesigner.rows') }}</div>
         <div class="queryDesingnerArea_container">
           <draggable
             class="dragArea list-group"
@@ -381,7 +384,7 @@ export default {
         </div>
       </div>
       <div class="queryDesignerArea">
-        <div class="va-title">Data</div>
+        <div class="va-title">{{ t('QueryDesigner.data') }}</div>
         <div class="queryDesingnerArea_container">
           <draggable
             class="dragArea list-group"
