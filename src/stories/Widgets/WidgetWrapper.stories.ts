@@ -14,12 +14,8 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 import { setup } from "@storybook/vue3";
 import {
   createVuesticEssential,
-  VaIcon,
   createIconsConfig,
-  VaButton,
 } from "vuestic-ui";
-import "vuestic-ui/css";
-import "@/assets/main.css";
 
 import WidgetWrapper from "@/components/Widgets/WidgetWrapper/WidgetWrapper.vue";
 import ImageWidget from "@/components/Widgets/Image/ImageWidget.vue";
@@ -38,10 +34,6 @@ setup(async (app) => {
   console.log(fonts);
   app.use(
     createVuesticEssential({
-      components: {
-        VaIcon,
-        VaButton,
-      },
       config: {
         icons: createIconsConfig({
           fonts: [
@@ -61,11 +53,11 @@ setup(async (app) => {
 });
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
-const meta = {
+const meta: Meta<typeof WidgetWrapper> = {
   title: "Widget/StaticWidgets/Wrapper",
   component: WidgetWrapper,
   tags: ["autodocs"],
-} as Meta<typeof WidgetWrapper>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -90,7 +82,9 @@ export const Primary: Story = {
         :borderRadius="args.borderRadius"
         :fullscreen="args.fullscreen"
       >
-        <ImageWidget imgSrc="https://placekitten.com/2000/1000" />
+        <ImageWidget
+          :images="[{ id: '0', url: 'https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U' }]"
+        />
       </WidgetWrapper>
     `,
     components: { ImageWidget, WidgetWrapper },
@@ -105,4 +99,9 @@ export const Primary: Story = {
     borderRadius: 4,
     fullscreen: false,
   },
+  decorators: [
+    () => ({
+      template: '<div style="width: 300px; height: 500px;"><story /></div>',
+    }),
+  ]
 };

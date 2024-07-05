@@ -11,7 +11,7 @@
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
-
+import { useErrorHandler } from "@/composables/dashboard/errorToast";
 export class Store implements IStore {
   public caption: string;
   public id: string;
@@ -25,6 +25,7 @@ export class Store implements IStore {
   public events: IStoreEvents[] = [];
   public initedEvents: Array<{ name: string; cb: Function }> = [];
   private runtimeParams: IStoreParams = {};
+  private errorToast: any;
 
   public type = "REST" as const;
 
@@ -37,6 +38,7 @@ export class Store implements IStore {
 
     this.calculateParams();
     this.registerForDataSourceEvents();
+    this.errorToast = useErrorHandler();
   }
 
   calculateParams(): void {
@@ -68,22 +70,26 @@ export class Store implements IStore {
   }
 
   async getData(): Promise<string> {
-    let requestTemplate = this.requestTemplate;
+    try {
+      let requestTemplate = this.requestTemplate;
 
-    const paramsList = Object.keys(this.params);
-
-    paramsList.forEach((e) => {
-      console.log(e);
-      requestTemplate = requestTemplate.replace(
-        `{${e}}`,
-        this.runtimeParams[e],
-      );
-    });
-
-    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
-    const json = (await datasource?.getData(requestTemplate)) as string;
-
-    return json;
+      const paramsList = Object.keys(this.params);
+  
+      paramsList.forEach((e) => {
+        console.log(e);
+        requestTemplate = requestTemplate.replace(
+          `{${e}}`,
+          this.runtimeParams[e],
+        );
+      });
+  
+      const datasource = this.datasourceManager.getDatasource(this.datasourceId);
+      const json = (await datasource?.getData(requestTemplate)) as string;
+  
+      return json;
+    } catch(e) {
+      return this.errorToast.handleErrorToast(e);
+    }    
   }
 
   reset(): void {

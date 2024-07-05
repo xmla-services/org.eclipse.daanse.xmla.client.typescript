@@ -11,11 +11,14 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { ref, type Ref } from "vue";
+import { useI18n } from 'vue-i18n';
+
 
 // const url = "https://ssemenkoff.dev/emondrian/xmla";
 export default {
   name: "CellPropertiesModal",
   setup() {
+    const { t } = useI18n();
     const memberProperties = ref(null) as Ref<any>;
 
     const getMemberProperties = async (member) => {
@@ -30,6 +33,7 @@ export default {
     const { isOpened, run, close } = usePromisifiedModal(() => {}, opened);
 
     return {
+      t,
       isOpened,
       run,
       close,
@@ -51,14 +55,14 @@ export default {
     @ok="ok"
   >
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Cell properties</va-card-title>
+      <va-card-title class="va-h6">{{ t('CellPropertiesModal.cellProperties') }}</va-card-title>
       <va-card-content>
         <div class="va-table-responsive">
           <table class="va-table va-table--hoverable">
             <thead>
               <tr>
-                <th>Property</th>
-                <th>Value</th>
+                <th>{{ t('CellPropertiesModal.property') }}</th>
+                <th>{{ t('CellPropertiesModal.value') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -72,7 +76,7 @@ export default {
         </div>
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok">Ok!</va-button>
+        <va-button @click="ok">{{ t('Modals.okButton') }}</va-button>
       </va-card-actions>
     </template>
   </va-modal>

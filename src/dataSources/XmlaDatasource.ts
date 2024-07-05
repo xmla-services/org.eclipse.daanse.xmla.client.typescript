@@ -29,6 +29,7 @@ export default class XMLADatasource implements IDatasource, ISerializable {
     url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
     caption: string,
   ) {
+    console.log(url);
     this.id = id;
     this.url = url;
     this.caption = caption;
