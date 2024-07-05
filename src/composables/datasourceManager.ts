@@ -75,11 +75,6 @@ export function useDatasourceManager() {
       }catch (e){
         throw new TypeError(`${ds.type} not found in registry`)
       }
-      if (ds.type === "XMLA") {
-        const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
-
-        availableDatasources.value[key] = datasource;
-      }
     });
 
     console.log(availableDatasources.value);
