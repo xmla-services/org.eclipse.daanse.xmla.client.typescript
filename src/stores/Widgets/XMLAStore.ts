@@ -12,7 +12,7 @@ Contributors: Smart City Jena
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import { getMdxRequest } from "@/utils/MdxRequests/MdxRequestConstructor";
 import BaseStore from "@/stores/Widgets/BaseStore";
-
+import { useErrorHandler } from "@/composables/dashboard/errorToast";
 interface EventBus {
   emit: (string, any?) => void;
   on: (string, Function) => void;
@@ -39,12 +39,14 @@ export class XMLAStore extends BaseStore implements IStore{
   public row = null as any;
   public column = null as any;
   public measure = null as any;
+  private errorToast: any;
 
   constructor(id, caption, eventBus: EventBus) {
     super(id, caption, eventBus);
 
     this.datasourceManager = useDatasourceManager();
     this.eventBus = eventBus;
+    this.errorToast = useErrorHandler();
 
     this.eventBus.on(`EXPAND:${this.id}`, ({ value, area }) => {
       if (area === "rows") {
@@ -244,6 +246,7 @@ export class XMLAStore extends BaseStore implements IStore{
   }
 
   expandOnRows(member) {
+    console.log("expandOnRows", member);
     const currentMemberHierarchyItems: any[] = this.rowsExpandedMembers.filter(
       (e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
@@ -280,6 +283,7 @@ export class XMLAStore extends BaseStore implements IStore{
   }
 
   expandOnColumns(member) {
+    console.log("expandOnColumns", member);
     const currentMemberHierarchyItems: any[] =
       this.columnsExpandedMembers.filter((e: any) => {
         return e.HIERARCHY_UNIQUE_NAME === member.HIERARCHY_UNIQUE_NAME;
@@ -355,18 +359,42 @@ export class XMLAStore extends BaseStore implements IStore{
     this.eventBus.emit(`UPDATE:${this.id}`);
   }
 
-  async getData() {
-    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
+  async getData({ rows, columns, measures }) {
+    try {
+      const datasource = this.datasourceManager.getDatasource(
+        this.datasourceId,
+      );
 
-    this.flushDrilldowns();
-    this.flushExpands();
-    const body = await this.getMDXRequest({
-      showEmpty: true,
-      alignContent: "right",
-    });
+      this.flushDrilldowns();
+      this.flushExpands();
 
-    const responce = await datasource.getData(body);
-    return responce;
+      const rowsMapped = rows.map((e) => {
+        return { originalItem: e };
+      });
+
+      const columnsMapped = columns.map((e) => {
+        return { originalItem: e };
+      });
+
+      const measuresMapped = measures.map((e) => {
+        return { originalItem: e };
+      });
+
+      const body = await this.getMDXRequest(
+        rowsMapped,
+        columnsMapped,
+        measuresMapped,
+        {
+          showEmpty: true,
+          alignContent: "right",
+        },
+      );
+
+      const responce = await datasource.getData(body);
+      return responce;
+    } catch (e) {
+      return this.errorToast.handleErrorToast(e);
+    }
   }
 
   setOptions({ caption, column, row, measure }:IStoreParams) {
@@ -398,7 +426,7 @@ export class XMLAStore extends BaseStore implements IStore{
     this.datasourceId = state.datasourceId;
   }
 
-  async getMDXRequest(pivotTableSettings) {
+  async getMDXRequest(rows, columns, measures, pivotTableSettings) {
     const datasource = this.datasourceManager.getDatasource(this.datasourceId);
 
     const mdxRequest = await getMdxRequest(
@@ -407,9 +435,12 @@ export class XMLAStore extends BaseStore implements IStore{
       this.columnsDrilldownMembers,
       this.rowsExpandedMembers,
       this.columnsExpandedMembers,
-      [{ originalItem: this.row }],
-      [{ originalItem: this.column }],
-      [{ originalItem: this.measure }],
+      rows,
+      columns,
+      measures,
+      // [{ originalItem: this.row }],
+      // [{ originalItem: this.column }],
+      // [{ originalItem: this.measure }],
       pivotTableSettings,
       datasource.getProperties(),
       [],

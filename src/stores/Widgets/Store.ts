@@ -12,6 +12,7 @@
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
 import BaseStore from "@/stores/Widgets/BaseStore";
+import { useErrorHandler } from "@/composables/dashboard/errorToast";
 
 export class Store extends BaseStore implements IStore {
   public static readonly TYPE = 'REST';
@@ -25,6 +26,7 @@ export class Store extends BaseStore implements IStore {
   public events: IStoreEvents[] = [];
   public initedEvents: Array<{ name: string; cb: Function }> = [];
   private runtimeParams: IStoreParams = {};
+  private errorToast: any;
 
   public type = Store.TYPE;
 
@@ -36,6 +38,7 @@ export class Store extends BaseStore implements IStore {
 
     this.calculateParams();
     this.registerForDataSourceEvents();
+    this.errorToast = useErrorHandler();
   }
 
   calculateParams(): void {
@@ -67,22 +70,26 @@ export class Store extends BaseStore implements IStore {
   }
 
   async getData(): Promise<string> {
-    let requestTemplate = this.requestTemplate;
+    try {
+      let requestTemplate = this.requestTemplate;
 
-    const paramsList = Object.keys(this.params);
+      const paramsList = Object.keys(this.params);
 
-    paramsList.forEach((e) => {
-      console.log(e);
-      requestTemplate = requestTemplate.replace(
-        `{${e}}`,
-        this.runtimeParams[e],
-      );
-    });
+      paramsList.forEach((e) => {
+        console.log(e);
+        requestTemplate = requestTemplate.replace(
+          `{${e}}`,
+          this.runtimeParams[e],
+        );
+      });
 
-    const datasource = this.datasourceManager.getDatasource(this.datasourceId);
-    const json = (await datasource?.getData(requestTemplate)) as string;
+      const datasource = this.datasourceManager.getDatasource(this.datasourceId);
+      const json = (await datasource?.getData(requestTemplate)) as string;
 
-    return json;
+      return json;
+    } catch(e) {
+      return this.errorToast.handleErrorToast(e);
+    }
   }
 
   reset(): void {

@@ -10,9 +10,9 @@ Contributors: Smart City Jena
 -->
 <script setup lang="ts">
 export interface IButtonSettingsProps {
-  title?: string;
-  availableEvents?: string[];
-  events?: EventItem[];
+    title?: string;
+    availableEvents?: string[];
+    events?: EventItem[];
 }
 
 import { inject } from "vue";
@@ -25,40 +25,40 @@ const settingsComponent = ButtonSettings;
 const EventBus = inject("customEventBus") as any;
 
 const props = withDefaults(defineProps<IButtonSettingsProps>(), {
-  title: "Next page",
-  availableEvents: (): string[] => ["Click"],
-  events: (): EventItem[] => [
-    {
-      name: "Next page",
-      trigger: "Click",
-    },
-  ],
+    title: "Next page",
+    availableEvents: (): string[] => ["Click"],
+    events: (): EventItem[] => [
+        {
+            name: "Next page",
+            trigger: "Click",
+        },
+    ],
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
 const { getState } = useSerialization(settings);
 
 const click = () => {
-  settings.value.events.forEach((e: EventItem) => {
-    if (e.trigger === "Click") {
-      console.log(`${e.name} emited`, settings);
-      EventBus.emit(e.name);
-    }
-  });
+    settings.value.events.forEach((e: EventItem) => {
+        if (e.trigger === "Click") {
+            console.log(`${e.name} emited`, settings);
+            EventBus.emit(e.name);
+        }
+    });
 };
 
 defineExpose({ setSetting, settings, settingsComponent, getState });
 </script>
 
 <template>
-  <va-button class="button-control" @click="click">
-    {{ settings.title }}
-  </va-button>
+    <va-button class="button-control" @click="click">
+        {{ settings.title }}
+    </va-button>
 </template>
 
 <style scoped>
 .button-control {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 </style>

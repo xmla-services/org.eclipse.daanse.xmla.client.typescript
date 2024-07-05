@@ -12,11 +12,13 @@ Contributors: Smart City Jena
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { useAppSettingsStore } from "@/stores/AppSettings";
 import { ref, watch } from "vue";
+import { useI18n } from 'vue-i18n';
 
 // const url = "https://ssemenkoff.dev/emondrian/xmla";
 export default {
   name: "CatalogSelectionModal",
   setup() {
+    const { t } = useI18n();
     const store = useAppSettingsStore();
     const selectedCatalog = ref("");
     const selectedCube = ref("");
@@ -97,6 +99,7 @@ export default {
     });
 
     return {
+      t,
       store,
       isOpened,
       selectedCatalog,
@@ -116,7 +119,7 @@ export default {
 <template>
   <va-modal :modelValue="isOpened" no-padding class="server-url-modal" @ok="ok">
     <template #content="{ ok }">
-      <va-card-title class="va-h6">Select catalog and cube:</va-card-title>
+      <va-card-title class="va-h6">{{ t('CatalogSelectionModal.selectCatalogAndCube') }}</va-card-title>
       <va-card-content>
         <va-select
           :options="catalogs"
@@ -138,7 +141,7 @@ export default {
         <div class="mt-2 va-text-danger">{{ error }}</div>
       </va-card-content>
       <va-card-actions>
-        <va-button @click="ok">Ok!</va-button>
+        <va-button @click="ok">{{ t('Modals.okButton') }}</va-button>
       </va-card-actions>
     </template>
   </va-modal>

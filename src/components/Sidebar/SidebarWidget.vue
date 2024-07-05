@@ -9,15 +9,17 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import WidgetWrapperSettings from '../Widgets/WidgetWrapper/WidgetWrapperSettings.vue';
 
+const { t } = useI18n();
 const props = defineProps(["component", "wrapper"]);
 </script>
 
 <template>
   <div class="sidebar-settings">
     <div class="sidebar-settings-title">
-      <h2>Widget settings</h2>
+      <h2>{{ t('SidebarWidgetSettings.widgetSettings') }}</h2>
     </div>
     <div class="sidebar-settings-content">
       <WidgetWrapperSettings :wrapper="props.wrapper"></WidgetWrapperSettings>

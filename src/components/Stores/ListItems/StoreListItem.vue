@@ -9,6 +9,7 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
 import { type Ref, onMounted, ref, watch } from "vue";
@@ -23,6 +24,7 @@ declare interface IDatasource {
   getData: (params: any) => Promise<any>;
 }
 
+const { t } = useI18n();
 const storeManager = useStoreManager();
 const dslist: Ref<IDatasource[]> = ref([]);
 
@@ -150,20 +152,20 @@ const getSelectedDatasource = (item) => {
   </div>
   <div v-if="isExpanded" class="store-item-content">
     <va-input
-      label="Caption"
+      :label="t('SidebarStoreList.caption')"
       v-model="item.caption"
       @blur="saveStore(item)"
     ></va-input>
     <va-input
-      label="Data endpoint"
+      :label="t('SidebarStoreList.dataEndpoint')"
       v-model="item.requestTemplate"
       @blur="saveStore(item)"
     ></va-input>
 
     <div class="datasource-list">
-      <h2>Datasources</h2>
+      <h2>{{ t('SidebarStoreList.dataSourcesTitle') }}</h2>
       <va-button class="datasource-list-add-button" @click="createDatasource">
-        Add datasource
+        {{ t('SidebarStoreList.addDatasourceButton') }}
       </va-button>
       <va-data-table
         class="table-crud"
@@ -200,7 +202,7 @@ const getSelectedDatasource = (item) => {
     </div>
 
     <div class="datasource-list">
-      <h2>Params</h2>
+      <h2>{{ t('SidebarStoreList.storeListItem.params') }}</h2>
       <va-data-table
         class="table-crud"
         :items="getParams(item)"
@@ -217,9 +219,9 @@ const getSelectedDatasource = (item) => {
     </div>
 
     <div class="datasource-list">
-      <h2>Events</h2>
+      <h2>{{ t('SidebarStoreList.storeListItem.events') }}</h2>
       <va-button class="datasource-list-add-button" @click="addEvent(item.id)">
-        Add event
+        {{ t('SidebarStoreList.storeListItem.addEventButton') }}
       </va-button>
       <va-data-table
         class="table-crud"

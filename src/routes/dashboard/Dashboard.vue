@@ -12,9 +12,9 @@ Contributors: Smart City Jena
   <NavBarDash></NavBarDash>
   <div class="app-layout-container bg grey padd">
     <div>
-      <va-button preset="primary" class="ml-2" @click="addPlainTextWidget"
-        >Add widget</va-button
-      >
+      <va-button preset="primary" class="ml-2" @click="addPlainTextWidget">
+        {{ t('Routes.addWidgetButton') }}
+      </va-button>
     </div>
     <div class="main-section">
       <va-scroll-container
@@ -94,7 +94,7 @@ Contributors: Smart City Jena
               <div></div>
               <Suspense>
                 <template #fallback>
-                  <div>Loading...</div>
+                  <div>{{ t('Routes.loading') }}</div>
                 </template>
                 <component
                   :is="widget.component"
@@ -108,7 +108,7 @@ Contributors: Smart City Jena
       </va-scroll-container>
       <div>
         <div>
-          <va-button>Add REST datasource</va-button>
+          <va-button>{{ t('Routes.addRestDatasourceButton') }}</va-button>
           <DatasourceList class="mt-2" />
         </div>
         <div>
@@ -129,6 +129,7 @@ Contributors: Smart City Jena
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import NavBarDash from "./NavBarDash.vue";
 import ChartWidget from "@/components/Charts/ChartWidgetModule.vue";
 import ChartPolarWidget from "@/components/Charts/ChartPolarWidgetModule.vue";
@@ -151,6 +152,7 @@ import StoreSelectionModal from "@/components/Stores/StoreSelectionModal.vue";
 import StoreConfigurationModal from "@/components/Stores/StoreConfigurationModal.vue";
 import { useStoreManager } from "@/composables/storeManager";
 
+const { t } = useI18n();
 const dashboardStore = useDashboardStore();
 const storeManager = useStoreManager();
 
@@ -530,12 +532,14 @@ body.no-overflow[data-v-059e0ffc] {
 <style scoped lang="scss">
 .padd {
   padding: 15px;
+  background-color: var(--app-background);
 }
 .app-layout-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   padding-left: 65px;
+  background-color: var(--app-background);
 }
 
 .main-section {

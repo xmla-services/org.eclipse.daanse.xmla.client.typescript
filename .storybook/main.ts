@@ -7,6 +7,14 @@ const config: StorybookConfig = {
     "@storybook/addon-links",
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
+    "@storybook/addon-mdx-gfm",
+    {
+      name: 'storybook-addon-jsdoc-to-mdx',
+      options: {
+        folderPaths: ['./src/@types/'],
+        extensions: ['js', 'ts']
+      }
+    }
   ],
   framework: {
     name: "@storybook/vue3-vite",

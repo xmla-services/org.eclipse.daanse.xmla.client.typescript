@@ -10,9 +10,9 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface ISVGSettingsProps {
-  initialState?: any;
-  src?: string;
-  classesConfig?: Config;
+    initialState?: any;
+    src?: string;
+    classesConfig?: Config;
 }
 
 import { computed, getCurrentInstance, onMounted, ref, type Ref } from "vue";
@@ -30,14 +30,14 @@ const inst = getCurrentInstance();
 const scope = inst?.type.__scopeId;
 
 const props = withDefaults(defineProps<ISVGSettingsProps>(), {
-  src: "/demo/test.svg",
-  classesConfig: () => ({
-    primary: {
-      fill: "#ff5733",
-      stroke: "#1e8449",
-      strokeWidth: "5px",
-    },
-  }),
+    src: "/demo/test.svg",
+    classesConfig: () => ({
+        primary: {
+            fill: "#ff5733",
+            stroke: "#1e8449",
+            strokeWidth: "5px",
+        },
+    }),
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
@@ -45,72 +45,74 @@ const { store, data, setStore } = useStore<Store>();
 const { getState } = useSerialization(settings);
 
 const styles: Ref<string> = computed(() => {
-  let string: string = "";
+    let string: string = "";
 
-  if (settings.value.classesConfig) {
-    string += "<style>";
-    for (const [key, value] of Object.entries(settings.value.classesConfig)) {
-      string += `
+    if (settings.value.classesConfig) {
+        string += "<style>";
+        for (const [key, value] of Object.entries(
+            settings.value.classesConfig,
+        )) {
+            string += `
         [${scope}] .${key} {
           stroke: ${value.stroke};
           fill: ${value.fill};
           stroke-width: ${value.strokeWidth};
         }
       `;
+        }
+        string += "</style>";
     }
-    string += "</style>";
-  }
 
-  return string;
+    return string;
 });
 
 onMounted(async () => {
-  if (!settings.value.src) return;
-  const req = await fetch(settings.value.src);
-  const svgObject = await req.text();
-  svgSource.value = svgObject;
+    if (!settings.value.src) return;
+    const req = await fetch(settings.value.src);
+    const svgObject = await req.text();
+    svgSource.value = svgObject;
 });
 
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  getState,
-  store,
-  setStore,
+    setSetting,
+    settings,
+    settingsComponent,
+    getState,
+    store,
+    setStore,
 });
 
 const svgSourceParced = computed(() => {
-  let processedString = svgSource.value;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
+    let processedString = svgSource.value;
+    const regex = /{(.*?)}/g;
+    const parts = processedString.match(regex);
 
-  if (!parts || !data.value) {
+    if (!parts || !data.value) {
+        return processedString;
+    }
+
+    parts.forEach((element: string) => {
+        const trimmedString = element.replace("{", "").replace("}", "");
+        const dataField = trimmedString.split(".");
+
+        const res = dataField.reduce((acc: any, field) => {
+            return acc[field];
+        }, data.value);
+
+        processedString = processedString.replace(element, res);
+    });
     return processedString;
-  }
-
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
-
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
 });
 </script>
 
 <template>
-  <div v-html="styles"></div>
-  <div class="svg" v-html="svgSourceParced"></div>
+    <div v-html="styles"></div>
+    <div class="svg" v-html="svgSourceParced"></div>
 </template>
 
 <style scoped>
 .svg {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 </style>

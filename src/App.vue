@@ -15,7 +15,6 @@ Contributors: Smart City Jena
     <va-sidebar
       hoverable
       minimized-width="55px"
-      color="#fefefe"
       class="colored-sidebar"
     >
       <va-sidebar-item
@@ -26,9 +25,8 @@ Contributors: Smart City Jena
         <va-sidebar-item-content>
           <va-icon
             name="draw"
-            :color="$route.name === 'designer' ? '#ffffff' : 'primary'"
           />
-          <va-sidebar-item-title> Designer </va-sidebar-item-title>
+          <va-sidebar-item-title> {{ $t('DashboardNavigation.designer') }} </va-sidebar-item-title>
         </va-sidebar-item-content>
       </va-sidebar-item>
       <va-sidebar-item
@@ -39,9 +37,8 @@ Contributors: Smart City Jena
         <va-sidebar-item-content>
           <va-icon
             name="dashboard"
-            :color="$route.name === 'dashboard' ? '#ffffff' : 'primary'"
           />
-          <va-sidebar-item-title> Dashboard </va-sidebar-item-title>
+          <va-sidebar-item-title> {{ $t('DashboardNavigation.dashboard') }} </va-sidebar-item-title>
         </va-sidebar-item-content>
       </va-sidebar-item>
       <va-sidebar-item
@@ -52,11 +49,8 @@ Contributors: Smart City Jena
         <va-sidebar-item-content>
           <va-icon
             name="dashboard"
-            :color="
-              $route.name === 'multilevel-dashboard' ? '#ffffff' : 'primary'
-            "
           />
-          <va-sidebar-item-title> Multilevel Dashboard </va-sidebar-item-title>
+          <va-sidebar-item-title> {{ $t('DashboardNavigation.multilevelDashboard') }} </va-sidebar-item-title>
         </va-sidebar-item-content>
       </va-sidebar-item>
     </va-sidebar>
@@ -65,7 +59,7 @@ Contributors: Smart City Jena
   <router-view> </router-view>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .sidebar {
   position: absolute;
   left: 0;
@@ -77,5 +71,54 @@ Contributors: Smart City Jena
 }
 .pointer {
   cursor: pointer;
+}
+
+.va-sidebar {
+  background-color: var(--app-sidebar-navigation) !important;
+}
+
+.va-sidebar__item {
+  
+  &.va-sidebar__item__content {
+
+    &:hover {
+
+      .va-icon {
+        color: var(--app-icon-color--hover);
+      }
+    }
+  }
+
+  &.va-sidebar-item {
+
+    &.va-sidebar-item--active {
+
+      &:hover {
+        .va-icon {
+          color: var(--app-icon-color--hover);
+        }
+
+        .va-sidebar__title {
+          color: var(--app-font-color--hover);
+        }
+      }
+
+      .va-icon {
+        color: var(--app-icon-color--active);
+      }
+
+      .va-sidebar__title {
+        color: var(--app-font-color--active);
+      }
+    }
+  }
+}
+
+.va-icon {
+  color: var(--app-icon-color);
+}
+
+.va-sidebar__title {
+  color: var(--app-font-color);
 }
 </style>
