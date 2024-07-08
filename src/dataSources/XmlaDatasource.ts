@@ -149,12 +149,14 @@ export default class XMLADatasource implements IDatasource, ISerializable {
     }
 
     getState() {
-        return JSON.stringify({
+        return {
             id: this.id,
             url: this.url,
             caption: this.caption,
             type: this.type,
-        });
+            catalog: this.catalog,
+            cube: this.cube,
+        };
     }
 
     loadState(state: string) {

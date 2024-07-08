@@ -20,65 +20,69 @@ import { XMLAStore } from "@/stores/Widgets/XMLAStore";
 const availableStores = ref(new Map<string, IStore>());
 
 export function useStoreManager() {
-  const initStore = (
-    caption = "NO CAPTION",
-    eventBus,
-    type = "REST",
-  ): string => {
-    console.log(eventBus);
-    const id = v4();
+    const initStore = (
+        caption = "NO CAPTION",
+        eventBus,
+        type = "REST",
+    ): string => {
+        console.log(eventBus);
+        const id = v4();
 
-    if (type === "REST") {
-      const store = reactive(new Store(id, caption, eventBus));
-      availableStores.value.set(id, store);
-    } else {
-      const store = reactive(new XMLAStore(id, caption, eventBus));
-      availableStores.value.set(id, store);
-    }
-    console.log("inited");
+        if (type === "REST") {
+            const store = reactive(new Store(id, caption, eventBus));
+            availableStores.value.set(id, store);
+        } else {
+            const store = reactive(new XMLAStore(id, caption, eventBus));
+            availableStores.value.set(id, store);
+        }
+        console.log("inited");
 
-    return id;
-  };
+        return id;
+    };
 
-  const getStore = (key): IStore => {
-    const store = availableStores.value.get(key);
-    if (store) {
-      return store;
-    } else {
-      throw new Error("Store with provided id doesn't exist");
-    }
-  };
+    const getStore = (key): IStore => {
+        const store = availableStores.value.get(key);
+        if (store) {
+            return store;
+        } else {
+            throw new Error("Store with provided id doesn't exist");
+        }
+    };
 
-  const getStoreList = () => {
-    return availableStores;
-  };
+    const getStoreList = () => {
+        return availableStores;
+    };
 
-  const getState = () => {
-    const state = {};
+    const getState = () => {
+        const state = {};
 
-    availableStores.value.forEach((store) => {
-      state[store.id] = store.getState();
-    });
+        availableStores.value.forEach((store) => {
+            state[store.id] = store.getState();
+        });
 
-    return JSON.stringify(state);
-  };
+        return JSON.stringify(state);
+    };
 
-  const loadState = (state, eventBus) => {
-    availableStores.value.clear();
+    const loadState = (state, eventBus) => {
+        availableStores.value.clear();
+        const parsed = JSON.parse(state);
 
-    Object.keys(state).forEach((key) => {
-      const store = new Store(key, state[key].caption, eventBus);
-      store.loadState(state[key]);
-      availableStores.value.set(key, store);
-    });
-    console.log(availableStores.value);
-  };
+        console.log(parsed);
 
-  return {
-    initStore,
-    getStore,
-    getStoreList,
-    getState,
-    loadState,
-  };
+        Object.keys(parsed).forEach((key) => {
+            const store = new Store(key, parsed[key].caption, eventBus);
+            store.loadState(parsed[key]);
+            console.log(store);
+            availableStores.value.set(key, store);
+        });
+        // console.log(availableStores.value);
+    };
+
+    return {
+        initStore,
+        getStore,
+        getStoreList,
+        getState,
+        loadState,
+    };
 }

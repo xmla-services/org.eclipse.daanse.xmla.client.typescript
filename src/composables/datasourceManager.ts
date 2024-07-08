@@ -18,99 +18,110 @@ import MQTTDatasource from "@/dataSources/MqttDatasource";
 import { inject } from "vue";
 
 declare interface DatasourceMap {
-  [key: string]: IDatasource;
+    [key: string]: IDatasource;
 }
 
 const availableDatasources: Ref<DatasourceMap> = ref({});
 
 export function useDatasourceManager() {
-  const EventBus = inject("customEventBus") as any;
+    const EventBus = inject("customEventBus") as any;
 
-  const initDatasource = (type: string, url: string, caption: string) => {
-    const id = v4();
+    const initDatasource = (type: string, url: string, caption: string) => {
+        const id = v4();
 
-    console.log("Datasource should be inited");
-    if (type === "REST") {
-      const datasource = new RESTDatasource(id, url, caption);
+        console.log("Datasource should be inited");
+        if (type === "REST") {
+            const datasource = new RESTDatasource(id, url, caption);
 
-      availableDatasources.value[id] = datasource;
-    }
-    if (type === "XMLA") {
-      const datasource = new XmlaDatasource(id, undefined, caption);
+            availableDatasources.value[id] = datasource;
+        }
+        if (type === "XMLA") {
+            const datasource = new XmlaDatasource(id, undefined, caption);
 
-      availableDatasources.value[id] = datasource;
-    }
-    if (type === "MQTT") {
-      const datasource = new MQTTDatasource(id, url, caption, EventBus);
+            availableDatasources.value[id] = datasource;
+        }
+        if (type === "MQTT") {
+            const datasource = new MQTTDatasource(id, url, caption, EventBus);
 
-      availableDatasources.value[id] = datasource;
-    }
+            availableDatasources.value[id] = datasource;
+        }
 
-    return id;
-  };
+        return id;
+    };
 
-  const getDatasource = (key) => {
-    return availableDatasources.value[key];
-  };
+    const getDatasource = (key) => {
+        return availableDatasources.value[key];
+    };
 
-  const getDatasourceList = () => {
-    return availableDatasources;
-  };
+    const getDatasourceList = () => {
+        return availableDatasources;
+    };
 
-  const updateDatasource = (key, type, caption, url) => {
-    console.log("Datasource should be updated", key, type, caption, url);
-    if (type === "REST") {
-      const datasource = new RESTDatasource(key, url, caption);
+    const updateDatasource = (key, type, caption, url) => {
+        console.log("Datasource should be updated", key, type, caption, url);
+        if (type === "REST") {
+            const datasource = new RESTDatasource(key, url, caption);
 
-      availableDatasources.value[key] = datasource;
-    }
-    if (type === "XMLA") {
-      const datasource = new XmlaDatasource(key, url, caption);
+            availableDatasources.value[key] = datasource;
+        }
+        if (type === "XMLA") {
+            const datasource = new XmlaDatasource(key, url, caption);
 
-      availableDatasources.value[key] = datasource;
-    }
-    if (type === "MQTT") {
-      const datasource = new MQTTDatasource(key, url, caption, EventBus);
+            availableDatasources.value[key] = datasource;
+        }
+        if (type === "MQTT") {
+            const datasource = new MQTTDatasource(key, url, caption, EventBus);
 
-      availableDatasources.value[key] = datasource;
-    }
-  };
+            availableDatasources.value[key] = datasource;
+        }
+    };
 
-  const getState = () => {
-    const state = {};
+    const getState = () => {
+        const state = {};
 
-    // availableDatasources.value.forEach((ds) => {
-    //   state[ds.id] = ds.getState();
-    // });
+        Object.keys(availableDatasources.value).forEach((key) => {
+            const ds = availableDatasources.value[key];
+            state[ds.id] = ds.getState();
+        });
 
-    return JSON.stringify(state);
-  };
+        return JSON.stringify(state);
+    };
 
-  const loadState = (state) => {
-    Object.keys(state).forEach((key) => {
-      const ds = state[key];
+    const loadState = (state) => {
+        const parsed = JSON.parse(state);
 
-      if (ds.type === "REST") {
-        const datasource = new RESTDatasource(ds.id, ds.url, ds.caption);
+        Object.keys(parsed).forEach((key) => {
+            const ds = parsed[key];
 
-        availableDatasources.value[key] = datasource;
-      }
-      if (ds.type === "XMLA") {
-        const datasource = new XmlaDatasource(ds.id, ds.url, ds.caption);
+            if (ds.type === "REST") {
+                const datasource = new RESTDatasource(
+                    ds.id,
+                    ds.url,
+                    ds.caption,
+                );
 
-        availableDatasources.value[key] = datasource;
-      }
-    });
+                availableDatasources.value[key] = datasource;
+            }
+            if (ds.type === "XMLA") {
+                const datasource = new XmlaDatasource(
+                    ds.id,
+                    ds.url,
+                    ds.caption,
+                );
 
-    console.log(availableDatasources.value);
-  };
+                availableDatasources.value[key] = datasource;
+            }
+        });
 
-  return {
-    initDatasource,
-    getDatasource,
-    getDatasourceList,
-    updateDatasource,
-    getState,
-    loadState,
-  };
+        console.log(availableDatasources.value);
+    };
+
+    return {
+        initDatasource,
+        getDatasource,
+        getDatasourceList,
+        updateDatasource,
+        getState,
+        loadState,
+    };
 }

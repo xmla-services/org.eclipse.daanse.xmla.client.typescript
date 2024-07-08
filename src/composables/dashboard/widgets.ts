@@ -8,8 +8,9 @@
   Contributors: Smart City Jena
 
 */
-import { ref, getCurrentInstance } from "vue";
+import { ref, getCurrentInstance, nextTick } from "vue";
 import { enabledWidgets, widgetNames } from "@/components/Widgets";
+import { useStoreManager } from "../storeManager";
 
 declare interface Widget {
     id: string;
@@ -27,6 +28,7 @@ declare interface Widget {
 
 export function useWidgets() {
     const instance = getCurrentInstance();
+    const storeManager = useStoreManager();
     const widgets = ref<Widget[]>([]);
 
     const widgetsStorage: ISerializable = {
@@ -41,6 +43,8 @@ export function useWidgets() {
                     `${widget.id}_component`
                 ] as ISerializable[];
                 state[widget.id] = componentRef[0].getState();
+                state[widget.id].type = widget.component;
+                state[widget.id].store = componentRef[0].store.id;
 
                 const wrapperRef = refs[
                     `${widget.id}_wrapper`
@@ -51,7 +55,30 @@ export function useWidgets() {
             return JSON.stringify(state);
         },
         loadState: (state) => {
-            console.warn("Not implemented", state);
+            const parsed = JSON.parse(state);
+
+            Object.keys(parsed).forEach(async (key) => {
+                if (key.includes("_wrapper")) return;
+                widgets.value.push({
+                    id: key,
+                    component: parsed[key].type,
+                    caption: "Test",
+                });
+                delete parsed[key].type;
+
+                await nextTick();
+                const ref = instance?.refs[`${key}_component`][0];
+
+                Object.keys(parsed[key]).forEach((setting) => {
+                    ref.setSetting(setting, parsed[key][setting]);
+                });
+                console.log(parsed[key], storeManager);
+                const store = storeManager.getStore(parsed[key].store);
+                ref.setStore(store);
+
+                console.log(key, parsed[key]);
+            });
+            console.log(parsed);
         },
     };
 

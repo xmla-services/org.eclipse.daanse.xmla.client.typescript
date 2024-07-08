@@ -309,16 +309,18 @@ const toggleEdit = () => {
 
 const saveLayout = () => {
     const state = getSerializedState();
+    localStorage.setItem("testLayout", JSON.stringify(state));
+
     console.log(state);
 };
 
 const loadLayout = async () => {
-    loadState("{}");
-    // const retrievedObject =
-    //   localStorage.getItem("testLayout") || JSON.stringify(layout);
+    // loadState("{}");
+    const retrievedObject =
+        localStorage.getItem("testLayout") || JSON.stringify(layout);
     // layout.value = JSON.parse(retrievedObject);
 
-    // console.log(layout.value);
+    loadState(JSON.parse(retrievedObject));
 
     // const dsState = localStorage.getItem("dsState") || "{}";
     // const storeState = localStorage.getItem("storeState") || "{}";
