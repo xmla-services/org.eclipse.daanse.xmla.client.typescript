@@ -100,7 +100,8 @@ export class XMLAStore implements IStore {
             caption: this.caption,
             id: this.id,
             events: this.events,
-            datasourceIds: this.datasourceId,
+            datasourceId: this.datasourceId,
+            type: this.type,
         };
     }
 

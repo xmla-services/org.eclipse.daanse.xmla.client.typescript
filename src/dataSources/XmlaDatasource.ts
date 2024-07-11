@@ -168,5 +168,23 @@ export default class XMLADatasource implements IDatasource, ISerializable {
         this.type = parsed.type;
         this.catalog = parsed.catalog;
         this.cube = parsed.cube;
+
+        this.api = new Promise((res) => {
+            const initApi = async () => {
+                const client = await createClientAsync("def/xmla.wsdl");
+
+                client.setEndpoint(this.url);
+                const api = new XMLAApi(client, this.url);
+                await api.startSession();
+
+                res(api);
+            };
+
+            initApi();
+        });
+
+        if (this.cube && this.catalog) {
+            this.openCube(this.catalog.CATALOG_NAME, this.cube.CUBE_NAME);
+        }
     }
 }

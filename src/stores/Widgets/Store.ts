@@ -169,6 +169,7 @@ export class Store implements IStore {
             events: this.events,
             datasourceId: this.datasourceId,
             params: this.params,
+            type: "REST",
         };
     }
 

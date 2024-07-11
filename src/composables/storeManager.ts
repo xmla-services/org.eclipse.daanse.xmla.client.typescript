@@ -70,10 +70,17 @@ export function useStoreManager() {
         console.log(parsed);
 
         Object.keys(parsed).forEach((key) => {
-            const store = new Store(key, parsed[key].caption, eventBus);
-            store.loadState(parsed[key]);
-            console.log(store);
-            availableStores.value.set(key, store);
+            if (parsed[key].type === "REST") {
+                const store = new Store(key, parsed[key].caption, eventBus);
+                store.loadState(parsed[key]);
+                availableStores.value.set(key, store);
+            } else if (parsed[key].type === "XMLA") {
+                const store = new XMLAStore(key, parsed[key].caption, eventBus);
+                store.loadState(parsed[key]);
+                console.log(store);
+                availableStores.value.set(key, store);
+
+            }
         });
         // console.log(availableStores.value);
     };
