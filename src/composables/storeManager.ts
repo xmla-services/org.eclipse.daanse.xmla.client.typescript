@@ -10,10 +10,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { reactive, ref, watch } from "vue";
-import queryString from "query-string";
-import { optionalArrayToArray } from "@/utils/helpers";
-import { v4, v5 } from "uuid";
+import { reactive, ref } from "vue";
+import { v4 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
 import { XMLAStore } from "@/stores/Widgets/XMLAStore";
 

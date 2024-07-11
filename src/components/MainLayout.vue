@@ -15,7 +15,7 @@ import { useAppSettingsStore } from "@/stores/AppSettings";
 
 const { t } = useI18n();
 const appSettings = useAppSettingsStore();
-const layout = "vertical";
+const layout: string = "vertical";
 
 const getLeftWidth = () => {
     return layout === "default" ? "600px" : "400px";

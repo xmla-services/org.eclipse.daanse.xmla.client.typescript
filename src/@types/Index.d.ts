@@ -28,9 +28,11 @@ interface IStore {
     type: "REST" | "XMLA";
     datasourceId: string | null;
     setDatasource: (datasourceId: string) => void;
-    getDatasource: (datasourceId: string) => IDatasource;
+    getDatasource: () => IDatasource;
     getData: () => Promise<any>;
     setOptions: (options: IStoreParams) => void;
+    updateParam: (paramName: string, value: string) => void;
+    updateEvents: (events: IStoreEvents[]) => void;
 }
 
 interface EventBus {

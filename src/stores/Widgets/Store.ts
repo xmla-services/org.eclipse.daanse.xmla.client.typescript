@@ -28,6 +28,7 @@ export class Store implements IStore {
     private errorToast: any;
 
     public type = "REST" as const;
+    public listAvailableDatasourceTypes = ["REST"];
 
     constructor(id: string, caption: string, eventBus: EventBus) {
         this.id = id;

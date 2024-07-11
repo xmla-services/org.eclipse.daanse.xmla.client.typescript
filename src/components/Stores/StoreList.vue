@@ -19,6 +19,9 @@ const { t } = useI18n();
 const storeManager = useStoreManager();
 const map = storeManager.getStoreList();
 const list = ref([] as IStore[]);
+const tabs = ["REST", "XMLA"]
+const currentTab = ref(0); 
+let filteredList = ref([] as IStore[]);
 
 watch(
   map,
@@ -35,25 +38,76 @@ onMounted(() => {
     return entry[1];
   });
 });
+
+watch(
+  [() => list.value, () => currentTab.value],
+  ([newList, _]) => {
+    filteredList.value = newList.filter(item => item.type === tabs[currentTab.value]);
+  }
+);
 </script>
 
 <template>
-  <va-list>
-    <template v-if="list.length">
-      <div v-for="(item, index) in list" :key="index" class="store-item">
-        <template v-if="item.type === 'REST'">
-          <store-list-item :item="item"></store-list-item>
-        </template>
-        <template v-else-if="item.type === 'XMLA'">
-          <XMLAStoreListItem :item="item"></XMLAStoreListItem>
-        </template>
-      </div>
+  <va-tabs 
+    v-model="currentTab"
+    hidePagination
+    color="info"
+  >
+    <template #tabs>
+      <va-tab
+        v-for="tab in tabs"
+        :key="tab"
+      >
+        {{ tab }}
+      </va-tab>
     </template>
-    <template v-else>{{ t('SidebarStoreList.noAvailableStores') }}</template>
-  </va-list>
+      <va-list>
+        <template v-if="filteredList?.length">
+          <div v-for="(item, index) in filteredList" :key="index" class="store-item">
+            <template v-if="item.type === 'REST' && item.type === tabs[currentTab]">
+              <store-list-item :item="item"></store-list-item>
+            </template>
+            <template v-else-if="item.type === 'XMLA' && item.type === tabs[currentTab]">
+              <XMLAStoreListItem :item="item"></XMLAStoreListItem>
+            </template>
+          </div>
+        </template>
+        <template v-else>{{ t('SidebarStoreList.noAvailableStores') }}</template>
+      </va-list>
+  </va-tabs>
 </template>
 
-<style>
+<style lang="scss">
+.va-tabs {
+  width: 100%;
+  height: 100%;
+
+  &__content {
+    width: 100%;
+  }
+
+  &__wrapper {
+    margin-bottom: 20px;
+  }
+}
+
+.connections-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.connections-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  button {
+    height: 36px;
+    margin: 0 0 0 12px;
+  }
+}
+
 .datasource-list {
   padding-top: 20px;
   margin-top: 8px;
@@ -88,6 +142,7 @@ onMounted(() => {
   width: 100%;
   font-size: 18px;
   font-weight: 600;
+  color: var(--va-primary);
 }
 
 .store-item-content {

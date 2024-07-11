@@ -50,9 +50,9 @@
     "caption": "Caption",
     "dataEndpoint": "Data endpoint",
     "newStore": "New Store",
-    "dataSourcesTitle": "Datasources",
+    "dataSourcesTitle": "Connections:",
     "noAvailableStores": "No stores available",
-    "addDatasourceButton": "Add datasource",
+    "addDatasourceButton": "Add connection",
     "storeListItem": {
       "params": "Params",
       "events": "Events",
@@ -62,10 +62,10 @@
       "catalog": "Catalog",
       "cube": "Cube",
       "rowsHierarchy": "Rows hierarchy",
-      "colsHierarchy:": "Cols hierarchy",
+      "colsHierarchy": "Cols hierarchy",
       "measure": "Measure"
     },
-    "dataTable": {
+    "StoreLabels": {
       "caption": "Caption",
       "type": "Type",
       "url": "Url",

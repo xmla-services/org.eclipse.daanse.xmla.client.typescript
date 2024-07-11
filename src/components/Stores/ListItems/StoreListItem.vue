@@ -13,19 +13,18 @@ import { useI18n } from 'vue-i18n';
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
 import { type Ref, onMounted, ref, watch } from "vue";
-
-// TODO: fix duplicate interface
-declare interface IDatasource {
-  id: string;
-  caption: string;
-  url: string;
-  type: "REST" | "XMLA" | "CSV" | "JSON" | "MQTT";
-  getData: (params: any) => Promise<any>;
-}
+import RESTDatasource from "@/dataSources/RestDatasource"
 
 const { t } = useI18n();
 const storeManager = useStoreManager();
-const dslist: Ref<IDatasource[]> = ref([]);
+const dslist: Ref<RESTDatasource[]> = ref([] as RESTDatasource[]);
+
+const selectedDatasourceId = ref("");
+const selectedDatasource = ref({
+  url: "",
+  caption: "",
+  id: "",
+});
 
 const props = defineProps({
   item: {
@@ -47,18 +46,44 @@ const clickHeader = () => {
 watch(
   dsmap,
   () => {
-    dslist.value = Object.entries(dsmap.value).map(([, ds]) => {
-      return { ...ds };
-    });
+    dslist.value = Object.entries(dsmap.value)
+      .map(([, ds]) => {
+        return ds;
+      })
+      .filter((e) => e.type === "REST") as RESTDatasource[];
   },
   { deep: true },
 );
 
 onMounted(() => {
-  dslist.value = Object.entries(dsmap.value).map(([, ds]) => {
-    return { ...ds };
-  });
+  dslist.value = Object.entries(dsmap.value)
+    .map(([, ds]) => {
+      return ds
+    })
+    .filter((e) => e.type === "REST") as RESTDatasource[];
+
+    const store = storeManager.getStore(item.value.id);
+    const ds = store.getDatasource();
+    if (ds) {
+      selectedDatasourceId.value = ds.id;
+    }
 });
+
+watch(
+  () => selectedDatasourceId.value,
+  (nV) => {
+    const currentDs = dslist.value.find((item) => item.id === nV);
+    if (!currentDs) {
+      return
+    }
+
+    selectedDatasource.value = currentDs;
+    const store = storeManager.getStore(item.value.id);
+    store.setDatasource(currentDs.id);
+  }, {
+    deep: true,
+  }
+);
 
 const saveStore = (item) => {
   const store = storeManager.getStore(item.id);
@@ -69,25 +94,8 @@ const saveStore = (item) => {
 };
 
 const createDatasource = () => {
-  dsManager.initDatasource("REST", "", "");
-};
-
-const updateDatasource = (index) => {
-  const datasourceToUpdate = dslist.value[index];
-  const ds = dsManager.getDatasource(datasourceToUpdate.id);
-  if (ds) {
-    ds.caption = datasourceToUpdate.caption;
-    ds.url = datasourceToUpdate.url;
-
-    if (ds.type !== datasourceToUpdate.type) {
-      dsManager.updateDatasource(
-        datasourceToUpdate.id,
-        datasourceToUpdate.type,
-        datasourceToUpdate.caption,
-        datasourceToUpdate.url,
-      );
-    }
-  }
+  const id = dsManager.initDatasource("REST", "", "New store");
+  selectedDatasourceId.value = id;
 };
 
 const addEvent = (id) => {
@@ -96,13 +104,6 @@ const addEvent = (id) => {
     name: "",
     action: "",
   });
-};
-
-const setSelectedDatasources = (id, currentSelectedItems) => {
-  console.log(currentSelectedItems);
-  const dsId = currentSelectedItems.map((e) => e.id)[0];
-  const store = storeManager.getStore(id);
-  store.setDatasource(dsId);
 };
 
 const updateEvents = (item) => {
@@ -129,13 +130,30 @@ const setParamValue = (item, index, value) => {
   console.log(paramName, value);
 };
 
-const getSelectedDatasource = (item) => {
-  const store = storeManager.getStore(item.id);
-  const selectedDatasource = store.datasourceId;
+const setCaption = () => {
+  const ds = dsManager.getDatasource(selectedDatasource.value.id);
+  if (ds) {
 
-  return dslist.value.filter((e: { id: string }) => {
-    return e.id === selectedDatasource;
-  });
+    dsManager.updateDatasource(
+      ds.id,
+      ds.type,
+      selectedDatasource.value.caption,
+      ds.url,
+    );
+  }
+};
+
+const setUrl = () => {
+  const ds = dsManager.getDatasource(selectedDatasource.value.id);
+  if (ds) {
+
+    dsManager.updateDatasource(
+      ds.id,
+      ds.type,
+      ds.caption,
+      selectedDatasource.value.url,
+    );
+  }
 };
 </script>
 
@@ -161,42 +179,34 @@ const getSelectedDatasource = (item) => {
     ></va-input>
 
     <div class="datasource-list">
-      <h2>{{ t('SidebarStoreList.dataSourcesTitle') }}</h2>
-      <va-button class="datasource-list-add-button" @click="createDatasource">
-        {{ t('SidebarStoreList.addDatasourceButton') }}
-      </va-button>
-      <va-data-table
-        class="table-crud"
-        :items="dslist"
-        :columns="[{ key: 'caption' }, { key: 'type' }, { key: 'url' }]"
-        :model-value="getSelectedDatasource(item)"
-        selectable
-        select-mode="single"
-        @update:model-value="setSelectedDatasources(item.id, $event)"
-      >
-        <template #cell(caption)="{ rowIndex }">
+      <h2>{{ t('SidebarStoreList.dataSourcesTitle') }}</h2> 
+      <div class="connections-controls">
+        <va-select
+          text-by="caption"
+          value-by="id"
+          v-model="selectedDatasourceId"
+          :options="dslist"
+        />
+        <va-button class="datasource-list-add-button" @click="createDatasource">
+          {{ t('SidebarStoreList.addDatasourceButton') }}
+        </va-button>
+      </div>
+      <template v-if="selectedDatasource.id">
+        <div class="connections-list">
           <va-input
-            class="caption-input"
-            @blur="updateDatasource(rowIndex)"
-            v-model="dslist[rowIndex].caption"
+            class="mt-3"
+            v-model="selectedDatasource.caption"
+            @blur="setCaption"
+            :label="t('SidebarStoreList.StoreLabels.caption')"
           ></va-input>
-        </template>
-        <template #cell(type)="{ rowIndex }">
-          <va-select
-            class="type-input"
-            v-model="dslist[rowIndex].type"
-            @update:modelValue="updateDatasource(rowIndex)"
-            :options="['REST', 'XMLA']"
-          />
-        </template>
-        <template #cell(url)="{ rowIndex }">
           <va-input
-            class="url-input"
-            @blur="updateDatasource(rowIndex)"
-            v-model="dslist[rowIndex].url"
+            class="mt-3"
+            @blur="setUrl"
+            v-model="selectedDatasource.url"
+            :label="t('SidebarStoreList.StoreLabels.url')"
           ></va-input>
-        </template>
-      </va-data-table>
+        </div>
+      </template>
     </div>
 
     <div class="datasource-list">
