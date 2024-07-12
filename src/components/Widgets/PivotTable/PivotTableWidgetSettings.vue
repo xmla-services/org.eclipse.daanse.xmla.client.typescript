@@ -19,7 +19,7 @@ import FilterSelectionModal from "@/components/Modals/FilterSelectionModal.vue";
 const { t } = useI18n();
 const storeSelectionOpened = ref(false);
 const props = defineProps(["component"]) as any;
-const storeId = ref(props.component.storeId);
+const storeId = ref(props.component.store.id);
 const storeManager = useStoreManager();
 
 const selectedMeasures = ref([] as MDSchemaMeasure[]);
@@ -201,6 +201,12 @@ watch(
 
 onMounted(() => {
     getStores();
+    const queryState = props.component.getQueryState();
+
+    selectedRows.value = queryState.rowsHierarchies;
+    selectedCols.value = queryState.colsHierarchies;
+    selectedFilters.value = queryState.filters;
+    selectedMeasures.value = queryState.measures;
 });
 </script>
 

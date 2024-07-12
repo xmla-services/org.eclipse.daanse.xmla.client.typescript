@@ -9,19 +9,26 @@
 
 */
 
-export default class RESTDatasource implements IDatasource, ISerializable {
+import DataSource from "@/dataSources/DataSource";
+
+export default class RESTDatasource
+    extends DataSource
+    implements IDatasource, ISerializable
+{
+    public static readonly TYPE = "REST";
     public url: string;
     public id: string;
     public caption: string;
-    public type = "REST" as const;
+    public type = RESTDatasource.TYPE;
 
     constructor(id: string, url: string, caption: string) {
+        super();
         this.id = id;
         this.url = url;
         this.caption = caption;
     }
 
-    async getData(resourcePath: string): Promise<any> {
+    async getData(resourcePath: string = ""): Promise<any> {
         const req = await fetch(`${this.url}${resourcePath}`);
         return await req.json();
     }

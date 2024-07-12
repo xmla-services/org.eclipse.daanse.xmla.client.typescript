@@ -12,15 +12,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type Ref, ref, watch } from "vue";
 import { v4 } from "uuid";
-import RESTDatasource from "@/dataSources/RestDatasource";
-import XmlaDatasource from "@/dataSources/XmlaDatasource";
-import MQTTDatasource from "@/dataSources/MqttDatasource";
 import { inject } from "vue";
+import type DataSource from "@/dataSources/DataSource";
 
 declare interface DatasourceMap {
     [key: string]: IDatasource;
 }
-
+declare interface DatasourceRegistryMap {
+    [key: string]: typeof DataSource;
+}
+const dataSourceRegistry: DatasourceRegistryMap = {};
 const availableDatasources: Ref<DatasourceMap> = ref({});
 
 export function useDatasourceManager() {
@@ -29,24 +30,19 @@ export function useDatasourceManager() {
     const initDatasource = (type: string, url: string, caption: string) => {
         const id = v4();
 
-        console.log("Datasource should be inited");
-        if (type === "REST") {
-            const datasource = new RESTDatasource(id, url, caption);
-
+        try {
+            const classinst = dataSourceRegistry[type];
+            const datasource = new classinst(
+                id,
+                url,
+                caption,
+                EventBus,
+            ) as IDatasource;
             availableDatasources.value[id] = datasource;
+            return id;
+        } catch (e) {
+            throw new TypeError(`${type} not found in registry`);
         }
-        if (type === "XMLA") {
-            const datasource = new XmlaDatasource(id, undefined, caption);
-
-            availableDatasources.value[id] = datasource;
-        }
-        if (type === "MQTT") {
-            const datasource = new MQTTDatasource(id, url, caption, EventBus);
-
-            availableDatasources.value[id] = datasource;
-        }
-
-        return id;
     };
 
     const getDatasource = (key) => {
@@ -57,22 +53,20 @@ export function useDatasourceManager() {
         return availableDatasources;
     };
 
-    const updateDatasource = (key, type, caption, url) => {
-        console.log("Datasource should be updated", key, type, caption, url);
-        if (type === "REST") {
-            const datasource = new RESTDatasource(key, url, caption);
-
+    const updateDatasource = (key, type, caption, url, cube, catalog) => {
+        try {
+            const classinst = dataSourceRegistry[type];
+            const datasource = new classinst(
+                key,
+                url,
+                caption,
+                EventBus,
+                cube,
+                catalog,
+            ) as IDatasource;
             availableDatasources.value[key] = datasource;
-        }
-        if (type === "XMLA") {
-            const datasource = new XmlaDatasource(key, url, caption);
-
-            availableDatasources.value[key] = datasource;
-        }
-        if (type === "MQTT") {
-            const datasource = new MQTTDatasource(key, url, caption, EventBus);
-
-            availableDatasources.value[key] = datasource;
+        } catch (e) {
+            throw new TypeError(`${type} not found in registry`);
         }
     };
 
@@ -92,33 +86,38 @@ export function useDatasourceManager() {
 
         Object.keys(parsed).forEach((key) => {
             const ds = parsed[key];
-
-            if (ds.type === "REST") {
-                const datasource = new RESTDatasource(
-                    ds.id,
+            try {
+                const classinst = dataSourceRegistry[ds.type];
+                const datasource = new classinst(
+                    key,
                     ds.url,
                     ds.caption,
-                );
-
-                availableDatasources.value[key] = datasource;
-            }
-            if (ds.type === "XMLA") {
-                const datasource = new XmlaDatasource(
-                    ds.id,
-                    ds.url,
-                    ds.caption,
+                    EventBus,
                     ds.cube,
                     ds.catalog,
-                );
-
+                ) as IDatasource;
                 availableDatasources.value[key] = datasource;
+            } catch (e) {
+                throw new TypeError(`${ds.type} not found in registry`);
             }
         });
+    };
 
-        console.log(availableDatasources.value);
+    const registerDataSource = (class_ref: typeof DataSource) => {
+        dataSourceRegistry[class_ref.TYPE] = class_ref;
+    };
+    const unRegisterDataSource = (class_ref: typeof DataSource) => {
+        delete dataSourceRegistry[class_ref.TYPE];
+        //dataSourceRegistry.push(class_ref);
+    };
+    const getDataSourceRegistry = () => {
+        return dataSourceRegistry;
     };
 
     return {
+        getDataSourceRegistry,
+        registerDataSource,
+        unRegisterDataSource,
         initDatasource,
         getDatasource,
         getDatasourceList,

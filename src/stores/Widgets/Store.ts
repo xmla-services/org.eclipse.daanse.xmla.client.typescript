@@ -11,12 +11,12 @@
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
+import BaseStore from "@/stores/Widgets/BaseStore";
 import { useErrorHandler } from "@/composables/dashboard/errorToast";
-export class Store implements IStore {
-    public caption: string;
-    public id: string;
+
+export class Store extends BaseStore implements IStore {
+    public static readonly TYPE = "REST";
     private datasourceManager: any;
-    private eventBus: EventBus;
 
     public datasourceId: string | null = null;
 
@@ -27,14 +27,12 @@ export class Store implements IStore {
     private runtimeParams: IStoreParams = {};
     private errorToast: any;
 
-    public type = "REST" as const;
+    public type = Store.TYPE;
     public listAvailableDatasourceTypes = ["REST"];
 
     constructor(id: string, caption: string, eventBus: EventBus) {
-        this.id = id;
-        this.caption = caption;
+        super(id, caption, eventBus);
         this.datasourceManager = useDatasourceManager();
-        this.eventBus = eventBus;
         this.requestTemplate = "/products/{pageNum}";
 
         this.calculateParams();

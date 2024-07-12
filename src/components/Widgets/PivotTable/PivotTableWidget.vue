@@ -25,6 +25,7 @@ import {
     parseMdxRequest,
     parseRequestToTable,
 } from "@/utils/MdxRequests/MdxRequestHelper";
+import { debounce } from "lodash";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
@@ -53,7 +54,7 @@ const settings = ref({
     sync: false,
 });
 
-const updateFn = async (store) => {
+const updateFn = debounce(async (store) => {
     inited.value = true;
 
     flushExpands(colsHierarchies.value, rowsHierarchies.value);
@@ -69,6 +70,7 @@ const updateFn = async (store) => {
         columnsDrilldownMembers: columnsDrilldownMembers.value,
     };
 
+    console.log(store);
     const mdxResponce = await store.getData(requestParams);
     console.log(mdxResponce);
 
@@ -87,7 +89,7 @@ const updateFn = async (store) => {
     cells.value = cellsResponce;
     propertiesRows.value = propertiesRowsResponce;
     propertiesCols.value = propertiesColsResponce;
-};
+}, 100);
 
 const watcher = (oldVal, newVal) => {
     if (settings.value.sync) {
@@ -157,6 +159,8 @@ const setSetting = (setting: string, data: any) => {
     } else if (setting === "columnsDrilldownMembers") {
         columnsDrilldownMembers.value = data;
     }
+
+    console.log(setting, data);
 };
 
 watch(
@@ -192,6 +196,15 @@ const getState = () => {
     };
 };
 
+const getQueryState = () => {
+    return {
+        rowsHierarchies: rowsHierarchies.value,
+        colsHierarchies: colsHierarchies.value,
+        measures: measures.value,
+        filters: filters.value,
+    };
+};
+
 defineExpose({
     settingsComponent,
     store,
@@ -199,6 +212,7 @@ defineExpose({
     settings,
     getState,
     setStore,
+    getQueryState,
 });
 
 // Pivot table logic

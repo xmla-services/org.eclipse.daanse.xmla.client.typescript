@@ -17,7 +17,7 @@ declare interface IDatasource extends ISerializable {
     id: string;
     caption: string;
     url: string;
-    type: "REST" | "XMLA" | "CSV" | "JSON" | "MQTT";
+    type: "REST" | "XMLA" | "CSV" | "JSON" | "MQTT" | string;
     getData: (params: any) => Promise<any>;
 }
 
@@ -25,7 +25,7 @@ interface IStore {
     id: string;
     caption: string;
     events: IStoreEvents[];
-    type: "REST" | "XMLA";
+    type: string;
     datasourceId: string | null;
     setDatasource: (datasourceId: string) => void;
     getDatasource: () => IDatasource;

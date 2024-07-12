@@ -94,6 +94,8 @@ onMounted(async () => {
         })
         .filter((e) => e.type === "XMLA") as XMLADatasource[];
 
+    console.log(item.value);
+    console.log(storeManager);
     const store = storeManager.getStore(item.value.id);
     const ds = store.getDatasource();
 
@@ -143,25 +145,34 @@ const createDatasource = () => {
 };
 
 const setCaption = () => {
-    const ds = dsManager.getDatasource(selectedDatasource.value.id);
+    const ds = dsManager.getDatasource(
+        selectedDatasource.value.id,
+    ) as XMLADatasource;
+
     if (ds) {
         dsManager.updateDatasource(
             ds.id,
             ds.type,
             selectedDatasource.value.caption,
             ds.url,
+            ds.cube,
+            ds.catalog,
         );
     }
 };
 
 const setUrl = () => {
-    const ds = dsManager.getDatasource(selectedDatasource.value.id);
+    const ds = dsManager.getDatasource(
+        selectedDatasource.value.id,
+    ) as XMLADatasource;
     if (ds) {
         dsManager.updateDatasource(
             ds.id,
             ds.type,
             ds.caption,
             selectedDatasource.value.url,
+            ds.cube,
+            ds.catalog,
         );
 
         getCatalogs();

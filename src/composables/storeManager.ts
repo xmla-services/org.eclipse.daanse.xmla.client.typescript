@@ -10,14 +10,33 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { reactive, ref } from "vue";
-import { v4 } from "uuid";
+import { reactive, type Ref, ref, watch } from "vue";
+import queryString from "query-string";
+import { optionalArrayToArray } from "@/utils/helpers";
+import { v4, v5 } from "uuid";
 import { Store } from "@/stores/Widgets/Store";
-import { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import type BaseStore from "@/stores/Widgets/BaseStore";
+type BaseStoreClass = typeof BaseStore;
+interface BaseStoreClassDerived extends BaseStoreClass {}
 
-const availableStores = ref(new Map<string, IStore>());
+//interface RouterDerived extends BaseStore1{}
 
-export function useStoreManager() {
+const availableStores = ref(new Map<string, IStore & ISerializable>());
+const storeRegistry: Map<string, BaseStoreClassDerived> = new Map();
+
+export interface StoreManagerI {
+    initStore: {
+        (caption: string, eventBus: any, type: string): string;
+    };
+    getStore: { (key: string): IStore };
+    getState: { (): any };
+    getStoreList: { (): Ref<Map<string, IStore & ISerializable>> };
+    loadState: Function;
+    registerStoreType: { (classOfStoreType: typeof BaseStore): void };
+    getStoreTypes: { (): string[] };
+}
+
+export function useStoreManager(): StoreManagerI {
     const initStore = (
         caption = "NO CAPTION",
         eventBus,
@@ -26,19 +45,24 @@ export function useStoreManager() {
         console.log(eventBus);
         const id = v4();
 
-        if (type === "REST") {
-            const store = reactive(new Store(id, caption, eventBus));
+        const storeClass = storeRegistry.get(type);
+        console.log(storeClass, "storeClass");
+        if (storeClass) {
+            const store = reactive(
+                new (storeClass as any)(id, caption, eventBus) as IStore &
+                    ISerializable,
+            );
             availableStores.value.set(id, store);
-        } else {
-            const store = reactive(new XMLAStore(id, caption, eventBus));
-            availableStores.value.set(id, store);
-        }
-        console.log("inited");
 
-        return id;
+            console.log("inited");
+
+            return id;
+        }
+        return "";
     };
 
     const getStore = (key): IStore => {
+        console.log(availableStores.value, "availableStores");
         const store = availableStores.value.get(key);
         if (store) {
             return store;
@@ -65,29 +89,33 @@ export function useStoreManager() {
         availableStores.value.clear();
         const parsed = JSON.parse(state);
 
-        console.log(parsed);
-
         Object.keys(parsed).forEach((key) => {
-            if (parsed[key].type === "REST") {
-                const store = new Store(key, parsed[key].caption, eventBus);
+            const storeClass = storeRegistry.get(parsed[key].type);
+            if (storeClass) {
+                const store: IStore & ISerializable = reactive(
+                    new (storeClass as any)(key, parsed[key].caption, eventBus),
+                );
                 store.loadState(parsed[key]);
                 availableStores.value.set(key, store);
-            } else if (parsed[key].type === "XMLA") {
-                const store = new XMLAStore(key, parsed[key].caption, eventBus);
-                store.loadState(parsed[key]);
-                console.log(store);
-                availableStores.value.set(key, store);
-
             }
         });
-        // console.log(availableStores.value);
+        console.log(availableStores.value);
+    };
+
+    const registerStoreType = (classOfStoreType: typeof BaseStore) => {
+        storeRegistry.set(classOfStoreType.TYPE, classOfStoreType);
+    };
+    const getStoreTypes = () => {
+        return Array.from(storeRegistry.keys());
     };
 
     return {
+        registerStoreType,
         initStore,
         getStore,
         getStoreList,
         getState,
         loadState,
+        getStoreTypes,
     };
 }

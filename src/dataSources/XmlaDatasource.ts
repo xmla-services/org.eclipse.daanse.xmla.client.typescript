@@ -11,12 +11,17 @@
 import { XMLAApi } from "@/api/xml";
 import { createClientAsync } from "@/XMLAClient";
 import { MetadataStore } from "./Storage/MetadataStore";
+import DataSource from "@/dataSources/DataSource";
 
-export default class XMLADatasource implements IDatasource, ISerializable {
+export default class XMLADatasource
+    extends DataSource
+    implements IDatasource, ISerializable
+{
+    public static readonly TYPE = "XMLA";
     public url: string;
     public id: string;
     public caption: string;
-    public type = "XMLA" as const;
+    public type = XMLADatasource.TYPE;
 
     public cube: MDSchemaCube | null = null;
     public catalog: DBSchemaCatalog | null = null;
@@ -29,10 +34,11 @@ export default class XMLADatasource implements IDatasource, ISerializable {
         id: string,
         url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
         caption: string,
-        cube?: MDSchemaCube,
-        catalog?: DBSchemaCatalog,
+        eventBus: EventBus,
+        cube: MDSchemaCube | null = null,
+        catalog: DBSchemaCatalog | null = null,
     ) {
-        console.log(url);
+        super();
         this.id = id;
         this.url = url;
         this.caption = caption;

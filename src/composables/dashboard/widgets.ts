@@ -68,10 +68,13 @@ export function useWidgets() {
 
                 await nextTick();
                 const ref = instance?.refs[`${key}_component`][0];
-                const store = storeManager.getStore(parsed[key].store);
-                ref.setStore(store);
+                if (parsed[key].store) {
+                    const store = storeManager.getStore(parsed[key].store);
+                    ref.setStore(store);
+                }
 
                 Object.keys(parsed[key]).forEach((setting) => {
+                    console.log(parsed[key][setting], setting);
                     ref.setSetting(setting, parsed[key][setting]);
                 });
             });
