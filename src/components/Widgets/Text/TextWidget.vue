@@ -28,6 +28,7 @@ export interface ITextSettingsProps {
   textDecoration?: string;
   horizontalAlign?: string;
   verticalAlign?: string;
+  test:string[]
 }
 
 import { computed } from "vue";
@@ -48,6 +49,7 @@ const props = withDefaults(defineProps<ITextSettingsProps>(), {
   textDecoration: "None",
   horizontalAlign: "Left",
   verticalAlign: "Top",
+    test:[] as any
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
@@ -99,6 +101,7 @@ const parsedText = computed(() => {
     }"
   >
     <div class="component">
+        {{settings}}
       {{ parsedText }}
     </div>
   </div>
