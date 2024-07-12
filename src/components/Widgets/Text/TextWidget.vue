@@ -40,14 +40,14 @@ import type { Store } from "@/stores/Widgets/Store";
 const settingsComponent = TextWidgetSettings;
 
 const props = withDefaults(defineProps<ITextSettingsProps>(), {
-    text: "",
-    fontSize: 12,
-    fontColor: "#000",
-    fontWeight: "normal",
-    fontStyle: "normal",
-    textDecoration: "None",
-    horizontalAlign: "Left",
-    verticalAlign: "Top",
+  text: "",
+  fontSize: 12,
+  fontColor: "#000",
+  fontWeight: "normal",
+  fontStyle: "normal",
+  textDecoration: "None",
+  horizontalAlign: "Left",
+  verticalAlign: "Top",
 });
 
 const { settings, setSetting } = useSettings<typeof props>(props);
