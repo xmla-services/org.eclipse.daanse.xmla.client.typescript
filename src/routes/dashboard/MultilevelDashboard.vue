@@ -81,8 +81,13 @@ Contributors: Smart City Jena
                         </template>
                         <va-dropdown-content
                             class="dropdown-list"
-                            style="background-color: var(--app-dropdown-background); color: var(--app-font-color);"
-                            >
+                            style="
+                                background-color: var(
+                                    --app-dropdown-background
+                                );
+                                color: var(--app-font-color);
+                            "
+                        >
                             <div
                                 class="dropdown-item"
                                 v-for="widget of widgetOptions"
@@ -196,7 +201,14 @@ Contributors: Smart City Jena
 <script setup lang="ts">
 import NavBarDash from "./NavBarDash.vue";
 import DashboardControls from "@/components/Dashboard/DashboardControls.vue";
-import { getCurrentInstance, markRaw, ref, type Ref, provide } from "vue";
+import {
+    getCurrentInstance,
+    markRaw,
+    ref,
+    type Ref,
+    provide,
+    inject,
+} from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import Moveable from "vue3-moveable";
 import SidebarSettings from "@/components/Sidebar/SidebarSettings.vue";
@@ -229,6 +241,8 @@ const layoutSettingsButtons = ref<
 >([]);
 
 provide("backgroundColor", backgroundColor);
+const EventBus = inject("customEventBus") as any;
+
 const instance = getCurrentInstance();
 
 const openErrorModal = (data) => {
@@ -298,12 +312,15 @@ const {
     moveToTop,
 } = useMoveableLayout();
 
-const { getSerializedState, loadState } = useSerialization({
-    layout: layoutStorage,
-    stores: storeManager,
-    datasources: dsManager,
-    widgets: widgetsStorage,
-});
+const { getSerializedState, loadState } = useSerialization(
+    {
+        layout: layoutStorage,
+        stores: storeManager,
+        datasources: dsManager,
+        widgets: widgetsStorage,
+    },
+    EventBus,
+);
 
 const toggleEdit = () => {
     editEnabled.value = !editEnabled.value;
@@ -317,55 +334,10 @@ const saveLayout = () => {
 };
 
 const loadLayout = async () => {
-    // loadState("{}");
     const retrievedObject =
         localStorage.getItem("testLayout") || JSON.stringify(layout);
-    // layout.value = JSON.parse(retrievedObject);
 
     loadState(JSON.parse(retrievedObject));
-
-    // const dsState = localStorage.getItem("dsState") || "{}";
-    // const storeState = localStorage.getItem("storeState") || "{}";
-    // const widgetsState = localStorage.getItem("widgetsState") || "{}";
-
-    // const widgetsStateObj = JSON.parse(widgetsState);
-
-    // let wrappers = [];
-
-    // Object.keys(widgetsStateObj).forEach((key) => {
-    //   const e = widgetsStateObj[key];
-    //   if (key.includes("_wrapper")) {
-    //     wrappers.push(key);
-    //   } else {
-    //     customWidgets.value.push({
-    //       id: key,
-    //       component: e.component,
-    //       caption: e.caption,
-    //       // state: e.state,
-    //     });
-    //   }
-    // });
-    // console.log(customWidgets.value);
-
-    // dsManager.loadState(JSON.parse(dsState));
-    // storeManager.loadState(JSON.parse(storeState), EventBus);
-
-    // await nextTick();
-
-    // customWidgets.value.forEach((e) => {
-    //   const refArr = refs.ctx.$refs[`${e.id}_component`];
-    //   const ref = Array.isArray(refArr) ? refArr[0] : refArr;
-
-    //   ref.setState(widgetsStateObj[e.id].state);
-    //   console.log(ref);
-    // });
-    // wrappers.forEach((key) => {
-    //   const e = widgetsStateObj[key];
-    //   const refArr = refs.ctx.$refs[key];
-    //   const ref = Array.isArray(refArr) ? refArr[0] : refArr;
-    //   console.log(e);
-    //   ref.setState(e.stateWp);
-    // });
 };
 
 const openStoreList = () => {
@@ -843,7 +815,9 @@ body.no-overflow[data-v-059e0ffc] {
     &:hover {
         color: var(--app-dropdown-button-color--hover) !important;
 
-        --va-background-color: var(--app-dropdown-button-background-color--hover) !important;
+        --va-background-color: var(
+            --app-dropdown-button-background-color--hover
+        ) !important;
         --va-background-color-opacity: 1 !important;
         --va-background-mask-opacity: 0 !important;
     }
@@ -854,7 +828,9 @@ body.no-overflow[data-v-059e0ffc] {
         border-radius: 8px;
         color: var(--app-dropdown-button-color--active) !important;
 
-        --va-background-color: var(--app-dropdown-button-background-color--active) !important;
+        --va-background-color: var(
+            --app-dropdown-button-background-color--active
+        ) !important;
         --va-background-color-opacity: 1 !important;
         --va-background-mask-opacity: 0 !important;
     }

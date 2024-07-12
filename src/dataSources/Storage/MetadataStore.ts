@@ -62,6 +62,10 @@ export class MetadataStore {
         });
     }
 
+    public async waitForInit() {
+        return this.initPromise;
+    }
+
     public async loadMetadata(catalogName: string, cubeName: string) {
         if (!this.api) throw new Error("API is not initialized");
 

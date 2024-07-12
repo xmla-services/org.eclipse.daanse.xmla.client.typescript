@@ -18,6 +18,16 @@ interface EventBus {
     off: (string, Function) => void;
 }
 
+interface XMLARequestParams {
+    rows: any[];
+    columns: any[];
+    measures: any[];
+    rowsExpandedMembers: any[];
+    rowsDrilldownMembers: any[];
+    columnsExpandedMembers: any[];
+    columnsDrilldownMembers: any[];
+}
+
 export class XMLAStore implements IStore {
     public caption = "";
     public id = "";
@@ -28,6 +38,14 @@ export class XMLAStore implements IStore {
     public events = [] as Array<{ name: string; action: string }>;
     public initedEvents = [] as Array<{ name: string; cb: Function }>;
     public type = "XMLA" as const;
+
+    updateParam() {
+        throw new Error("Method not implemented.");
+    }
+
+    updateEvents() {
+        throw new Error("Method not implemented.");
+    }
 
     private errorToast: any;
 
@@ -44,35 +62,24 @@ export class XMLAStore implements IStore {
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
 
-    async getData({
-        rows,
-        columns,
-        measures,
-        rowsExpandedMembers,
-        rowsDrilldownMembers,
-        columnsExpandedMembers,
-        columnsDrilldownMembers,
-    }) {
+    async getData(params: XMLARequestParams) {
         try {
             const datasource = this.datasourceManager.getDatasource(
                 this.datasourceId,
             );
 
-            // this.flushDrilldowns(columns, rows);
-            // this.flushExpands(columns, rows);
-
-            const measuresMapped = measures.map((e) => {
+            const measuresMapped = params.measures.map((e) => {
                 return { originalItem: e };
             });
 
             const body = await this.getMDXRequest(
-                rows,
-                columns,
+                params.rows,
+                params.columns,
                 measuresMapped,
-                rowsExpandedMembers,
-                rowsDrilldownMembers,
-                columnsExpandedMembers,
-                columnsDrilldownMembers,
+                params.rowsExpandedMembers,
+                params.rowsDrilldownMembers,
+                params.columnsExpandedMembers,
+                params.columnsDrilldownMembers,
                 {
                     showEmpty: true,
                     alignContent: "right",
@@ -86,7 +93,7 @@ export class XMLAStore implements IStore {
         }
     }
 
-    setOptions({ caption }) {
+    setOptions({ caption }: IStoreParams) {
         this.caption = caption || this.caption;
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
@@ -125,6 +132,7 @@ export class XMLAStore implements IStore {
         const datasource = this.datasourceManager.getDatasource(
             this.datasourceId,
         );
+        await datasource.ready();
 
         const mdxRequest = await getMdxRequest(
             datasource.cube.CUBE_NAME,

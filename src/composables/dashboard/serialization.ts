@@ -12,7 +12,10 @@ declare interface SerializableParts {
     [key: string]: ISerializable;
 }
 
-export function useSerialization(serializableParts: SerializableParts) {
+export function useSerialization(
+    serializableParts: SerializableParts,
+    EventBus: EventBus,
+) {
     const getSerializedState = () => {
         const state = {};
 
@@ -30,7 +33,10 @@ export function useSerialization(serializableParts: SerializableParts) {
         Object.keys(serializableParts).forEach((key) => {
             if (!parsed[key]) return;
             console.log(serializableParts[key], key);
-            serializableParts[key].loadState(JSON.stringify(parsed[key]));
+            serializableParts[key].loadState(
+                JSON.stringify(parsed[key]),
+                EventBus,
+            );
         });
     };
 

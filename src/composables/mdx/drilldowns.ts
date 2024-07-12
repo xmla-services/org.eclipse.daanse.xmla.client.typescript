@@ -1,19 +1,10 @@
-import { ref, watch } from "vue";
-import { useStoreManager } from "@/composables/storeManager";
-import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import { ref } from "vue";
 
-export function useDrilldowns(storeId) {
+export function useDrilldowns(store) {
     const rowsExpandedMembers = ref([] as any[]);
     const rowsDrilldownMembers = ref([] as any[]);
     const columnsExpandedMembers = ref([] as any[]);
     const columnsDrilldownMembers = ref([] as any[]);
-
-    let store = null as unknown as XMLAStore;
-    const storeManager = useStoreManager();
-
-    watch(storeId, () => {
-        store = storeManager.getStore(storeId.value) as unknown as XMLAStore;
-    });
 
     const drilldownOnRows = (member) => {
         const expandedIndex = rowsExpandedMembers.value.findIndex(

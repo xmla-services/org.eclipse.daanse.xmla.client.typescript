@@ -10,44 +10,100 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 import PivotTableWidgetSettings from "./PivotTableWidgetSettings.vue";
-import { useStoreManager } from "@/composables/storeManager";
-import { optionalArrayToArray } from "@/utils/helpers";
 import { provide, ref, watch, type Ref, computed, inject } from "vue";
 import { TinyEmitter } from "tiny-emitter";
 import { useElementSize } from "@vueuse/core";
-import { debounce } from "lodash";
 import PivotTable from "./PivotTable";
 import RowsArea from "../../PivotTable/Areas/RowsArea.vue";
 import ColumnsArea from "../../PivotTable/Areas/ColumnsArea.vue";
 import CellsArea from "../../PivotTable/Areas/CellsArea.vue";
 import PivotTableSettingsButton from "@/components/PivotTable/PivotTableSettingsButton.vue";
-import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
+import { type XMLAStore } from "@/stores/Widgets/XMLAStore";
+import { useStore } from "@/composables/widgets/store";
 import { useDrilldowns } from "@/composables/mdx/drilldowns";
-import { r } from "node_modules/@storybook/vue3/dist/render-18d12fa7";
+import {
+    parseMdxRequest,
+    parseRequestToTable,
+} from "@/utils/MdxRequests/MdxRequestHelper";
 
 const DEFAULT_COLUMN_WIDTH = 150;
 const DEFAULT_ROW_HEIGHT = 30;
 const DEFAULT_ROW_HEIGHT_CSS = `${DEFAULT_ROW_HEIGHT}px`;
 const inited = ref(false);
-const storeManager = useStoreManager();
 const settingsComponent = PivotTableWidgetSettings;
 
 const EventBus = inject("customEventBus") as any;
-
-const storeId = ref("");
 
 const rowsHierarchies = ref([] as MDSchemaHierarchy[]);
 const colsHierarchies = ref([] as MDSchemaHierarchy[]);
 const measures = ref([] as MDSchemaMeasure[]);
 const filters = ref([] as MDSchemaHierarchy[]);
+const pivotTableControl = new PivotTable();
+
+const rows = ref([] as any[]);
+const columns = ref([] as any[]);
+const cells = ref([] as any[]);
+const propertiesRows = ref([] as any[]);
+const propertiesCols = ref([] as any[]);
+
+const colStyles = ref([...pivotTableControl.styles.columns]);
+const rowsStyles = ref([...pivotTableControl.styles.rows]);
 
 const settings = ref({
     sync: false,
 });
 
-watch(storeId, () => {
-    getData();
-});
+const updateFn = async (store) => {
+    inited.value = true;
+
+    flushExpands(colsHierarchies.value, rowsHierarchies.value);
+    flushDrilldowns(colsHierarchies.value, rowsHierarchies.value);
+
+    const requestParams = {
+        rows: rowsHierarchies.value,
+        columns: colsHierarchies.value,
+        measures: measures.value,
+        rowsExpandedMembers: rowsExpandedMembers.value,
+        rowsDrilldownMembers: rowsDrilldownMembers.value,
+        columnsExpandedMembers: columnsExpandedMembers.value,
+        columnsDrilldownMembers: columnsDrilldownMembers.value,
+    };
+
+    const mdxResponce = await store.getData(requestParams);
+    console.log(mdxResponce);
+
+    const {
+        cells: cellsResponce,
+        rows: rowsResponce,
+        columns: columnsResponce,
+        propertiesRows: propertiesRowsResponce,
+        propertiesCols: propertiesColsResponce,
+    } = parseMdxRequest(mdxResponce);
+
+    parseRequestToTable(mdxResponce, 0);
+
+    rows.value = rowsResponce;
+    columns.value = columnsResponce;
+    cells.value = cellsResponce;
+    propertiesRows.value = propertiesRowsResponce;
+    propertiesCols.value = propertiesColsResponce;
+};
+
+const watcher = (oldVal, newVal) => {
+    if (settings.value.sync) {
+        EventBus.off(`DRILLDOWN:${oldVal.id}`, handleDrilldownEvent);
+        EventBus.off(`DRILLUP:${oldVal.id}`, handleDrillupEvent);
+        EventBus.off(`EXPAND:${oldVal.id}`, handleExpandEvent);
+        EventBus.off(`COLLAPSE:${oldVal.id}`, handleCollapseEvent);
+
+        EventBus.on(`DRILLDOWN:${newVal.id}`, handleDrilldownEvent);
+        EventBus.on(`DRILLUP:${newVal.id}`, handleDrillupEvent);
+        EventBus.on(`EXPAND:${newVal.id}`, handleExpandEvent);
+        EventBus.on(`COLLAPSE:${newVal.id}`, handleCollapseEvent);
+    }
+};
+
+const { store, setStore } = useStore<XMLAStore>(updateFn, watcher);
 
 const {
     rowsExpandedMembers,
@@ -68,7 +124,40 @@ const {
     handleDrillupEvent,
     handleExpandEvent,
     handleCollapseEvent,
-} = useDrilldowns(storeId);
+} = useDrilldowns(store);
+
+const setSetting = (setting: string, data: any) => {
+    if (setting === "rowsHierarchies") {
+        rowsHierarchies.value = data;
+    } else if (setting === "colsHierarchies") {
+        colsHierarchies.value = data;
+    } else if (setting === "measures") {
+        measures.value = data;
+    } else if (setting === "filters") {
+        filters.value = data;
+    } else if (setting === "sync") {
+        if (data) {
+            EventBus.on(`DRILLDOWN:${store.value.id}`, handleDrilldownEvent);
+            EventBus.on(`DRILLUP:${store.value.id}`, handleDrillupEvent);
+            EventBus.on(`EXPAND:${store.value.id}`, handleExpandEvent);
+            EventBus.on(`COLLAPSE:${store.value.id}`, handleCollapseEvent);
+        } else {
+            EventBus.off(`DRILLDOWN:${store.value.id}`, handleDrilldownEvent);
+            EventBus.off(`DRILLUP:${store.value.id}`, handleDrillupEvent);
+            EventBus.off(`EXPAND:${store.value.id}`, handleExpandEvent);
+            EventBus.off(`COLLAPSE:${store.value.id}`, handleCollapseEvent);
+        }
+        settings.value.sync = data;
+    } else if (setting === "rowsExpandedMembers") {
+        rowsExpandedMembers.value = data;
+    } else if (setting === "rowsDrilldownMembers") {
+        rowsDrilldownMembers.value = data;
+    } else if (setting === "columnsExpandedMembers") {
+        columnsExpandedMembers.value = data;
+    } else if (setting === "columnsDrilldownMembers") {
+        columnsDrilldownMembers.value = data;
+    }
+};
 
 watch(
     () => [
@@ -82,84 +171,37 @@ watch(
         columnsDrilldownMembers.value,
     ],
     () => {
-        getData();
+        updateFn(store.value);
     },
     { deep: true },
 );
 
-const setSetting = (setting: string, data: any) => {
-    if (setting === "rows") {
-        rowsHierarchies.value = data;
-    } else if (setting === "cols") {
-        colsHierarchies.value = data;
-    } else if (setting === "measures") {
-        measures.value = data;
-    } else if (setting === "filters") {
-        filters.value = data;
-    } else if (setting === "sync") {
-        console.log(data);
-
-        if (data) {
-            EventBus.on(`DRILLDOWN:${storeId.value}`, handleDrilldownEvent);
-            EventBus.on(`DRILLUP:${storeId.value}`, handleDrillupEvent);
-            EventBus.on(`EXPAND:${storeId.value}`, handleExpandEvent);
-            EventBus.on(`COLLAPSE:${storeId.value}`, handleCollapseEvent);
-        } else {
-            EventBus.off(`DRILLDOWN:${storeId.value}`, handleDrilldownEvent);
-            EventBus.off(`DRILLUP:${storeId.value}`, handleDrillupEvent);
-            EventBus.off(`EXPAND:${storeId.value}`, handleExpandEvent);
-            EventBus.off(`COLLAPSE:${storeId.value}`, handleCollapseEvent);
-        }
-        settings.value.sync = data;
-    }
+const getState = () => {
+    return {
+        rowsHierarchies: rowsHierarchies.value,
+        colsHierarchies: colsHierarchies.value,
+        measures: measures.value,
+        filters: filters.value,
+        rowsStyles: rowsStyles.value,
+        colStyles: colStyles.value,
+        rowsExpandedMembers: rowsExpandedMembers.value,
+        columnsExpandedMembers: columnsExpandedMembers.value,
+        rowsDrilldownMembers: rowsDrilldownMembers.value,
+        columnsDrilldownMembers: columnsDrilldownMembers.value,
+        sync: settings.value.sync,
+    };
 };
-
-const updateFn = async () => {
-    await getPivotTableData();
-    inited.value = true;
-};
-
-const getData = async () => {
-    updateFn();
-};
-
-watch(storeId, (newVal, oldVal) => {
-    EventBus.off(`UPDATE:${oldVal}`, updateFn);
-    EventBus.on(`UPDATE:${storeId.value}`, updateFn);
-
-    if (settings.value.sync) {
-        EventBus.off(`DRILLDOWN:${oldVal}`, handleDrilldownEvent);
-        EventBus.off(`DRILLUP:${oldVal}`, handleDrillupEvent);
-        EventBus.off(`EXPAND:${oldVal}`, handleExpandEvent);
-        EventBus.off(`COLLAPSE:${oldVal}`, handleCollapseEvent);
-
-        EventBus.on(`DRILLDOWN:${storeId.value}`, handleDrilldownEvent);
-        EventBus.on(`DRILLUP:${storeId.value}`, handleDrillupEvent);
-        EventBus.on(`EXPAND:${storeId.value}`, handleExpandEvent);
-        EventBus.on(`COLLAPSE:${storeId.value}`, handleCollapseEvent);
-    }
-
-    getData();
-});
 
 defineExpose({
     settingsComponent,
-    storeId,
+    store,
     setSetting,
     settings,
+    getState,
+    setStore,
 });
 
 // Pivot table logic
-const pivotTableControl = new PivotTable();
-
-const rows = ref([] as any[]);
-const columns = ref([] as any[]);
-const cells = ref([] as any[]);
-const propertiesRows = ref([] as any[]);
-const propertiesCols = ref([] as any[]);
-
-const colStyles = ref([...pivotTableControl.styles.columns]);
-const rowsStyles = ref([...pivotTableControl.styles.rows]);
 
 const rowsContainer = ref(null) as Ref<any>;
 const { width: rowsWidth } = useElementSize(rowsContainer);
@@ -202,7 +244,7 @@ provide("drilldown", (value, area) => {
     }
 
     if (settings.value.sync) {
-        EventBus.emit(`DRILLDOWN:${storeId.value}`, { value, area });
+        EventBus.emit(`DRILLDOWN:${store.value.id}`, { value, area });
     }
 });
 provide("drillup", (value, area) => {
@@ -213,7 +255,7 @@ provide("drillup", (value, area) => {
     }
 
     if (settings.value.sync) {
-        EventBus.emit(`DRILLUP:${storeId.value}`, { value, area });
+        EventBus.emit(`DRILLUP:${store.value.id}`, { value, area });
     }
 });
 provide("expand", (value, area) => {
@@ -224,7 +266,7 @@ provide("expand", (value, area) => {
     }
 
     if (settings.value.sync) {
-        EventBus.emit(`EXPAND:${storeId.value}`, { value, area });
+        EventBus.emit(`EXPAND:${store.value.id}`, { value, area });
     }
 });
 provide("collapse", (value, area) => {
@@ -235,26 +277,9 @@ provide("collapse", (value, area) => {
     }
 
     if (settings.value.sync) {
-        EventBus.emit(`COLLAPSE:${storeId.value}`, { value, area });
+        EventBus.emit(`COLLAPSE:${store.value.id}`, { value, area });
     }
 });
-
-const parseCells = (cells: any[], columns: any[], rows: any[]) => {
-    if (!cells.length) return [];
-    if (!rows.length) {
-        return [cells];
-    } else if (!columns.length) {
-        return cells.map((e) => [e]);
-    }
-    const cp = [...cells] as any[];
-
-    const columnsArray = [] as any[];
-    const count = columns.length;
-    while (cp.length) {
-        columnsArray.push(cp.splice(0, count));
-    }
-    return columnsArray;
-};
 
 const totalContentSize = computed(() => {
     const columnsDesc = [
@@ -310,224 +335,6 @@ const totalContentSize = computed(() => {
         yAxis: yAxisDesc,
     };
 });
-
-const getPivotTableData = debounce(async () => {
-    const store = storeManager.getStore(storeId.value) as unknown as XMLAStore;
-
-    flushExpands(colsHierarchies.value, rowsHierarchies.value);
-    flushDrilldowns(colsHierarchies.value, rowsHierarchies.value);
-
-    const mdxResponce = await store.getData({
-        rows: rowsHierarchies.value,
-        columns: colsHierarchies.value,
-        measures: measures.value,
-        rowsExpandedMembers: rowsExpandedMembers.value,
-        rowsDrilldownMembers: rowsDrilldownMembers.value,
-        columnsExpandedMembers: columnsExpandedMembers.value,
-        columnsDrilldownMembers: columnsDrilldownMembers.value,
-    });
-
-    console.log("MDX", mdxResponce);
-    // const properties = (await metadataStorage.getMetadataStorage()).properties;
-    // console.log(properties);
-    const axis0 = optionalArrayToArray(
-        optionalArrayToArray(
-            mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis,
-        )?.[0]?.Tuples?.Tuple,
-    );
-    let axis1 = [] as any[];
-    if (
-        mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.__attrs
-            .name === "Axis1"
-    ) {
-        axis1 = optionalArrayToArray(
-            mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-                ?.Tuple,
-        );
-    }
-    // else if (
-    //   mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.__attrs
-    //     .name === "SlicerAxis"
-    // ) {
-    //   axis1 = optionalArrayToArray(
-    //     mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-    //       ?.Tuple,
-    //   );
-    // }
-
-    console.log(axis1);
-
-    // console.log(queryDesignerState.measures);
-    // if (queryDesignerState.measures.length === 1) {
-    //   const mes = queryDesignerState.measures[0];
-    //   if (axis1.length === 0) {
-    //     axis1.push({
-    //       Member: {
-    //         Caption: mes.originalItem.MEASURE_CAPTION,
-    //         UName: mes.originalItem.MEASURE_UNIQUE_NAME,
-    //       },
-    //     });
-    //   }
-    //   if (axis0.length === 0) {
-    //     axis0.push({
-    //       Member: {
-    //         Caption: mes.originalItem.MEASURE_CAPTION,
-    //         UName: mes.originalItem.MEASURE_UNIQUE_NAME,
-    //       },
-    //     });
-    //   }
-    // }
-
-    const cellsArray = optionalArrayToArray(
-        mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
-    );
-
-    // if (!queryDesignerState.columns.length) {
-    //   columns.value = axis1.map((e: { Member: any }) => {
-    //     return optionalArrayToArray(e.Member);
-    //   });
-    //   rows.value = axis0.map((e: { Member: any }) => {
-    //     return optionalArrayToArray(e.Member);
-    //   });
-    //   cells.value = parseCells(cellsArray, columns.value, rows.value);
-    // } else {
-    columns.value = axis0.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-    });
-    rows.value = axis1.map((e: { Member: any }) => {
-        return optionalArrayToArray(e.Member);
-    });
-    cells.value = parseCells(cellsArray, columns.value, rows.value);
-    // }
-
-    const columnProperties = [] as any[];
-    const rowsProperties = [] as any[];
-
-    // columns.value[0]?.forEach((col) => {
-    //   const colPropsShown = pivotTableStore.state.membersWithProps.includes(
-    //     col.HIERARCHY_UNIQUE_NAME,
-    //   );
-    //   if (!colPropsShown) return;
-
-    //   const colProps: any[] = properties.filter(
-    //     (prop) => prop.HIERARCHY_UNIQUE_NAME === col.HIERARCHY_UNIQUE_NAME,
-    //   );
-    //   columnProperties.push(...colProps);
-    // });
-
-    // rows.value[0]?.forEach((row) => {
-    //   const rowPropsShown = pivotTableStore.state.membersWithProps.includes(
-    //     row.HIERARCHY_UNIQUE_NAME,
-    //   );
-    //   if (!rowPropsShown) return;
-
-    //   const rowProps: any[] = properties.filter(
-    //     (prop) => prop.HIERARCHY_UNIQUE_NAME === row.HIERARCHY_UNIQUE_NAME,
-    //   );
-    //   rowsProperties.push(...rowProps);
-    // });
-
-    const colPropertiesDescription = optionalArrayToArray(
-        optionalArrayToArray(
-            mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-                .AxisInfo,
-        )[0]?.HierarchyInfo,
-    );
-
-    let rowPropertiesDescription = [] as any[];
-    // if (!queryDesignerState.columns.length) {
-    //   rowPropertiesDescription = optionalArrayToArray(
-    //     optionalArrayToArray(
-    //       mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-    //         .AxisInfo,
-    //     )[0]?.HierarchyInfo,
-    //   );
-    // } else {
-    rowPropertiesDescription = optionalArrayToArray(
-        optionalArrayToArray(
-            mdxResponce.Body.ExecuteResponse.return.root.OlapInfo?.AxesInfo
-                .AxisInfo,
-        )[1]?.HierarchyInfo,
-    );
-    // }
-
-    propertiesRows.value = columnProperties.map((e) => ({
-        ...e,
-        isProperty: true,
-    }));
-
-    propertiesCols.value = rowsProperties.map((e) => ({
-        ...e,
-        isProperty: true,
-    }));
-
-    const propertiesCells = propertiesRows.value.map((prop) => {
-        return columns.value.map((col) => {
-            const propsOrigin = col.find(
-                (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME,
-            );
-
-            const colHierarchyIndex = col.indexOf(propsOrigin);
-            const desc = colPropertiesDescription[colHierarchyIndex];
-            const propName = `${prop.HIERARCHY_UNIQUE_NAME}.[${prop.PROPERTY_NAME}]`;
-            const objPropName = Object.entries(desc).find((keyValue: any) => {
-                if (Array.isArray(keyValue[1])) {
-                    const att = keyValue[1].find((entry) => {
-                        return entry.__attrs?.name === propName;
-                    });
-                    if (att) return att;
-                } else {
-                    return keyValue[1]?.__attrs?.name === propName;
-                }
-            });
-
-            if (objPropName) {
-                return {
-                    Value: propsOrigin[objPropName[0]],
-                };
-            }
-
-            return {
-                Value: "",
-            };
-        });
-    });
-
-    cells.value = [...propertiesCells, ...cells.value];
-
-    cells.value = cells.value.map((row, i) => {
-        const propertiesCells = propertiesCols.value.map((prop) => {
-            const rowDesc = rows.value[i];
-
-            const propsOrigin = rowDesc.find(
-                (e) => e.HIERARCHY_UNIQUE_NAME === prop.HIERARCHY_UNIQUE_NAME,
-            );
-
-            const rowHierarchyIndex = rowDesc.indexOf(propsOrigin);
-            const desc = rowPropertiesDescription[rowHierarchyIndex];
-            const propName = `${prop.HIERARCHY_UNIQUE_NAME}.[${prop.PROPERTY_NAME}]`;
-            const objPropName = Object.entries(desc)?.find((keyValue: any) => {
-                return keyValue[1]?.__attrs?.name === propName;
-            });
-
-            if (objPropName) {
-                return {
-                    Value: propsOrigin[objPropName[0]],
-                };
-            }
-
-            return {
-                Value: "",
-            };
-        });
-
-        return [...propertiesCells, ...row];
-    });
-
-    console.log("rows", rows.value);
-    console.log("columnd", columns.value);
-    console.log("cells", cells.value);
-}, 100);
 </script>
 
 <template>

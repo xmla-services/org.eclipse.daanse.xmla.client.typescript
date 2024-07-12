@@ -107,6 +107,8 @@ export function useDatasourceManager() {
                     ds.id,
                     ds.url,
                     ds.caption,
+                    ds.cube,
+                    ds.catalog,
                 );
 
                 availableDatasources.value[key] = datasource;

@@ -23,11 +23,14 @@ export default class XMLADatasource implements IDatasource, ISerializable {
     private metadataStore: MetadataStore | null = null;
 
     private api: Promise<XMLAApi>;
+    private metadataStorePromise: Promise<MetadataStore | null>;
 
     constructor(
         id: string,
         url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
         caption: string,
+        cube?: MDSchemaCube,
+        catalog?: DBSchemaCatalog,
     ) {
         console.log(url);
         this.id = id;
@@ -47,6 +50,23 @@ export default class XMLADatasource implements IDatasource, ISerializable {
 
             initApi();
         });
+
+        this.metadataStorePromise = new Promise((res) => {
+            const initMetadataStore = async () => {
+                if (cube && catalog) {
+                    this.cube = cube;
+                    this.catalog = catalog;
+
+                    await this.openCube(catalog.CATALOG_NAME, cube.CUBE_NAME);
+
+                    res(this.metadataStore);
+                } else {
+                    res(null);
+                }
+            };
+
+            initMetadataStore();
+        });
     }
 
     async getData(mdx: string) {
@@ -57,6 +77,11 @@ export default class XMLADatasource implements IDatasource, ISerializable {
 
     getApi(): Promise<XMLAApi> {
         return this.api;
+    }
+
+    async ready() {
+        await this.api;
+        await this.metadataStorePromise;
     }
 
     async openCube(catalogName: string, cube: string) {

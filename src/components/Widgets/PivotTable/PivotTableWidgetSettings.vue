@@ -43,7 +43,7 @@ const getStores = () => {
 
 const updateStore = async (storeIdSelected) => {
     storeId.value = storeIdSelected;
-    props.component.storeId = storeId.value;
+    props.component.setStore(storeManager.getStore(storeIdSelected));
 };
 
 const openMeasureSelectionModal = async (store) => {
@@ -177,7 +177,7 @@ watch(
 watch(
     selectedRows,
     () => {
-        props.component.setSetting("rows", selectedRows.value);
+        props.component.setSetting("rowsHierarchies", selectedRows.value);
         console.log("watcher", selectedRows.value);
     },
     { deep: true },
@@ -186,7 +186,7 @@ watch(
 watch(
     selectedCols,
     () => {
-        props.component.setSetting("cols", selectedCols.value);
+        props.component.setSetting("colsHierarchies", selectedCols.value);
     },
     { deep: true },
 );

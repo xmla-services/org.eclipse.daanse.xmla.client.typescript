@@ -12,16 +12,18 @@ Contributors: Smart City Jena
 import { ref, type Ref, inject } from "vue";
 import type { TinyEmitter } from "tiny-emitter";
 
-export function useStore<Type extends IStore>() {
+export function useStore<Type extends IStore>(updateFn?, watcher?) {
     const data = ref({});
     const store = ref(null) as unknown as Ref<Type>;
 
     const EventBus = inject("customEventBus") as TinyEmitter;
 
-    const updateFn = async () => {
-        if (!store) return;
-        data.value = await store.value.getData();
-    };
+    if (!updateFn) {
+        updateFn = async () => {
+            if (!store) return;
+            data.value = await store.value.getData();
+        };
+    }
 
     const setStore = (newStore: Type) => {
         if (store.value) {
@@ -29,11 +31,14 @@ export function useStore<Type extends IStore>() {
         }
 
         if (!newStore) return;
+
+        if (watcher) {
+            watcher(store.value, newStore);
+        }
         store.value = newStore;
 
         EventBus.on(`UPDATE:${newStore.id}`, updateFn);
-        updateFn();
-        console.log(store);
+        updateFn(store.value);
     };
 
     return {
