@@ -9,7 +9,7 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import {ref, type Ref, onMounted, computed, unref, toRaw} from "vue";
+import {ref, type Ref, onMounted, computed, unref, toRaw, watch} from "vue";
 import { useStoreManager } from "@/composables/storeManager";
 import type { Store } from "@/stores/Widgets/Store";
 
@@ -19,15 +19,17 @@ import type {IDataSetSelector} from "@/plugins/charts/widgets/api/DataSetSelecto
 import type {Composer, CSVSelector, Selector} from "@/plugins/charts/widgets/api/ChartdataComposer";
 import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 import CSVComposerV from "@/plugins/charts/widgets/parts/CSVComposerV.vue";
-
-
+import {clone} from "lodash"
+import { deepUnref } from 'vue-deepunref';
 
 export interface AxisSettings{
 
     type:string,
-    align:string,
-    color:string,
-    padding:number
+    backgroundColor:string,
+    stacked:boolean,
+    weight:number,
+    reverse:boolean,
+    display:boolean
 
 }
 export interface ITChartSettings {
@@ -36,8 +38,12 @@ export interface ITChartSettings {
     composer:Composer<Selector>[];
     axes:{
         x:AxisSettings,
-        y:AxisSettings[]
-    }
+        y:AxisSettings,
+        y2:AxisSettings,
+        [key: string]:AxisSettings
+    },
+    axisAssignment:
+        {[key: string]:Composer<any>};
 }
 
 
@@ -80,17 +86,20 @@ const addComposer=(store:IStore)=>{
     csvComposer.setStore(storeData.store);
     csvComposer.setData(storeData.data);
 
-    csvComposer.setSelectorX({
+    /*csvComposer.setSelectorX({
         header:'item'
     }as CSVSelector)
     csvComposer.addSelectorY({
         header:'markets'
-    }as CSVSelector)
+    }as CSVSelector)*/
     /*csvComposer.addSelectorY({
         header:'bj'
     }as CSVSelector)*/
 
-   const val = [...toRaw(unref(component.settings.composer))];
+    /*const val = [ ...deepUnref(component.settings.composer as any)];
+    val.push(csvComposer)
+    component.setSetting('composer',val);*/
+    const val = [...toRaw(unref(component.settings.composer))];
     val.push(csvComposer)
     //console.log(component.settings.composer.push(2));
     component.setSetting('composer',val);
@@ -99,54 +108,174 @@ const addComposer=(store:IStore)=>{
     list.push(csvComposer)*/
 
 }
+const axis_names =computed(()=>{
+    //console.log(component.value.settings);
+    return Object.keys(component.settings.axes).filter((name)=>(name!=='y' && name!='x'))
 
+})
+function addAxis(){
+    let name='y2';
+
+    //component.setSetting('axes.'+name,{
+    //let axis =  clone(toRaw(unref(component.settings.axes)));
+
+    axes.value[name] ={
+        type:'category',
+        backgroundColor:'#fff',
+        stacked:false,
+        weight:2,
+        reverse:false,
+        display:true
+    };
+    //component.setSetting('axes',axis);
+}
 onMounted(() => {
 
 });
+
+const axes = ref({});
+watch(component.settings.axes,(axis)=>{
+    axes.value = { ...deepUnref(axis as any)};
+},{immediate:true,deep:true})
+watch(axes,(axis)=>{
+   component.setSetting('axes',axis);
+},{deep:true})
 </script>
 
 <template>
   <va-collapse v-model="opened.mapSection" header="Axes">
     <div class="settings-container">
 
-      <div class="settings-block">
+     <div class="settings-block" v-if="component">
 
-          x-Axis:
+                   x-Axis:
 
+
+                   <VaSelect
+                       v-if="axes.x"
+                       v-model="axes.x.type"
+
+                       :options="['time','linear','logarithmic','category']"
+                       placeholder="Select an header for X"
+                   />
+                   <VaColorInput
+                       v-model="axes.x.backgroundColor"
+
+                       label="color">
+                   </VaColorInput>
+                   <br>
+                   <VaSwitch
+                       label="stacked"
+                       v-model="axes.x.stacked"
+
+                   /><br>
+                   <VaSwitch
+                       label="reverse"
+                       v-model="axes.x.reverse"
+
+                   /><br>
+                   <VaSwitch
+                       label="display"
+                       left-label
+                       v-model="axes.x.display"
+
+
+                   /><br>
+                   <VaInput
+                       v-model="axes.x.weight"
+
+                       label="weight">
+                   </VaInput>
+
+
+         <br>
+                   <h2>y-Axis:</h2>
+                   <br>
+
+                   <VaSelect
+
+                       v-model="axes.y.type"
+                       :options="['time','linear','logarithmic','category']"
+                       placeholder="Select an header for X"
+                   />
+                   <VaColorInput
+                       v-model="axes.y.backgroundColor"
+
+                       label="color">
+                   </VaColorInput>
+                   <br>
+                   <VaSwitch
+                       label="stacked"
+                       v-model="axes.y.stacked"
+
+                   /><br>
+                   <VaSwitch
+                       label="reverse"
+                       v-model="axes.y.reverse"
+
+                   /><br>
+                   <VaSwitch
+                       label="display"
+                       left-label
+                       v-model="axes.y.display"
+
+
+                   /><br>
+                   <VaInput
+                       v-model="axes.y.weight"
+
+                       label="weight">
+                   </VaInput>
+         <br>
+
+      <div v-for="additionanl_name in axis_names" :key="additionanl_name">
+         <h2>{{additionanl_name}}</h2>
           <VaSelect
-              v-if="component.settings.axes.x"
-              :model-value="component.settings.axes.x.type"
-              @update:modelValue="ev=>component.setSetting('axes.x.type',ev)"
+
+              v-model="axes[additionanl_name].type"
+
               :options="['time','linear','logarithmic','category']"
               placeholder="Select an header for X"
           />
-          <VaSelect
-              v-model="align"
-              :options="['start','center','end']"
-              placeholder="Select an header for X"
-          />
           <VaColorInput
-              v-model="color">
+              v-model="axes[additionanl_name].backgroundColor"
+
+              label="color">
           </VaColorInput>
+          <br>
+          <VaSwitch
+              label="stacked"
+              v-model="axes[additionanl_name].stacked"
+
+          /><br>
+          <VaSwitch
+              label="reverse"
+              v-model="axes[additionanl_name].reverse"
+
+          /><br>
+          <VaSwitch
+              label="display"
+              left-label
+              v-model="axes[additionanl_name].display"
+
+
+          /><br>
           <VaInput
-              v-model="padding"
-          label="padding">
+              v-model="axes[additionanl_name].weight"
 
+              label="weight">
           </VaInput>
-
-
-          y-Axis:
-
-
+    </div>
       </div>
+        <VaButton @click="addAxis()"> Add+  </VaButton>
     </div>
   </va-collapse>
-  <va-collapse v-model="opened.RenderSection" header="Data">
+  <va-collapse v-model="opened.RenderSection" header="Data" v-if="component">
     <div class="settings-container">
 
       <div class="settings-block">
 
-          <!--<DataSetPropertyList  :model-value="component.settings.dataSets" @update:model-value="value => component.setSetting('dataSets',value)"></DataSetPropertyList>-->
+          <!--<DataSetPropertyList  v-model="component.settings.dataSets" @updatev-model="value => component.setSetting('dataSets',value)"></DataSetPropertyList>-->
           <VaDropdown>
               <template #anchor>
                   <VaButton> Add+  </VaButton>
@@ -163,9 +292,8 @@ onMounted(() => {
           </VaDropdown>
 
       </div>
-
-      <div class="composers" v-for="(composer, i) in component.settings.composer">
-            <CSVComposerV :modelValue="component.settings.composer[i]"></CSVComposerV>
+     <div class="composers" v-for="(composer, i) in component.settings.composer">
+            <CSVComposerV :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></CSVComposerV>
       </div>
 
     </div>

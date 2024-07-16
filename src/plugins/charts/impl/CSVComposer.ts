@@ -48,13 +48,15 @@ export class CSVComposer implements Composer<CSVSelector>{
             try{
                 return {//@ts-ignore
                     data: this.data.map(e=>e[this.selectorX!.header]),
-                    title: this.selectorX?.header
+                    title: this.selectorX?.header,
+                    from:this.selectorX
                 } as AxisData
             }
             catch (e) {
                 return  {
                     data: [],
-                    title: this.selectorX?.header
+                    title: this.selectorX?.header,
+                    from:undefined,
                 } as AxisData
             }
 
@@ -71,7 +73,8 @@ export class CSVComposer implements Composer<CSVSelector>{
 
                     ret.push({//@ts-ignore
                         data: this.data.map(e => {return {x:e[this.selectorX!.header],y:e[sel.header]}}),
-                        title: sel.header
+                        title: sel.header,
+                        from:sel
                     } as AxisData);
                 }
                 catch(e){
