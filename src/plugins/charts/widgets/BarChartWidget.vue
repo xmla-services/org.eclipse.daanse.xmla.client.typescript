@@ -33,22 +33,44 @@ const settingsComponent = BarChartWidgetSettings;
 const props = withDefaults(defineProps<ITChartSettings>(), {
     dataSets: [] as IDataSetSelector[],
     composer: [],
-    axes:{
+    axes: {
         x:{
             type:'category',
-            align:'center',
-            color:'#000',
-            padding:5
+            backgroundColor:'#fff',
+            stacked:false,
+            weight:2,
+            reverse:false,
+            display:true
         },
-        y:[{
-            type:'linear',
-            align:'center',
-            color:'#000',
-            padding:5
-        }]
-    }
+        y:{
+            type: 'category',
+            backgroundColor: '#fff',
+            stacked: false,
+            weight: 2,
+            reverse: false,
+            display: true
+        }
+    },
+    axisAssignment:{},
+    test:{}
 } as any);
 const {settings,setSetting}=useSettings<ITChartSettings>(props);
+/*setSetting('axes.x',{
+    type:'category',
+    backgroundColor:'#fff',
+    stacked:false,
+    weight:2,
+    reverse:false,
+    display:true
+})
+setSetting('axes.y',{
+    type: 'category',
+    backgroundColor: '#fff',
+    stacked: false,
+    weight: 2,
+    reverse: false,
+    display: true
+})*/
 const eventbus = inject("customEventBus") as TinyEmitter;
 const { getState } = useSerialization(settings);
 const {getDataFilterer} = useDataSetSelector();
@@ -85,13 +107,25 @@ watch(()=>settings.value.composer,()=>{
 
 const chartData= computed(()=>{
 
+    const getAssignment=(from:Selector)=>{
+            const keys = Object.keys(settings.value.axisAssignment);
+       for (let akey of keys) {
+           let item = settings.value.axisAssignment[akey].find(e=>(e.id==from.id));
+           if(item) {
+               return akey;
+               break
+           }
+       }
+       return 'y';
+    }
     if(settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
             datasets: chartDataComposer.getDataForAxesY().value.map(e=>{
                 return {
                     label:e.title,
-                    data:e.data
+                    data:e.data,
+                    yAxisID:getAssignment(e.from!)
                 }
             })
         }
@@ -104,13 +138,12 @@ const chartData= computed(()=>{
 
 });
    const chartOptions= computed(()=>{
-       console.log(settings.value.axes.x)
+
        return{
            responsive: true,
            backgroundColor:'#00000000',
-           scales:{
-               x:settings.value.axes.x
-           }
+           scales:settings.value.axes
+
        }
 
 });
@@ -125,7 +158,7 @@ const chartData= computed(()=>{
 </script>
 
 <template>
- <!-- <div class="chart_container">-->
+ <div class="chart_container" v-if="settings">
 
       <Bar
           id="my-chart-id"
@@ -133,7 +166,7 @@ const chartData= computed(()=>{
           :data="chartData"
       />
 
-  <!--</div>-->
+</div>
 </template>
 
 <style scoped>
