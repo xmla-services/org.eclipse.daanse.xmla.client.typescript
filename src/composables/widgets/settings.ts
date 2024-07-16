@@ -19,17 +19,20 @@ export function useSettings<Type>(props: any) {
 
     const setSetting = (key, value) => {
         const keyArr = key.split(".");
-        let iter = settings.value;
+        let iter:any = settings.value;
 
 
-        keyArr.forEach((key,index,array) => {
+        keyArr.forEach((akey,index,array) => {
 
-            if (typeof iter[key] === "object" && index!=(array.length-1)) {
+            if (!(akey in iter)){
+                iter[akey]={}
+            }
+            if (typeof iter[akey] === "object" && index!=(array.length-1)) {
 
-                iter = iter[key];
+                iter = iter[akey];
 
             } else {
-                iter[key] = value;
+                iter[akey] = value;
             }
         });
 

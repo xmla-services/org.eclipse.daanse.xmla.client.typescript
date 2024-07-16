@@ -171,7 +171,7 @@ app.use(
             VaCounter,
             VaSwitch,
             VaDateInput,
-            VaTimeInput,
+            VaTimeInput
         },
         config: {
             colors: {

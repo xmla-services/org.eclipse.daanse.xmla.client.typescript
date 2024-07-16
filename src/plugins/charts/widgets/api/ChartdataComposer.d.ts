@@ -24,10 +24,11 @@ export interface Composer<Selector>{
 }
 export interface AxisData{
     title:string,
-    data:Array<string|number>
+    data:Array<string|number>,
+    from?:Selector
 }
 export abstract interface Selector{
-
+    id:string
 }
 
 export interface CSVSelector extends Selector{
