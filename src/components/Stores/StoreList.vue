@@ -47,6 +47,9 @@ onMounted(() => {
         <template v-else-if="item.type === 'XMLA'">
           <XMLAStoreListItem :item="item"></XMLAStoreListItem>
         </template>
+          <template v-else-if="item.type === 'CSV'">
+              <CSVStoreListItem :item="item"></CSVStoreListItem>
+          </template>
       </div>
     </template>
     <template v-else>{{ t('SidebarStoreList.noAvailableStores') }}</template>
