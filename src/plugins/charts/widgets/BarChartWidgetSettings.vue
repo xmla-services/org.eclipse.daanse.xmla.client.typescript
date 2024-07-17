@@ -148,7 +148,7 @@ watch(axes,(axis)=>{
 
      <div class="settings-block" v-if="component">
 
-                   x-Axis:
+         <h2>x-Axis: </h2>
 
 
                    <VaSelect

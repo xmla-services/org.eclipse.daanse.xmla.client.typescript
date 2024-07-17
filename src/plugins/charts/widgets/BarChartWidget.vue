@@ -25,7 +25,8 @@ import {useDataSetSelector} from "@/plugins/charts/composables/dataSetSelector";
 import type {Composer, Selector} from "@/plugins/charts/widgets/api/ChartdataComposer";
 import type {TinyEmitter} from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
-
+import 'chartjs-adapter-date-fns';
+import {de} from 'date-fns/locale';
 
 
 const settingsComponent = BarChartWidgetSettings;
@@ -158,7 +159,7 @@ const chartData= computed(()=>{
 </script>
 
 <template>
- <div class="chart_container" v-if="settings">
+ <!--<div class="chart_container" v-if="settings">-->
 
       <Bar
           id="my-chart-id"
@@ -166,7 +167,7 @@ const chartData= computed(()=>{
           :data="chartData"
       />
 
-</div>
+<!--</div>-->
 </template>
 
 <style scoped>
