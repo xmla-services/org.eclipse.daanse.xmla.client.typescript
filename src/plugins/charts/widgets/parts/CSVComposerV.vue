@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type {IChartComponent} from "chart.js/dist/core/core.typedRegistry";
 import {deepUnref} from "vue-deepunref";
 import {isEqual} from "lodash";
+import type CSVStore from "@/plugins/charts/stores/CSVStore";
 
     const model = defineModel<Composer<Selector>>()
     model.value?.getSelectorX()
@@ -35,7 +36,10 @@ import {isEqual} from "lodash";
     const ySel = computed(()=>{
        return (model.value?.getSelectorsY() as CSVSelector[]).map(e=>e.header);
     })
-    const headers = [{header:'id',id:uuidv4()},{header:'item',id:uuidv4()},{header:"model",id:uuidv4()},{header:"bj",id:uuidv4()},{header:"gender",id:uuidv4()},{header:"markets",id:uuidv4()}];
+    const headers = computed(()=>{
+        return (model.value?.getStore() as CSVStore).getHeader().map(head=>{return {header:head,id:uuidv4()}})
+    })
+//[{header:'id',id:uuidv4()},{header:'item',id:uuidv4()},{header:"model",id:uuidv4()},{header:"bj",id:uuidv4()},{header:"gender",id:uuidv4()},{header:"markets",id:uuidv4()}];
     const updateSelectorY = (val,head,name)=>{
         if(!Object.keys(axisAssignment.value).includes(name)){
             axisAssignment.value[name]=[];
