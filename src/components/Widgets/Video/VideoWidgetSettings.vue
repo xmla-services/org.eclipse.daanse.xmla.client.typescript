@@ -86,7 +86,7 @@ onMounted(() => {
                 :model-value="component.settings.videoSettings.fit"
                 :label="t('VideoWidget.videoFit')"
                 :options="['Cover', 'Contain', 'Stretch', 'Fill', 'None']"
-                @update:model-value="component.setSetting('fit', $event)"
+                @update:model-value="component.setSetting('videoSettings.fit', $event)"
             >
             </va-select>
         </div>

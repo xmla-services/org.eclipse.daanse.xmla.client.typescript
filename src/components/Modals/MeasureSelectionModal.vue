@@ -11,78 +11,77 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
-import { ref, type Ref } from "vue";
+import { ref } from "vue";
 
-// const url = "https://ssemenkoff.dev/emondrian/xmla";
 export default {
-  name: "MeasureSelectionModal",
-  setup() {
-    const measuresList = ref([] as MDSchemaMeasure[]);
-    const selectedMeasures = ref([] as MDSchemaMeasure[]);
+    name: "MeasureSelectionModal",
+    setup() {
+        const measuresList = ref([] as MDSchemaMeasure[]);
+        const selectedMeasures = ref([] as MDSchemaMeasure[]);
 
-    const opened = async (data) => {
-      const store = data.store as XMLAStore;
-      const preselectedMeasures = data.selectedMeasures as MDSchemaMeasure[];
-      const dataSource = store.getDatasource();
+        const opened = async (data) => {
+            const store = data.store as XMLAStore;
+            const preselectedMeasures =
+                data.selectedMeasures as MDSchemaMeasure[];
+            const dataSource = store.getDatasource();
 
-      const measures = await dataSource.getMeasures();
-      selectedMeasures.value = preselectedMeasures;
+            const measures = await dataSource.getMeasures();
+            selectedMeasures.value = preselectedMeasures;
 
-      console.log(measures);
-      measuresList.value = measures;
-    };
+            measuresList.value = measures;
+        };
 
-    const { isOpened, run, close } = usePromisifiedModal(() => {
-      selectedMeasures.value = [];
-      measuresList.value = [];
-    }, opened);
+        const { isOpened, run, close } = usePromisifiedModal(() => {
+            selectedMeasures.value = [];
+            measuresList.value = [];
+        }, opened);
 
-    return {
-      isOpened,
-      run,
-      close,
-      measuresList,
-      selectedMeasures,
-    };
-  },
-  methods: {
-    ok() {
-      this.close(this.selectedMeasures);
+        return {
+            isOpened,
+            run,
+            close,
+            measuresList,
+            selectedMeasures,
+        };
     },
-  },
+    methods: {
+        ok() {
+            this.close(this.selectedMeasures);
+        },
+    },
 };
 </script>
 <template>
-  <va-modal
-    :modelValue="isOpened"
-    no-padding
-    class="modal"
-    @ok="ok"
-    zIndex="10000000"
-  >
-    <template #content="{ ok }">
-      <va-card-title class="va-h6">Select measures</va-card-title>
-      <va-card-content>
-        <VaOptionList
-          v-model="selectedMeasures"
-          :options="measuresList"
-          track-by="MEASURE_UNIQUE_NAME"
-          text-by="MEASURE_NAME"
-          class="measure_list"
-        />
-      </va-card-content>
-      <va-card-actions>
-        <va-button @click="ok">Ok!</va-button>
-      </va-card-actions>
-    </template>
-  </va-modal>
+    <va-modal
+        :modelValue="isOpened"
+        no-padding
+        class="modal"
+        @ok="ok"
+        zIndex="10000000"
+    >
+        <template #content="{ ok }">
+            <va-card-title class="va-h6">Select measures</va-card-title>
+            <va-card-content>
+                <VaOptionList
+                    v-model="selectedMeasures"
+                    :options="measuresList"
+                    track-by="MEASURE_UNIQUE_NAME"
+                    text-by="MEASURE_NAME"
+                    class="measure_list"
+                />
+            </va-card-content>
+            <va-card-actions>
+                <va-button @click="ok">Ok!</va-button>
+            </va-card-actions>
+        </template>
+    </va-modal>
 </template>
 <style lang="scss" scoped>
 .measure_list {
-  padding: 20px 0;
+    padding: 20px 0;
 }
 
 .modal {
-  z-index: 1000000;
+    z-index: 1000000;
 }
 </style>

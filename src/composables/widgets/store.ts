@@ -12,33 +12,38 @@ Contributors: Smart City Jena
 import { ref, type Ref, inject } from "vue";
 import type { TinyEmitter } from "tiny-emitter";
 
-export function useStore<Type extends IStore>() {
-  const data = ref({});
-  const store = ref(null) as unknown as Ref<Type>;
+export function useStore<Type extends IStore>(updateFn?, watcher?) {
+    const data = ref({});
+    const store = ref(null) as unknown as Ref<Type>;
 
-  const EventBus = inject("customEventBus") as TinyEmitter;
+    const EventBus = inject("customEventBus") as TinyEmitter;
 
-  const updateFn = async () => {
-    if (!store) return;
-    data.value = await store.value.getData();
-  };
-
-  const setStore = (newStore: Type) => {
-    if (store.value) {
-      EventBus.off(`UPDATE:${store.value.id}`, updateFn);
+    if (!updateFn) {
+        updateFn = async () => {
+            if (!store) return;
+            data.value = await store.value.getData();
+        };
     }
 
-    if (!newStore) return;
-    store.value = newStore;
+    const setStore = (newStore: Type) => {
+        if (store.value) {
+            EventBus.off(`UPDATE:${store.value.id}`, updateFn);
+        }
 
-    EventBus.on(`UPDATE:${newStore.id}`, updateFn);
-    updateFn();
-    console.log(store);
-  };
+        if (!newStore) return;
 
-  return {
-    data,
-    store,
-    setStore,
-  };
+        if (watcher) {
+            watcher(store.value, newStore);
+        }
+        store.value = newStore;
+
+        EventBus.on(`UPDATE:${newStore.id}`, updateFn);
+        updateFn(store.value);
+    };
+
+    return {
+        data,
+        store,
+        setStore,
+    };
 }

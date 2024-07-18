@@ -13,93 +13,116 @@
 import { type Ref, ref, watch } from "vue";
 import { v4 } from "uuid";
 import { inject } from "vue";
-import DataSource from "@/dataSources/DataSource";
+import type DataSource from "@/dataSources/DataSource";
 
 declare interface DatasourceMap {
-  [key: string]: IDatasource;
+    [key: string]: IDatasource;
 }
 declare interface DatasourceRegistryMap {
-  [key: string]:  typeof DataSource;
+    [key: string]: typeof DataSource;
 }
-const dataSourceRegistry:DatasourceRegistryMap = {};
+const dataSourceRegistry: DatasourceRegistryMap = {};
 const availableDatasources: Ref<DatasourceMap> = ref({});
 
 export function useDatasourceManager() {
-  const EventBus = inject("customEventBus") as any;
+    const EventBus = inject("customEventBus") as any;
 
-  const initDatasource = (type: string, url: string, caption: string) => {
-    const id = v4();
+    const initDatasource = (type: string, url: string, caption: string) => {
+        const id = v4();
 
-    try{
-      const classinst = dataSourceRegistry[type];
-      const datasource = (new classinst(id, url, caption, EventBus) as IDatasource);
-      availableDatasources.value[id] = datasource;
-      return id;
-    }catch (e){
-        throw new TypeError(`${type} not found in registry`)
-    }
+        try {
+            const classinst = dataSourceRegistry[type];
+            const datasource = new classinst(
+                id,
+                url,
+                caption,
+                EventBus,
+            ) as IDatasource;
+            availableDatasources.value[id] = datasource;
+            return id;
+        } catch (e) {
+            throw new TypeError(`${type} not found in registry`);
+        }
+    };
 
-  };
+    const getDatasource = (key) => {
+        return availableDatasources.value[key];
+    };
 
-  const getDatasource = (key) => {
-    return availableDatasources.value[key];
-  };
+    const getDatasourceList = () => {
+        return availableDatasources;
+    };
 
-  const getDatasourceList = () => {
-    return availableDatasources;
-  };
+    const updateDatasource = (key, type, caption, url, cube, catalog) => {
+        try {
+            const classinst = dataSourceRegistry[type];
+            const datasource = new classinst(
+                key,
+                url,
+                caption,
+                EventBus,
+                cube,
+                catalog,
+            ) as IDatasource;
+            availableDatasources.value[key] = datasource;
+        } catch (e) {
+            throw new TypeError(`${type} not found in registry`);
+        }
+    };
 
-  const updateDatasource = (key, type, caption, url) => {
-    try{
-      const classinst = dataSourceRegistry[type];
-      const datasource = (new classinst(key, url, caption, EventBus) as IDatasource);
-      availableDatasources.value[key] = datasource;
-    }catch (e){
-      throw new TypeError(`${type} not found in registry`)
-    }
-  };
+    const getState = () => {
+        const state = {};
 
-  const getState = () => {
-    const state = {};
-    return JSON.stringify(state);
-  };
+        Object.keys(availableDatasources.value).forEach((key) => {
+            const ds = availableDatasources.value[key];
+            state[ds.id] = ds.getState();
+        });
 
-  const loadState = (state) => {
-    Object.keys(state).forEach((key) => {
-      const ds = state[key];
+        return JSON.stringify(state);
+    };
 
-      try{
-        const classinst = dataSourceRegistry[ds.type];
-        const datasource = (new classinst(key, ds.url, ds.caption, EventBus) as IDatasource);
-        availableDatasources.value[key] = datasource;
-      }catch (e){
-        throw new TypeError(`${ds.type} not found in registry`)
-      }
-    });
+    const loadState = (state) => {
+        const parsed = JSON.parse(state);
 
-    console.log(availableDatasources.value);
-  };
+        Object.keys(parsed).forEach((key) => {
+            const ds = parsed[key];
+            try {
+                const classinst = dataSourceRegistry[ds.type];
+                const datasource = new classinst(
+                    key,
+                    ds.url,
+                    ds.caption,
+                    EventBus,
+                    ds.cube,
+                    ds.catalog,
+                ) as IDatasource;
+                availableDatasources.value[key] = datasource;
+            } catch (e) {
+                throw new TypeError(`${ds.type} not found in registry`);
+            }
+        });
+    };
 
-  const registerDataSource = (class_ref:typeof DataSource)=>{
-    dataSourceRegistry[class_ref.TYPE]=class_ref;
-  }
-  const unRegisterDataSource = (class_ref: typeof DataSource)=>{
-    delete dataSourceRegistry[class_ref.TYPE];
-    //dataSourceRegistry.push(class_ref);
-  }
-  const getDataSourceRegistry = ()=>{
-    return dataSourceRegistry
-  }
+    const registerDataSource = (class_ref: typeof DataSource) => {
+        dataSourceRegistry[class_ref.TYPE] = class_ref;
+    };
+    const unRegisterDataSource = (class_ref: typeof DataSource) => {
+        delete dataSourceRegistry[class_ref.TYPE];
+        //dataSourceRegistry.push(class_ref);
+    };
+    const getDataSourceRegistry = () => {
+        return dataSourceRegistry;
+    };
 
-  return {
-    getDataSourceRegistry,
-    registerDataSource,
-    unRegisterDataSource,
-    initDatasource,
-    getDatasource,
-    getDatasourceList,
-    updateDatasource,
-    getState,
-    loadState,
-  };
+    return {
+        getDataSourceRegistry,
+        registerDataSource,
+        unRegisterDataSource,
+        initDatasource,
+        getDatasource,
+        getDatasourceList,
+        updateDatasource,
+        getState,
+        loadState,
+    };
 }

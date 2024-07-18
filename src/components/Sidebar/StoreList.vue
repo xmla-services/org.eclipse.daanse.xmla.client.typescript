@@ -12,7 +12,7 @@ Contributors: Smart City Jena
 import { useI18n } from "vue-i18n";
 import StoreList from "@/components/Stores/StoreList.vue";
 import { useStoreManager } from "@/composables/storeManager";
-import {computed, inject, ref} from "vue";
+import { computed, inject, ref } from "vue";
 
 const { t } = useI18n();
 const EventBus = inject("customEventBus") as any;
@@ -20,23 +20,14 @@ const storeManager = useStoreManager();
 
 const isDropdownVisible = ref(false);
 
-const storeList = computed(()=>{
-
-   console.log(storeManager.getStoreTypes());
-   return {}
-})
-
+const storeList = computed(() => {
+    console.log(storeManager.getStoreTypes());
+    return {};
+});
 
 const addSelectedStore = (store: string) => {
-
-        storeManager.initStore(
-            t("SidebarStoreList.newStore"),
-            EventBus,
-            store,
-        );
-
+    storeManager.initStore(t("SidebarStoreList.newStore"), EventBus, store);
 };
-
 </script>
 
 <template>

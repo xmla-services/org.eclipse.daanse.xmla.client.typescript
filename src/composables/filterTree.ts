@@ -11,8 +11,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ref, watch } from "vue";
-import { useAppSettingsStore } from "@/stores/AppSettings";
-import { optionalArrayToArray } from "@/utils/helpers";
+import type XMLADatasource from "@/dataSources/XmlaDatasource";
 
 interface SelectionItem {
     timestamp: number;
@@ -45,18 +44,18 @@ function getTreeItem(e: any, parentSelected: boolean = false) {
     return treeItem;
 }
 
-export async function useFilterTreeDataSource(element: {
-    item: MDSchemaHierarchy;
-    filters: any;
-}) {
-    const appSettings = useAppSettingsStore();
-    const api = appSettings.getApi();
-
+export async function useFilterTree(
+    element: {
+        item: MDSchemaHierarchy;
+        filters: any;
+    },
+    datasource: XMLADatasource,
+) {
     const tree = ref([] as any[]);
     const selectedItems = ref([] as SelectionItem[]);
     const deselectedItems = ref([] as SelectionItem[]);
     const selectAll = ref(false);
-    let treeSelection = [] as any[];
+    const treeSelection = [] as any[];
 
     if (element.filters) {
         selectAll.value = element.filters.selectAll ?? selectAll.value;
@@ -67,15 +66,14 @@ export async function useFilterTreeDataSource(element: {
     }
 
     try {
-        const mdx = `
-        SELECT {AddCalculatedMembers({${element.item.DIMENSION_UNIQUE_NAME}.${element.item.HIERARCHY_UNIQUE_NAME}.Levels(0).Members})} DIMENSION PROPERTIES MEMBER_TYPE ON 0, {} ON 1 FROM ${element.item.CUBE_NAME} CELL PROPERTIES CELL_ORDINAL
-      `;
+        console.log(datasource);
+        const childMembers = (
+            await datasource.getChildMembers(element.item)
+        ).map((e) => {
+            return getTreeItem(e);
+        });
 
-        const childMembersResponce = await api.getMDX(mdx);
-        const childMembers = optionalArrayToArray(
-            childMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0]
-                .Tuples.Tuple,
-        ).map((e) => getTreeItem(e));
+        console.log(childMembers);
 
         if (selectedItems.value.length || deselectedItems.value.length) {
             let joinedMembers = "";
@@ -92,30 +90,30 @@ export async function useFilterTreeDataSource(element: {
                     joinedMembers +
                     deselectedItems.value.map((e) => e.UName).join(", ");
             }
-            const selectedTreeMdx = `
-        WITH
-        Set FilteredMembers As {
-          ${joinedMembers}
-        }
-        Select { } on 1,
-        Hierarchize(Generate(FilteredMembers, Ascendants(${element.item.HIERARCHY_UNIQUE_NAME}.currentmember))) DIMENSION PROPERTIES PARENT_UNIQUE_NAME, MEMBER_TYPE ON 0 FROM ${element.item.CUBE_NAME}
-      `;
+            //         const selectedTreeMdx = `
+            //     WITH
+            //     Set FilteredMembers As {
+            //       ${joinedMembers}
+            //     }
+            //     Select { } on 1,
+            //     Hierarchize(Generate(FilteredMembers, Ascendants(${element.item.HIERARCHY_UNIQUE_NAME}.currentmember))) DIMENSION PROPERTIES PARENT_UNIQUE_NAME, MEMBER_TYPE ON 0 FROM ${element.item.CUBE_NAME}
+            //   `;
 
-            const treeSelectionResponce = await api.getMDX(selectedTreeMdx);
-            const treeSelectionTupples = optionalArrayToArray(
-                treeSelectionResponce.Body.ExecuteResponse.return.root.Axes
-                    .Axis[0].Tuples.Tuple,
-            );
-            treeSelection = treeSelectionTupples.map((e) => {
-                return {
-                    ...e.Member,
-                    UName: e.Member.UName,
-                    hasChild: treeSelectionTupples.some(
-                        (member) =>
-                            member.Member.PARENT_UNIQUE_NAME === e.Member.UName,
-                    ),
-                };
-            });
+            //         const treeSelectionResponce = await api.getMDX(selectedTreeMdx);
+            //         const treeSelectionTupples = optionalArrayToArray(
+            //             treeSelectionResponce.Body.ExecuteResponse.return.root.Axes
+            //                 .Axis[0].Tuples.Tuple,
+            //         );
+            //         treeSelection = treeSelectionTupples.map((e) => {
+            //             return {
+            //                 ...e.Member,
+            //                 UName: e.Member.UName,
+            //                 hasChild: treeSelectionTupples.some(
+            //                     (member) =>
+            //                         member.Member.PARENT_UNIQUE_NAME === e.Member.UName,
+            //                 ),
+            //             };
+            //         });
         }
 
         tree.value = childMembers;
@@ -129,13 +127,9 @@ export async function useFilterTreeDataSource(element: {
                 treeNode.loaded = true;
 
                 try {
-                    const mdx = `
-            SELECT {AddCalculatedMembers({${treeNode.UName}.Children})} DIMENSION PROPERTIES MEMBER_TYPE ON 0, {} ON 1 FROM ${element.item.CUBE_NAME} CELL PROPERTIES CELL_ORDINAL
-          `;
-                    const childrenResponce = await api.getMDX(mdx);
-                    const children = optionalArrayToArray(
-                        childrenResponce.Body.ExecuteResponse.return.root.Axes
-                            .Axis[0].Tuples.Tuple,
+                    console.log(treeNode);
+                    const children = (
+                        await datasource.getChildren(treeNode, element.item)
                     ).map((e) => getTreeItem(e, treeNode.selected));
 
                     treeNode.children = [...children];

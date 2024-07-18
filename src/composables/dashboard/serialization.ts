@@ -9,30 +9,39 @@
 
 */
 declare interface SerializableParts {
-  [key: string]: ISerializable;
+    [key: string]: ISerializable;
 }
 
-export function useSerialization(serializableParts: SerializableParts) {
-  const getSerializedState = () => {
-    const state = {};
+export function useSerialization(
+    serializableParts: SerializableParts,
+    EventBus: EventBus,
+) {
+    const getSerializedState = () => {
+        const state = {};
 
-    Object.keys(serializableParts).forEach((key) => {
-      state[key] = JSON.parse(serializableParts[key].getState());
-    });
+        Object.keys(serializableParts).forEach((key) => {
+            console.log(key, serializableParts[key]);
+            state[key] = JSON.parse(serializableParts[key].getState());
+        });
 
-    return JSON.stringify(state);
-  };
+        return JSON.stringify(state);
+    };
 
-  const loadState = (state: string) => {
-    const parsed = JSON.parse(state);
-    Object.keys(serializableParts).forEach((key) => {
-      if (!parsed[key]) return;
-      serializableParts[key].loadState(JSON.stringify(parsed[key]));
-    });
-  };
+    const loadState = (state: string) => {
+        const parsed = JSON.parse(state);
+        console.log(parsed);
+        Object.keys(serializableParts).forEach((key) => {
+            if (!parsed[key]) return;
+            console.log(serializableParts[key], key);
+            serializableParts[key].loadState(
+                JSON.stringify(parsed[key]),
+                EventBus,
+            );
+        });
+    };
 
-  return {
-    getSerializedState,
-    loadState,
-  };
+    return {
+        getSerializedState,
+        loadState,
+    };
 }

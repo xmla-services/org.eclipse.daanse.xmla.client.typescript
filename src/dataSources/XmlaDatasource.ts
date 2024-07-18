@@ -13,134 +13,209 @@ import { createClientAsync } from "@/XMLAClient";
 import { MetadataStore } from "./Storage/MetadataStore";
 import DataSource from "@/dataSources/DataSource";
 
-export default class XMLADatasource extends DataSource implements IDatasource, ISerializable {
-  public static readonly TYPE="XMLA";
-  public url: string;
-  public id: string;
-  public caption: string;
-  public type = XMLADatasource.TYPE;
+export default class XMLADatasource
+    extends DataSource
+    implements IDatasource, ISerializable
+{
+    public static readonly TYPE = "XMLA";
+    public url: string;
+    public id: string;
+    public caption: string;
+    public type = XMLADatasource.TYPE;
 
-  public cube: MDSchemaCube | null = null;
-  public catalog: DBSchemaCatalog | null = null;
-  private metadataStore: MetadataStore | null = null;
+    public cube: MDSchemaCube | null = null;
+    public catalog: DBSchemaCatalog | null = null;
+    private metadataStore: MetadataStore | null = null;
 
-  private api: Promise<XMLAApi>;
+    private api: Promise<XMLAApi>;
+    private metadataStorePromise: Promise<MetadataStore | null>;
 
-  constructor(
-    id: string,
-    url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
-    caption: string,
-  ) {
-    super();
-    this.id = id;
-    this.url = url;
-    this.caption = caption;
+    constructor(
+        id: string,
+        url: string = "https://emondrian.ssemenkoff.dev/emondrian/xmla",
+        caption: string,
+        eventBus: EventBus,
+        cube: MDSchemaCube | null = null,
+        catalog: DBSchemaCatalog | null = null,
+    ) {
+        super();
+        this.id = id;
+        this.url = url;
+        this.caption = caption;
 
-    this.api = new Promise((res) => {
-      const initApi = async () => {
-        const client = await createClientAsync("def/xmla.wsdl");
+        this.api = new Promise((res) => {
+            const initApi = async () => {
+                const client = await createClientAsync("def/xmla.wsdl");
 
-        client.setEndpoint(url);
-        const api = new XMLAApi(client, url);
-        await api.startSession();
+                client.setEndpoint(url);
+                const api = new XMLAApi(client, url);
+                await api.startSession();
 
-        res(api);
-      };
+                res(api);
+            };
 
-      initApi();
-    });
-  }
+            initApi();
+        });
 
-  async getData(mdx: string) {
-    const api = await this.api;
-    const mdxResponce = await api.getMDX(mdx);
-    return mdxResponce;
-  }
+        this.metadataStorePromise = new Promise((res) => {
+            const initMetadataStore = async () => {
+                if (cube && catalog) {
+                    this.cube = cube;
+                    this.catalog = catalog;
 
-  getApi(): Promise<XMLAApi> {
-    return this.api;
-  }
+                    await this.openCube(catalog.CATALOG_NAME, cube.CUBE_NAME);
 
-  async openCube(catalogName: string, cube: string) {
-    const api = await this.api;
+                    res(this.metadataStore);
+                } else {
+                    res(null);
+                }
+            };
 
-    const metadataStore = new MetadataStore(api);
-    await metadataStore.loadMetadata(catalogName, cube);
-    this.metadataStore = metadataStore;
-  }
+            initMetadataStore();
+        });
+    }
 
-  async getHierarchies(): Promise<MDSchemaHierarchy[]> {
-    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+    async getData(mdx: string) {
+        const api = await this.api;
+        const mdxResponce = await api.getMDX(mdx);
+        return mdxResponce;
+    }
 
-    return this.metadataStore.getHierarchies();
-  }
+    getApi(): Promise<XMLAApi> {
+        return this.api;
+    }
 
-  async getMeasures(): Promise<MDSchemaMeasure[]> {
-    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+    async ready() {
+        await this.api;
+        await this.metadataStorePromise;
+    }
 
-    return this.metadataStore.getMeasures();
-  }
+    async openCube(catalogName: string, cube: string) {
+        const api = await this.api;
 
-  public async getCatalogs(): Promise<DBSchemaCatalog[]> {
-    const api = await this.api;
+        const metadataStore = new MetadataStore(api);
+        await metadataStore.loadMetadata(catalogName, cube);
+        this.metadataStore = metadataStore;
+    }
 
-    const { catalogs } = await api.getCatalogs();
-    return catalogs;
-  }
+    async getHierarchies(): Promise<MDSchemaHierarchy[]> {
+        if (!this.metadataStore)
+            throw new Error("Metadata store is not loaded");
 
-  public async getCubes(catalogName: string): Promise<MDSchemaCube[]> {
-    const api = await this.api;
+        return this.metadataStore.getHierarchies();
+    }
 
-    const { cubes } = await api.getCubes(catalogName);
-    return cubes;
-  }
+    async getMeasures(): Promise<MDSchemaMeasure[]> {
+        if (!this.metadataStore)
+            throw new Error("Metadata store is not loaded");
 
-  public async setCube(cube: MDSchemaCube) {
-    this.cube = cube;
-  }
+        return this.metadataStore.getMeasures();
+    }
 
-  public async setCatalog(catalog: DBSchemaCatalog) {
-    this.catalog = catalog;
-  }
+    public async getCatalogs(): Promise<DBSchemaCatalog[]> {
+        const api = await this.api;
 
-  public getProperties(): MDSchemaProperty[] {
-    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+        const { catalogs } = await api.getCatalogs();
+        return catalogs;
+    }
 
-    return this.metadataStore.getProperties();
-  }
+    public async getCubes(catalogName: string): Promise<MDSchemaCube[]> {
+        const api = await this.api;
 
-  public getLevels(): MDSchemaLevel[] {
-    if (!this.metadataStore) throw new Error("Metadata store is not loaded");
+        const { cubes } = await api.getCubes(catalogName);
+        return cubes;
+    }
 
-    return this.metadataStore.getLevels();
-  }
+    public async setCube(cube: MDSchemaCube) {
+        this.cube = cube;
+    }
 
-  public async getMember(
-    parentLevel: MDSchemaLevel,
-    parentName: string,
-  ): Promise<MDSchemaMember> {
-    const api = await this.api;
+    public async setCatalog(catalog: DBSchemaCatalog) {
+        this.catalog = catalog;
+    }
 
-    return await api.getMember(parentLevel, parentName);
-  }
+    public getProperties(): MDSchemaProperty[] {
+        if (!this.metadataStore)
+            throw new Error("Metadata store is not loaded");
 
-  getState() {
-    return JSON.stringify({
-      id: this.id,
-      url: this.url,
-      caption: this.caption,
-      type: this.type,
-    });
-  }
+        return this.metadataStore.getProperties();
+    }
 
-  loadState(state: string) {
-    const parsed = JSON.parse(state);
+    public getLevels(): MDSchemaLevel[] {
+        if (!this.metadataStore)
+            throw new Error("Metadata store is not loaded");
 
-    this.id = parsed.id;
-    this.url = parsed.url;
-    this.caption = parsed.caption;
-    this.type = parsed.type;
-    this.catalog = parsed.catalog;
-    this.cube = parsed.cube;
-  }
+        return this.metadataStore.getLevels();
+    }
+
+    public async getChildMembers(element) {
+        const api = await this.api;
+        const members = await api.getLevelChildMembers(element);
+
+        return members;
+    }
+
+    public async getChildMembersSelection(element, joinedMembers) {
+        const api = await this.api;
+        const members = await api.getLevelChildMembers(element);
+
+        return members;
+    }
+
+    public async getChildren(node, element) {
+        console.log(element);
+        const api = await this.api;
+        const members = await api.getChildren(node, element.CUBE_NAME);
+
+        return members;
+    }
+
+    public async getMember(
+        parentLevel: MDSchemaLevel,
+        parentName: string,
+    ): Promise<MDSchemaMember> {
+        const api = await this.api;
+
+        return await api.getMember(parentLevel, parentName);
+    }
+
+    getState() {
+        return {
+            id: this.id,
+            url: this.url,
+            caption: this.caption,
+            type: this.type,
+            catalog: this.catalog,
+            cube: this.cube,
+        };
+    }
+
+    loadState(state: string) {
+        const parsed = JSON.parse(state);
+
+        this.id = parsed.id;
+        this.url = parsed.url;
+        this.caption = parsed.caption;
+        this.type = parsed.type;
+        this.catalog = parsed.catalog;
+        this.cube = parsed.cube;
+
+        this.api = new Promise((res) => {
+            const initApi = async () => {
+                const client = await createClientAsync("def/xmla.wsdl");
+
+                client.setEndpoint(this.url);
+                const api = new XMLAApi(client, this.url);
+                await api.startSession();
+
+                res(api);
+            };
+
+            initApi();
+        });
+
+        if (this.cube && this.catalog) {
+            this.openCube(this.catalog.CATALOG_NAME, this.cube.CUBE_NAME);
+        }
+    }
 }
