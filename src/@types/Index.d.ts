@@ -21,6 +21,12 @@ declare interface IDatasource extends ISerializable {
     getData: (params: any) => Promise<any>;
 }
 
+interface IReactiveWidget {
+    store: IStore;
+    setStore: (store: IStore) => void;
+    setSetting: (key: string, value: any) => void;
+}
+
 interface IStore {
     id: string;
     caption: string;

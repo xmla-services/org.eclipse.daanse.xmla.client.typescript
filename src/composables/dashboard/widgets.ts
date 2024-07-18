@@ -41,10 +41,13 @@ export function useWidgets() {
 
                 const componentRef = refs[
                     `${widget.id}_component`
-                ] as ISerializable[];
+                ] as (ISerializable & IReactiveWidget)[];
                 state[widget.id] = componentRef[0].getState();
                 state[widget.id].type = widget.component;
-                state[widget.id].store = componentRef[0].store.id;
+
+                if (componentRef[0].store) {
+                    state[widget.id].store = componentRef[0].store.id;
+                }
 
                 const wrapperRef = refs[
                     `${widget.id}_wrapper`
@@ -67,16 +70,20 @@ export function useWidgets() {
                 delete parsed[key].type;
 
                 await nextTick();
-                const ref = instance?.refs[`${key}_component`][0];
-                if (parsed[key].store) {
-                    const store = storeManager.getStore(parsed[key].store);
-                    ref.setStore(store);
-                }
+                const ref = instance?.refs[
+                    `${key}_component`
+                ]?.[0] as ISerializable & IReactiveWidget;
+                if (ref) {
+                    if (parsed[key].store) {
+                        const store = storeManager.getStore(parsed[key].store);
+                        ref.setStore(store);
+                    }
 
-                Object.keys(parsed[key]).forEach((setting) => {
-                    console.log(parsed[key][setting], setting);
-                    ref.setSetting(setting, parsed[key][setting]);
-                });
+                    Object.keys(parsed[key]).forEach((setting) => {
+                        console.log(parsed[key][setting], setting);
+                        ref.setSetting(setting, parsed[key][setting]);
+                    });
+                }
             });
             console.log(parsed);
         },
