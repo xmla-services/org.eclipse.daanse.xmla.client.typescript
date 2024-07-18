@@ -13,12 +13,12 @@ Contributors: Smart City Jena
 <script lang="ts">
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import { ref } from "vue";
-import FilterTreeView from "../Filters/FilterTreeView.vue";
+import FilterView from "../Filters/FilterView.vue";
 import { useI18n } from "vue-i18n";
+import type XMLADatasource from "@/dataSources/XmlaDatasource";
 
 export default {
-    name: "ServerSelectionModal",
-    emits: ["setFilters"],
+    name: "FilterSelectionModal",
     setup() {
         const { t } = useI18n();
         const filterConfigured = ref({});
@@ -28,7 +28,10 @@ export default {
         };
         const multipleChoise = ref(false);
         const currentlySelected = ref(null as any);
-        const opened = ({ element }: { element: any }) => {
+        const datasource = ref(null as any);
+
+        const opened = ({ element, store }) => {
+            datasource.value = store.getDatasource() as XMLADatasource;
             rootHierarchy.value = {
                 item: element.originalItem,
                 filters: element.filters,
@@ -107,6 +110,7 @@ export default {
             setSelection,
             multipleChoise,
             currentlySelected,
+            datasource,
         };
     },
     methods: {
@@ -120,7 +124,7 @@ export default {
             this.$refs.filterTreeView?.resetSelection();
         },
     },
-    components: { FilterTreeView },
+    components: { FilterView },
 };
 </script>
 <template>
@@ -130,6 +134,7 @@ export default {
         class="filter-modal"
         @ok="ok"
         fixed-layout
+        zIndex="10000000"
     >
         <template #content="{ ok }">
             <va-card-title class="va-h6">{{
@@ -137,11 +142,12 @@ export default {
             }}</va-card-title>
             <va-card-content>
                 <Suspense>
-                    <FilterTreeView
+                    <FilterView
                         ref="filterTreeView"
+                        :datasource="datasource"
                         :rootHierarchy="rootHierarchy"
                         @set-selection="setSelection"
-                    ></FilterTreeView>
+                    ></FilterView>
                 </Suspense>
             </va-card-content>
             <va-card-actions class="actions">

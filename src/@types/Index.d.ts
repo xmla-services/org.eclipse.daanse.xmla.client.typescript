@@ -9,41 +9,49 @@ Contributors: Smart City Jena
 */
 
 declare interface ISerializable {
-  getState: () => string;
-  loadState: (state: string, eventBus?: any) => void;
+    getState: () => any;
+    loadState: (state: any, eventBus?: any) => void;
 }
 
-declare interface IDatasource {
-  id: string;
-  caption: string;
-  url: string;
-  type: "REST" | "XMLA" | "CSV" | "JSON" | "MQTT" | string;
-  getData: (params: any) => Promise<any>;
+declare interface IDatasource extends ISerializable {
+    id: string;
+    caption: string;
+    url: string;
+    type: "REST" | "XMLA" | "CSV" | "JSON" | "MQTT" | string;
+    getData: (params: any) => Promise<any>;
+}
+
+interface IReactiveWidget {
+    store: IStore;
+    setStore: (store: IStore) => void;
+    setSetting: (key: string, value: any) => void;
 }
 
 interface IStore {
-  id: string;
-  caption: string;
-  events: IStoreEvents[];
-  type: string;
-  datasourceId: string | null;
-  setDatasource: (datasourceId: string) => void;
-  getDatasource: (datasourceId: string) => IDatasource;
-  getData: (...args) => Promise<any>;
-  setOptions: (options: IStoreParams) => void;
+    id: string;
+    caption: string;
+    events: IStoreEvents[];
+    type: string;
+    datasourceId: string | null;
+    setDatasource: (datasourceId: string) => void;
+    getDatasource: () => IDatasource;
+    getData: (params?: any) => Promise<any>;
+    setOptions: (options: IStoreParams) => void;
+    updateParam: (paramName: string, value: string) => void;
+    updateEvents: (events: IStoreEvents[]) => void;
 }
 
 interface EventBus {
-  emit: (string, any?) => void;
-  on: (string, Function) => void;
-  off: (string, Function) => void;
+    emit: (string, any?) => void;
+    on: (string, Function) => void;
+    off: (string, Function) => void;
 }
 
 interface IStoreParams {
-  [key: string]: any;
+    [key: string]: any;
 }
 
 interface IStoreEvents {
-  name: string;
-  action: string;
+    name: string;
+    action: string;
 }

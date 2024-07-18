@@ -12,655 +12,685 @@ Contributors: Smart City Jena
 import type { Client } from "eMondrianUtils/SOAPInBrowser/src/client";
 
 class XMLAApi {
-  public url: string;
-  sessionId: string = "";
-  SOAPClient: null | Client = null;
+    public url: string;
+    sessionId: string = "";
+    SOAPClient: null | Client = null;
 
-  constructor(SOAPClient: any, url: string) {
-    this.url = url;
-    this.SOAPClient = SOAPClient;
-  }
-
-  private rowToArray(row: any): any[] {
-    if (Array.isArray(row)) return row;
-    if (row) {
-      return [row];
+    constructor(SOAPClient: any, url: string) {
+        this.url = url;
+        this.SOAPClient = SOAPClient;
     }
-    return [];
-  }
 
-  public async startSession(): Promise<void> {
-    const res = await this.SOAPClient?.ExecuteAsync({
-      Headers: {
-        BeginSession: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-          },
-        },
-        Version: {},
-      },
-      Command: {
-        Statement: "",
-      },
-      Properties: {
-        PropertieList: {
-          LocaleIdentifier: "1033",
-        },
-      },
-    });
+    private rowToArray(row: any): any[] {
+        if (Array.isArray(row)) return row;
+        if (row) {
+            return [row];
+        }
+        return [];
+    }
 
-    const sessionId = res?.Header?.Session?.__attrs?.SessionId;
-    this.sessionId = sessionId;
-  }
+    public async startSession(): Promise<void> {
+        const res = await this.SOAPClient?.ExecuteAsync({
+            Headers: {
+                BeginSession: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                    },
+                },
+                Version: {},
+            },
+            Command: {
+                Statement: "",
+            },
+            Properties: {
+                PropertieList: {
+                    LocaleIdentifier: "1033",
+                },
+            },
+        });
 
-  public async getCatalogs(): Promise<{ catalogs: DBSchemaCatalog[] }> {
-    const catalogsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "DBSCHEMA_CATALOGS",
-      Restrictions: {
-        RestrictionList: {},
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        const sessionId = res?.Header?.Session?.__attrs?.SessionId;
+        this.sessionId = sessionId;
+    }
 
-    const catalogs = this.rowToArray(
-      catalogsResponce.Body.DiscoverResponse.return[0].root.row,
-    );
+    public async getCatalogs(): Promise<{ catalogs: DBSchemaCatalog[] }> {
+        const catalogsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "DBSCHEMA_CATALOGS",
+            Restrictions: {
+                RestrictionList: {},
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-    return {
-      catalogs,
-    };
-  }
+        const catalogs = this.rowToArray(
+            catalogsResponce.Body.DiscoverResponse.return[0].root.row,
+        );
 
-  public async getCubes(
-    catalogName: string,
-  ): Promise<{ cubes: MDSchemaCube[] }> {
-    const cubesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_CUBES",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return {
+            catalogs,
+        };
+    }
 
-    const cubes = this.rowToArray(
-      cubesResponce.Body.DiscoverResponse.return[0].root.row,
-    );
-    return {
-      cubes,
-    };
-  }
+    public async getCubes(
+        catalogName: string,
+    ): Promise<{ cubes: MDSchemaCube[] }> {
+        const cubesResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_CUBES",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getDimensions(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaDimension[]> {
-    const dimensionsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_DIMENSIONS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        const cubes = this.rowToArray(
+            cubesResponce.Body.DiscoverResponse.return[0].root.row,
+        );
+        return {
+            cubes,
+        };
+    }
 
-    return this.rowToArray(
-      dimensionsResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaDimension[];
-  }
+    public async getDimensions(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaDimension[]> {
+        const dimensionsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_DIMENSIONS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getHierarchies(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaHierarchy[]> {
-    const hierarchiesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_HIERARCHIES",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            dimensionsResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaDimension[];
+    }
 
-    return this.rowToArray(
-      hierarchiesResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaHierarchy[];
-  }
+    public async getHierarchies(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaHierarchy[]> {
+        const hierarchiesResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_HIERARCHIES",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getLevels(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaLevel[]> {
-    const levelsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_LEVELS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            hierarchiesResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaHierarchy[];
+    }
 
-    return this.rowToArray(
-      levelsResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaLevel[];
-  }
+    public async getLevels(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaLevel[]> {
+        const levelsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_LEVELS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getHierarchyLevels(
-    catalogName: string,
-    cubeName: string,
-    hierarchyUniqueName: string,
-  ): Promise<MDSchemaLevel[]> {
-    const levelsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_LEVELS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-          HIERARCHY_UNIQUE_NAME: hierarchyUniqueName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            levelsResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaLevel[];
+    }
 
-    return this.rowToArray(
-      levelsResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaLevel[];
-  }
+    public async getHierarchyLevels(
+        catalogName: string,
+        cubeName: string,
+        hierarchyUniqueName: string,
+    ): Promise<MDSchemaLevel[]> {
+        const levelsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_LEVELS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                    HIERARCHY_UNIQUE_NAME: hierarchyUniqueName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getMeasureGroups(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaMeasureGroup[]> {
-    const measureGroupsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_MEASUREGROUPS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            levelsResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaLevel[];
+    }
 
-    return this.rowToArray(
-      measureGroupsResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaMeasureGroup[];
-  }
+    public async getMeasureGroups(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaMeasureGroup[]> {
+        const measureGroupsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_MEASUREGROUPS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getMeasures(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaMeasure[]> {
-    const measuresResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_MEASURES",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            measureGroupsResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaMeasureGroup[];
+    }
 
-    return this.rowToArray(
-      measuresResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaMeasure[];
-  }
+    public async getMeasures(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaMeasure[]> {
+        const measuresResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_MEASURES",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getSets(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaSet[]> {
-    const setsResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_SETS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            measuresResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaMeasure[];
+    }
 
-    return this.rowToArray(
-      setsResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaSet[];
-  }
+    public async getSets(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaSet[]> {
+        const setsResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_SETS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getProperties(
-    catalogName: string,
-    cubeName: string,
-  ): Promise<MDSchemaProperty[]> {
-    const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_PROPERTIES",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: catalogName,
-          CUBE_NAME: cubeName,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            setsResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaSet[];
+    }
 
-    return this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaProperty[];
-  }
+    public async getProperties(
+        catalogName: string,
+        cubeName: string,
+    ): Promise<MDSchemaProperty[]> {
+        const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_PROPERTIES",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: catalogName,
+                    CUBE_NAME: cubeName,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getMembers(level: MDSchemaLevel): Promise<MDSchemaMember[]> {
-    const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_MEMBERS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: level.CATALOG_NAME,
-          CUBE_NAME: level.CUBE_NAME,
-          DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
-          HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
-          LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return this.rowToArray(
+            propertiesResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaProperty[];
+    }
 
-    return this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaMember[];
-  }
+    public async getMembers(level: MDSchemaLevel): Promise<MDSchemaMember[]> {
+        const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_MEMBERS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: level.CATALOG_NAME,
+                    CUBE_NAME: level.CUBE_NAME,
+                    DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
+                    HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
+                    LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-  public async getLevelMembers(
-    level: MDSchemaLevel,
-    amount: number,
-    start: number,
-  ): Promise<any[]> {
-    const levelMembersRequestMDX = `
+        return this.rowToArray(
+            propertiesResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaMember[];
+    }
+
+    public async getLevelMembers(
+        level: MDSchemaLevel,
+        amount: number,
+        start: number,
+    ): Promise<any[]> {
+        const levelMembersRequestMDX = `
       select Subset(${level.LEVEL_UNIQUE_NAME}.AllMembers, ${start}, ${
-        amount + 1
-      }) 
-      DIMENSION PROPERTIES MEMBER_TYPE on 0, 
-      {} on 1 
+          amount + 1
+      })
+      DIMENSION PROPERTIES MEMBER_TYPE on 0,
+      {} on 1
       from ${level.CUBE_NAME}
     `;
 
-    const levelMembersResponce = await this.getMDX(levelMembersRequestMDX);
-    return this.rowToArray(
-      levelMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
-        .Tuple,
-    );
-  }
+        const levelMembersResponce = await this.getMDX(levelMembersRequestMDX);
+        return this.rowToArray(
+            levelMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0]
+                .Tuples.Tuple,
+        );
+    }
 
-  public async getChildMembers(
-    member: MDSchemaMember,
-    amount: number,
-    start: number,
-  ): Promise<any[]> {
-    const childMembersRequestMDX = `
+    public async getChildMembers(
+        member: MDSchemaMember,
+        amount: number,
+        start: number,
+    ): Promise<any[]> {
+        const childMembersRequestMDX = `
       select Subset({AddCalculatedMembers(${
-        member.MEMBER_UNIQUE_NAME
-      }.Children)}, ${start}, ${amount + 1}) 
-      DIMENSION PROPERTIES MEMBER_TYPE on 0, 
-      {} on 1 
+          member.MEMBER_UNIQUE_NAME
+      }.Children)}, ${start}, ${amount + 1})
+      DIMENSION PROPERTIES MEMBER_TYPE on 0,
+      {} on 1
       from ${member.CUBE_NAME}
     `;
 
-    const childMembersResponce = await this.getMDX(childMembersRequestMDX);
-    return this.rowToArray(
-      childMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
-        .Tuple,
-    );
-  }
+        const childMembersResponce = await this.getMDX(childMembersRequestMDX);
+        return this.rowToArray(
+            childMembersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0]
+                .Tuples.Tuple,
+        );
+    }
 
-  public async getMDX(mdx: string): Promise<any> {
-    const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      Command: {
-        Statement: mdx,
-      },
-      Properties: {},
-    });
+    public async getMDX(mdx: string): Promise<any> {
+        const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            Command: {
+                Statement: mdx,
+            },
+            Properties: {},
+        });
 
-    return propertiesResponce;
-  }
+        return propertiesResponce;
+    }
 
-  public async getPivotTableData(
-    cubename: string,
-    rows: any[],
-    columns: any[],
-    pivotTableSettings: any,
-    properties: any[],
-  ): Promise<any> {
-    let mdxRequest;
-    if (rows.length && columns.length) {
-      const rowsProperties = [] as any[];
-      let rowsRequest = "";
-      if (rows.length >= 1) {
-        rows.forEach((e: any, i: number) => {
-          if (i === 0) {
-            rowsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
-          } else {
-            rowsRequest = `
+    public async getPivotTableData(
+        cubename: string,
+        rows: any[],
+        columns: any[],
+        pivotTableSettings: any,
+        properties: any[],
+    ): Promise<any> {
+        let mdxRequest;
+        if (rows.length && columns.length) {
+            const rowsProperties = [] as any[];
+            let rowsRequest = "";
+            if (rows.length >= 1) {
+                rows.forEach((e: any, i: number) => {
+                    if (i === 0) {
+                        rowsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
+                    } else {
+                        rowsRequest = `
               CrossJoin(
                 ${rowsRequest},
                 Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})
               )
             `;
-          }
-        });
-      } else {
-        rowsRequest = `{ ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
-      }
+                    }
+                });
+            } else {
+                rowsRequest = `{ ${rows[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
+            }
 
-      rows.forEach((e: any) => {
-        rowsProperties.push(
-          properties.filter(
-            (prop) =>
-              prop.HIERARCHY_UNIQUE_NAME ===
-              e.originalItem.HIERARCHY_UNIQUE_NAME,
-          ),
-        );
-      });
+            rows.forEach((e: any) => {
+                rowsProperties.push(
+                    properties.filter(
+                        (prop) =>
+                            prop.HIERARCHY_UNIQUE_NAME ===
+                            e.originalItem.HIERARCHY_UNIQUE_NAME,
+                    ),
+                );
+            });
 
-      const columnsProperties = [] as any[];
-      let columnsRequest = "";
-      if (columns.length >= 1) {
-        columns.forEach((e: any, i: number) => {
-          if (i === 0) {
-            columnsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
-          } else {
-            columnsRequest = `
+            const columnsProperties = [] as any[];
+            let columnsRequest = "";
+            if (columns.length >= 1) {
+                columns.forEach((e: any, i: number) => {
+                    if (i === 0) {
+                        columnsRequest = `Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})`;
+                    } else {
+                        columnsRequest = `
               CrossJoin(
                 ${columnsRequest},
                 Hierarchize({DrilldownLevel({${e.originalItem.HIERARCHY_UNIQUE_NAME}},,,INCLUDE_CALC_MEMBERS)})
               )
             `;
-          }
-        });
-      } else {
-        columnsRequest = `{ ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
-      }
+                    }
+                });
+            } else {
+                columnsRequest = `{ ${columns[0].originalItem.HIERARCHY_UNIQUE_NAME}.Members }`;
+            }
 
-      columns.forEach((e: any) => {
-        columnsProperties.push(
-          properties.filter(
-            (prop) =>
-              prop.HIERARCHY_UNIQUE_NAME ===
-              e.originalItem.HIERARCHY_UNIQUE_NAME,
-          ),
-        );
-      });
+            columns.forEach((e: any) => {
+                columnsProperties.push(
+                    properties.filter(
+                        (prop) =>
+                            prop.HIERARCHY_UNIQUE_NAME ===
+                            e.originalItem.HIERARCHY_UNIQUE_NAME,
+                    ),
+                );
+            });
 
-      let columnsPropertiesList = columnsProperties
-        .flat(1)
-        .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
-        .join(",");
-      let rowsPropertiesList = rowsProperties
-        .flat(1)
-        .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
-        .join(",");
+            let columnsPropertiesList = columnsProperties
+                .flat(1)
+                .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
+                .join(",");
+            let rowsPropertiesList = rowsProperties
+                .flat(1)
+                .map((e) => `${e.LEVEL_UNIQUE_NAME}.[${e.PROPERTY_NAME}]`)
+                .join(",");
 
-      if (columnsPropertiesList)
-        columnsPropertiesList = `,${columnsPropertiesList}`;
-      if (rowsPropertiesList) rowsPropertiesList = `,${rowsPropertiesList}`;
+            if (columnsPropertiesList)
+                columnsPropertiesList = `,${columnsPropertiesList}`;
+            if (rowsPropertiesList)
+                rowsPropertiesList = `,${rowsPropertiesList}`;
 
-      // if (drillDownHistory.length === 1) {
-      //   if (pivotTableSettings.showEmpty) {
-      //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
-      //     SELECT NON EMPTY Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
-      //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
-      //     NON EMPTY Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
-      //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
-      //   } else {
-      //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
-      //     SELECT Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
-      //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
-      //     Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
-      //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
-      //   }
-      // }
+            // if (drillDownHistory.length === 1) {
+            //   if (pivotTableSettings.showEmpty) {
+            //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
+            //     SELECT NON EMPTY Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
+            //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
+            //     NON EMPTY Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
+            //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+            //   } else {
+            //     mdxRequest = `WITH  SET [XL_Col_Dim_0] AS 'VisualTotals(Distinct(Hierarchize({Ascendants([Product].[Drink]), Descendants([Product].[Drink])})))'
+            //     SELECT Hierarchize(Intersect(AddCalculatedMembers({DrilldownLevel({DrilldownLevel({[Product].[All Products]})},[Product].[Product Family])}),
+            //     [XL_Col_Dim_0])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON COLUMNS,
+            //     Hierarchize(AddCalculatedMembers({DrilldownLevel({[Gender].[All Gender]})})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME ON ROWS
+            //     FROM [Sales] CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS`;
+            //   }
+            // }
 
-      if (pivotTableSettings.showEmpty) {
-        mdxRequest = `
+            if (pivotTableSettings.showEmpty) {
+                mdxRequest = `
             SELECT
             ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${columnsPropertiesList} ON 1,
             ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${rowsPropertiesList}  ON 0
             FROM ${cubename}
         `;
-      } else {
-        mdxRequest = `
+            } else {
+                mdxRequest = `
             SELECT
             NON EMPTY ${columnsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${columnsPropertiesList} ON 1,
             NON EMPTY ${rowsRequest} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${rowsPropertiesList} ON 0
             FROM ${cubename}
         `;
-      }
-      console.log(mdxRequest);
-    } else {
-      mdxRequest = `
+            }
+            console.log(mdxRequest);
+        } else {
+            mdxRequest = `
           SELECT
           FROM ${cubename}
       `;
+        }
+
+        const mdxResponce = await this.getMDX(mdxRequest);
+        const axis0 = this.rowToArray(
+            mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
+                ?.Tuple,
+        );
+        const axis1 = this.rowToArray(
+            mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
+                ?.Tuple,
+        );
+        const cells = this.rowToArray(
+            mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
+        );
+
+        return {
+            axis0,
+            axis1,
+            cells,
+        };
     }
 
-    const mdxResponce = await this.getMDX(mdxRequest);
-    const axis0 = this.rowToArray(
-      mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[0]?.Tuples
-        ?.Tuple,
-    );
-    const axis1 = this.rowToArray(
-      mdxResponce.Body.ExecuteResponse.return.root.Axes?.Axis?.[1]?.Tuples
-        ?.Tuple,
-    );
-    const cells = this.rowToArray(
-      mdxResponce.Body.ExecuteResponse.return.root.CellData?.Cell,
-    );
+    public async getMember(
+        level: MDSchemaLevel,
+        MEMBER_UNIQUE_NAME: string,
+    ): Promise<MDSchemaMember> {
+        const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            RequestType: "MDSCHEMA_MEMBERS",
+            Restrictions: {
+                RestrictionList: {
+                    CATALOG_NAME: level.CATALOG_NAME,
+                    CUBE_NAME: level.CUBE_NAME,
+                    DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
+                    HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
+                    LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
+                    MEMBER_UNIQUE_NAME,
+                },
+            },
+            Properties: {
+                PropertyList: {},
+            },
+        });
 
-    return {
-      axis0,
-      axis1,
-      cells,
-    };
-  }
+        const array = this.rowToArray(
+            propertiesResponce.Body.DiscoverResponse.return[0].root.row,
+        ) as MDSchemaMember[];
 
-  public async getMember(
-    level: MDSchemaLevel,
-    MEMBER_UNIQUE_NAME: string,
-  ): Promise<MDSchemaMember> {
-    const propertiesResponce = await this.SOAPClient?.DiscoverAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      RequestType: "MDSCHEMA_MEMBERS",
-      Restrictions: {
-        RestrictionList: {
-          CATALOG_NAME: level.CATALOG_NAME,
-          CUBE_NAME: level.CUBE_NAME,
-          DIMENSION_UNIQUE_NAME: level.DIMENSION_UNIQUE_NAME,
-          HIERARCHY_UNIQUE_NAME: level.HIERARCHY_UNIQUE_NAME,
-          LEVEL_UNIQUE_NAME: level.LEVEL_UNIQUE_NAME,
-          MEMBER_UNIQUE_NAME,
-        },
-      },
-      Properties: {
-        PropertyList: {},
-      },
-    });
+        return array[0];
+    }
 
-    const array = this.rowToArray(
-      propertiesResponce.Body.DiscoverResponse.return[0].root.row,
-    ) as MDSchemaMember[];
+    public async getLevelChildMembers(level: MDSchemaLevel) {
+        console.log(level);
+        const mdx = `
+            SELECT {AddCalculatedMembers({${level.DIMENSION_UNIQUE_NAME}.${level.HIERARCHY_UNIQUE_NAME}.Levels(0).Members})} DIMENSION PROPERTIES MEMBER_TYPE ON 0, {} ON 1 FROM ${level.CUBE_NAME} CELL PROPERTIES CELL_ORDINAL
+        `;
 
-    return array[0];
-  }
+        const membersResponce = await this.getMDX(mdx);
+        const childMembers = this.rowToArray(
+            membersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
+                .Tuple,
+        );
 
-  public async getDrillthroughMDX(mdx: string): Promise<any> {
-    const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
-      Headers: {
-        Session: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      Command: {
-        Statement: mdx,
-      },
-      Properties: {
-        PropertyList: {
-          Format: "Tabular",
-        },
-      },
-    });
+        return childMembers;
+    }
 
-    return propertiesResponce;
-  }
+    public async getChildren(member, cube) {
+        const mdx = `
+            SELECT {AddCalculatedMembers({${member.UName}.Children})} DIMENSION PROPERTIES MEMBER_TYPE ON 0, {} ON 1 FROM ${cube} CELL PROPERTIES CELL_ORDINAL
+        `;
 
-  public async endSession(): Promise<void> {
-    await this.SOAPClient?.ExecuteAsync({
-      Headers: {
-        EndSession: {
-          __attrs: {
-            xmlns: "urn:schemas-microsoft-com:xml-analysis",
-            SessionId: this.sessionId,
-          },
-        },
-      },
-      Command: {
-        Statement: {},
-      },
-      Properties: {},
-    });
+        const membersResponce = await this.getMDX(mdx);
+        const childMembers = this.rowToArray(
+            membersResponce.Body.ExecuteResponse.return.root.Axes.Axis[0].Tuples
+                .Tuple,
+        );
 
-    this.sessionId = "";
-  }
+        return childMembers;
+    }
+
+    public async getDrillthroughMDX(mdx: string): Promise<any> {
+        const propertiesResponce = await this.SOAPClient?.ExecuteAsync({
+            Headers: {
+                Session: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            Command: {
+                Statement: mdx,
+            },
+            Properties: {
+                PropertyList: {
+                    Format: "Tabular",
+                },
+            },
+        });
+
+        return propertiesResponce;
+    }
+
+    public async endSession(): Promise<void> {
+        await this.SOAPClient?.ExecuteAsync({
+            Headers: {
+                EndSession: {
+                    __attrs: {
+                        xmlns: "urn:schemas-microsoft-com:xml-analysis",
+                        SessionId: this.sessionId,
+                    },
+                },
+            },
+            Command: {
+                Statement: {},
+            },
+            Properties: {},
+        });
+
+        this.sessionId = "";
+    }
 }
 
 export { XMLAApi };

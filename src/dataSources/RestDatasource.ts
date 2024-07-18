@@ -11,40 +11,43 @@
 
 import DataSource from "@/dataSources/DataSource";
 
-export default class RESTDatasource extends  DataSource implements IDatasource, ISerializable {
-  public static readonly TYPE = "REST";
-  public url: string;
-  public id: string;
-  public caption: string;
-  public type = RESTDatasource.TYPE;
+export default class RESTDatasource
+    extends DataSource
+    implements IDatasource, ISerializable
+{
+    public static readonly TYPE = "REST";
+    public url: string;
+    public id: string;
+    public caption: string;
+    public type = RESTDatasource.TYPE;
 
-  constructor(id: string, url: string, caption: string) {
-    super();
-    this.id = id;
-    this.url = url;
-    this.caption = caption;
-  }
+    constructor(id: string, url: string, caption: string) {
+        super();
+        this.id = id;
+        this.url = url;
+        this.caption = caption;
+    }
 
-  async getData(resourcePath: string=''): Promise<any> {
-    const req = await fetch(`${this.url}${resourcePath}`);
-    return await req.json();
-  }
+    async getData(resourcePath: string = ""): Promise<any> {
+        const req = await fetch(`${this.url}${resourcePath}`);
+        return await req.json();
+    }
 
-  getState(): string {
-    return JSON.stringify({
-      id: this.id,
-      url: this.url,
-      caption: this.caption,
-      type: this.type,
-    });
-  }
+    getState(): any {
+        return {
+            id: this.id,
+            url: this.url,
+            caption: this.caption,
+            type: this.type,
+        };
+    }
 
-  loadState(state: string) {
-    const parsed = JSON.parse(state);
+    loadState(state: string) {
+        const parsed = JSON.parse(state);
 
-    this.id = parsed.id;
-    this.url = parsed.url;
-    this.caption = parsed.caption;
-    this.type = parsed.type;
-  }
+        this.id = parsed.id;
+        this.url = parsed.url;
+        this.caption = parsed.caption;
+        this.type = parsed.type;
+    }
 }

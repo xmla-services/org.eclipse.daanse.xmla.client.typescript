@@ -118,15 +118,6 @@ watch(
     },
 );
 
-watch(
-  () => component.settings.isGradient,
-  (newValue) => {
-    newValue === true
-      ? gradientFields.value.push({color: `${component.settings.fillColor}`, location: 0}, {color: "#FAFAFA", location: 85})
-      : gradientFields.value = [];
-  }
-)
-
 const deleteField = (id: number) => {
     gradientFields.value = gradientFields.value.filter((_, i) => i !== id);
 };

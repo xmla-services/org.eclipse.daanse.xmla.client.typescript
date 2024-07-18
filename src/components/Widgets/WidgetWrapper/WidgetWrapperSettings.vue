@@ -54,19 +54,19 @@ const fontColor = computed(() => {
                 <span class="px-2">{{ t("WidgetWrapper.title") }}</span>
             </VaDivider>
             <va-input
-                v-model="wrapper.settings.title"
+                :model-value="wrapper.settings.title"
                 :label="t('WidgetWrapper.label')"
                 @update:model-value="wrapper.setSetting('title', $event)"
             />
             <va-input
-                v-model="wrapper.settings.titleFontSize"
+                :model-value="wrapper.settings.titleFontSize"
                 :label="t('WidgetWrapper.fontSize')"
                 @update:model-value="
                     wrapper.setSetting('titleFontSize', $event)
                 "
             />
             <va-color-input
-                v-model="wrapper.settings.titleColor"
+                :model-value="wrapper.settings.titleColor"
                 :label="t('WidgetWrapper.fontColor')"
                 @update:model-value="wrapper.setSetting('titleColor', $event)"
             />

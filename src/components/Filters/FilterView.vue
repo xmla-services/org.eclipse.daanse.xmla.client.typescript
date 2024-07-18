@@ -9,8 +9,8 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { useFilterTreeDataSource } from "@/composables/filterTreeDataSource";
-import { useSearchResultTreeData } from "@/composables/searchResultTreeData";
+import { useFilterTree } from "@/composables/filterTree";
+// import { useSearchResultTreeData } from "@/composables/searchResultTreeData";
 import { debounce } from "lodash";
 import { computed, ref, watch } from "vue";
 
@@ -43,53 +43,53 @@ const {
     setSelectAll,
 } = await useFilterTree(props.rootHierarchy, props.datasource);
 
-const {
-    filteredTree,
-    levels,
-    searchBy,
-    searchValue,
-    triggerExpandedWithSearch,
-    expanded,
-    search,
-    searchSelectAll,
-    searchSelectedItems,
-    searchDeselectedItems,
-    searchSetSelectAll,
-    searchChangeSelection,
-} = await useSearchResultTreeData(props.rootHierarchy);
+// const {
+//     filteredTree,
+//     levels,
+//     searchBy,
+//     searchValue,
+//     triggerExpandedWithSearch,
+//     expanded,
+//     search,
+//     searchSelectAll,
+//     searchSelectedItems,
+//     searchDeselectedItems,
+//     searchSetSelectAll,
+//     searchChangeSelection,
+// } = await useSearchResultTreeData(props.rootHierarchy);
 
 const treeData = ref({} as TreeData);
 
-watch(
-    searchValue,
-    debounce(() => {
-        if (searchValue.value) {
-            treeData.value = {
-                nodes: filteredTree,
-                onExpanded: triggerExpandedWithSearch,
-                setSelectAll: searchSetSelectAll,
-                changeSelection: searchChangeSelection,
-                selectAll: searchSelectAll,
-                key: "SearchTree",
-                expanded: expanded,
-            };
-        } else {
-            treeData.value = {
-                nodes: tree,
-                onExpanded: triggerExpanded,
-                setSelectAll: setSelectAll,
-                changeSelection: changeSelection,
-                selectAll: selectAll,
-                key: "Tree",
-                expanded: ref([]),
-            };
-        }
+// watch(
+//     searchValue,
+//     debounce(() => {
+//         if (searchValue.value) {
+//             treeData.value = {
+//                 nodes: filteredTree,
+//                 onExpanded: triggerExpandedWithSearch,
+//                 setSelectAll: searchSetSelectAll,
+//                 changeSelection: searchChangeSelection,
+//                 selectAll: searchSelectAll,
+//                 key: "SearchTree",
+//                 expanded: expanded,
+//             };
+//         } else {
+//         treeData.value = {
+//             nodes: tree,
+//             onExpanded: triggerExpanded,
+//             setSelectAll: setSelectAll,
+//             changeSelection: changeSelection,
+//             selectAll: selectAll,
+//             key: "Tree",
+//             expanded: ref([]),
+//         };
+//         }
 
-        if (searchValue.value.length > 1) {
-            search();
-        }
-    }, 500),
-);
+//         if (searchValue.value.length > 1) {
+//             search();
+//         }
+//     }, 500),
+// );
 
 treeData.value = {
     nodes: tree,
@@ -109,27 +109,27 @@ const multipleChoise = ref(
 const singleSelection = ref({ id: null });
 
 const emitSelectFunc = () => {
-    if (searchValue.value) {
-        emit("setSelection", {
-            enabled: true,
-            multipleChoise: multipleChoise.value,
-            selectedItem: singleSelection.value,
-            selectAll: searchSelectAll.value,
-            deselectedItems: searchDeselectedItems.value,
-            selectedItems: searchSelectedItems.value,
-            originalItem: props.rootHierarchy.item,
-        });
-    } else {
-        emit("setSelection", {
-            enabled: true,
-            multipleChoise: multipleChoise.value,
-            selectedItem: singleSelection.value,
-            selectAll: selectAll.value,
-            deselectedItems: deselectedItems.value,
-            selectedItems: selectedItems.value,
-            originalItem: props.rootHierarchy.item,
-        });
-    }
+    // if (searchValue.value) {
+    //     emit("setSelection", {
+    //         enabled: true,
+    //         multipleChoise: multipleChoise.value,
+    //         selectedItem: singleSelection.value,
+    //         selectAll: searchSelectAll.value,
+    //         deselectedItems: searchDeselectedItems.value,
+    //         selectedItems: searchSelectedItems.value,
+    //         originalItem: props.rootHierarchy.item,
+    //     });
+    // } else {
+    emit("setSelection", {
+        enabled: true,
+        multipleChoise: multipleChoise.value,
+        selectedItem: singleSelection.value,
+        selectAll: selectAll.value,
+        deselectedItems: deselectedItems.value,
+        selectedItems: selectedItems.value,
+        originalItem: props.rootHierarchy.item,
+    });
+    // }
 };
 
 watch(multipleChoise, emitSelectFunc);
@@ -137,19 +137,19 @@ watch(selectAll, emitSelectFunc);
 watch(selectedItems, emitSelectFunc);
 watch(deselectedItems, emitSelectFunc);
 watch(singleSelection, emitSelectFunc);
-watch(searchSelectAll, emitSelectFunc);
-watch(searchDeselectedItems, emitSelectFunc);
-watch(searchSelectedItems, emitSelectFunc);
+// watch(searchSelectAll, emitSelectFunc);
+// watch(searchDeselectedItems, emitSelectFunc);
+// watch(searchSelectedItems, emitSelectFunc);
 
 const emptySelection = computed(() => {
-    if (searchValue.value) {
-        return (
-            !searchSelectedItems.value.length &&
-            !searchDeselectedItems.value.length
-        );
-    } else {
-        return !selectedItems.value.length && !deselectedItems.value.length;
-    }
+    // if (searchValue.value) {
+    //     return (
+    //         !searchSelectedItems.value.length &&
+    //         !searchDeselectedItems.value.length
+    //     );
+    // } else {
+    return !selectedItems.value.length && !deselectedItems.value.length;
+    // }
 });
 
 const selectFilter = function (e: any) {
@@ -162,7 +162,7 @@ resetSelection.value = () => {
 </script>
 <template>
     <div class="d-flex" style="flex-direction: column; width: 100%">
-        <div class="d-flex">
+        <!-- <div class="d-flex">
             <va-input
                 v-model="searchValue"
                 class="mr-3"
@@ -178,7 +178,7 @@ resetSelection.value = () => {
                 text-by="LEVEL_CAPTION"
                 prevent-overflow
             />
-        </div>
+        </div> -->
         <div class="mt-3 mb-2">
             <va-checkbox
                 v-model="multipleChoise"
