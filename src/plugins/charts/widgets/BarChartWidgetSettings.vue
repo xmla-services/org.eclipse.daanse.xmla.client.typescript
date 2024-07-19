@@ -24,6 +24,7 @@ import type {
 import { CSVComposer } from "@/plugins/charts/impl/CSVComposer";
 import { XMLAComposer } from "@/plugins/charts/impl/XMLAComposer";
 import CSVComposerV from "@/plugins/charts/widgets/parts/CSVComposerV.vue";
+import XMLAComposerV from "@/plugins/charts/widgets/parts/XMLAComposerV.vue";
 import { clone } from "lodash";
 import { deepUnref } from "vue-deepunref";
 
@@ -80,7 +81,13 @@ const addComposer = (store: IStore) => {
     if (store.type === "XMLA") {
         component.setStore(store as XMLAStore);
         const xmlaComposer = new XMLAComposer();
+        xmlaComposer.setStore(store as XMLAStore);
         console.log(xmlaComposer);
+
+
+        const val = [...toRaw(unref(component.settings.composer))];
+        val.push(xmlaComposer);
+        component.setSetting("composer", val);
     } else if (store.type === "CSV") {
         console.log("csv");
         const storeData = component.setStore(store as Store);
@@ -261,12 +268,22 @@ watch(
             <div
                 class="composers"
                 v-for="(composer, i) in component.settings.composer"
+                :key="i"
             >
-                <CSVComposerV
-                    :modelValue="component.settings.composer[i]"
-                    :axes="component.settings.axes"
-                    :component="component"
-                ></CSVComposerV>
+                <template v-if="composer instanceof CSVComposer">
+                    <CSVComposerV
+                        :modelValue="component.settings.composer[i]"
+                        :axes="component.settings.axes"
+                        :component="component"
+                    ></CSVComposerV>
+                </template>
+                <template v-if="composer instanceof XMLAComposer">
+                    <XMLAComposerV
+                        :modelValue="component.settings.composer[i]"
+                        :axes="component.settings.axes"
+                        :component="component"
+                    ></XMLAComposerV>
+                </template>
             </div>
         </div>
     </va-collapse>

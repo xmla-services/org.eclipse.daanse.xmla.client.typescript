@@ -23,6 +23,7 @@ export default {
             const store = data.store as XMLAStore;
             const preselectedMeasures =
                 data.selectedMeasures as MDSchemaMeasure[];
+            console.log(store);
             const dataSource = store.getDatasource();
 
             const measures = await dataSource.getMeasures();
