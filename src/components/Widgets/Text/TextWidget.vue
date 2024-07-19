@@ -10,25 +10,25 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 export interface ITextSettings {
-  text: string;
-  fontSize: number;
-  fontColor: string;
-  fontWeight: string;
-  textDecoration: string;
-  horizontalAlign: string;
-  verticalAlign: string;
+    text: string;
+    fontSize: number;
+    fontColor: string;
+    fontWeight: string;
+    textDecoration: string;
+    horizontalAlign: string;
+    verticalAlign: string;
 }
 
 export interface ITextSettingsProps {
-  text?: string;
-  fontSize?: number;
-  fontColor?: string;
-  fontWeight?: string;
-  fontStyle?: string;
-  textDecoration?: string;
-  horizontalAlign?: string;
-  verticalAlign?: string;
-  test:string[]
+    text?: string;
+    fontSize?: number;
+    fontColor?: string;
+    fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    horizontalAlign?: string;
+    verticalAlign?: string;
+    test:string[]
 }
 
 import { computed } from "vue";
@@ -41,14 +41,14 @@ import type { Store } from "@/stores/Widgets/Store";
 const settingsComponent = TextWidgetSettings;
 
 const props = withDefaults(defineProps<ITextSettingsProps>(), {
-  text: "",
-  fontSize: 12,
-  fontColor: "#000",
-  fontWeight: "normal",
-  fontStyle: "normal",
-  textDecoration: "None",
-  horizontalAlign: "Left",
-  verticalAlign: "Top",
+    text: "",
+    fontSize: 12,
+    fontColor: "#000",
+    fontWeight: "normal",
+    fontStyle: "normal",
+    textDecoration: "None",
+    horizontalAlign: "Left",
+    verticalAlign: "Top",
     test:[] as any
 });
 
@@ -57,73 +57,73 @@ const { store, data, setStore } = useStore<Store>();
 const { getState } = useSerialization(settings);
 
 defineExpose({
-  setSetting,
-  settings,
-  settingsComponent,
-  store,
-  setStore,
-  getState,
+    setSetting,
+    settings,
+    settingsComponent,
+    store,
+    setStore,
+    getState,
 });
 
 const parsedText = computed(() => {
-  let processedString = settings.value.text;
-  const regex = /{(.*?)}/g;
-  const parts = processedString.match(regex);
+    let processedString = settings.value.text;
+    const regex = /{(.*?)}/g;
+    const parts = processedString.match(regex);
 
-  if (!parts || !data.value) {
+    if (!parts || !data.value) {
+        return processedString;
+    }
+
+    parts.forEach((element: string) => {
+        const trimmedString = element.replace("{", "").replace("}", "");
+        const dataField = trimmedString.split(".");
+
+        const res = dataField.reduce((acc: any, field) => {
+            return acc[field];
+        }, data.value);
+
+        processedString = processedString.replace(element, res);
+    });
     return processedString;
-  }
-
-  parts.forEach((element: string) => {
-    const trimmedString = element.replace("{", "").replace("}", "");
-    const dataField = trimmedString.split(".");
-
-    const res = dataField.reduce((acc: any, field) => {
-      return acc[field];
-    }, data.value);
-
-    processedString = processedString.replace(element, res);
-  });
-  return processedString;
 });
 </script>
 
 <template>
-  <div
-    class="text-container"
-    :style="{
-      'justify-content':
-        settings.verticalAlign === 'Top'
-          ? 'flex-start'
-          : settings.verticalAlign === 'Center'
-            ? 'center'
-            : 'flex-end',
-    }"
-  >
-    <div class="component">
-        {{settings}}
-      {{ parsedText }}
+    <div
+        class="text-container"
+        :style="{
+            'justify-content':
+                settings.verticalAlign === 'Top'
+                    ? 'flex-start'
+                    : settings.verticalAlign === 'Center'
+                      ? 'center'
+                      : 'flex-end',
+        }"
+    >
+        <div class="component">
+            {{settings}}
+            {{ parsedText }}
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
 .text-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  gap: 1rem;
-  align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 .component {
-  font-size: v-bind(settings.fontSize + "px");
-  color: v-bind(settings.fontColor);
-  text-align: v-bind(settings.horizontalAlign);
-  font-weight: v-bind(settings.fontWeight);
-  font-style: v-bind(settings.fontStyle);
-  text-decoration: v-bind(settings.textDecoration);
-  overflow: hidden;
+    font-size: v-bind(settings.fontSize + "px");
+    color: v-bind(settings.fontColor);
+    text-align: v-bind(settings.horizontalAlign);
+    font-weight: v-bind(settings.fontWeight);
+    font-style: v-bind(settings.fontStyle);
+    text-decoration: v-bind(settings.textDecoration);
+    overflow: hidden;
 }
 </style>

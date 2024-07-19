@@ -67,6 +67,8 @@ import {
     VaSwitch,
     VaDateInput,
     VaTimeInput,
+    VaTabs,
+    VaTab,
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -172,7 +174,9 @@ app.use(
             VaCounter,
             VaSwitch,
             VaDateInput,
-            VaTimeInput
+            VaTimeInput,
+            VaTabs,
+            VaTab,
         },
         config: {
             colors: {

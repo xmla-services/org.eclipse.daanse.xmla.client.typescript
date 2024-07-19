@@ -9,7 +9,7 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { ref, onMounted, computed, type Ref } from "vue";
+import { ref, onMounted, computed, type Ref, provide } from "vue";
 import type { CollapseState, MaterialIcon } from "@/@types/widgets";
 import type { Store } from "@/stores/Widgets/Store";
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
@@ -35,6 +35,9 @@ export interface IIconComponent {
 
 const { t } = useI18n();
 const { component } = defineProps<{ component: IIconComponent }>();
+const isDarkTheme: Ref<boolean> = ref(
+    JSON.parse(localStorage.getItem("isDarkTheme")) || false,
+);
 
 const opened: Ref<CollapseState> = ref({
     widgetSection: false,
@@ -69,6 +72,10 @@ const handleIconClick = (icon: MaterialIcon) => {
 onMounted(() => {
     iconsList.value = filterUniqueIcons(MaterialIcons);
 });
+
+const fontColor = computed(() => {
+    return isDarkTheme.value ? "#ffffff" : "";
+});
 </script>
 
 <template>
@@ -88,7 +95,6 @@ onMounted(() => {
                         &quot;GRAD&quot; 100,
                         &quot;opsz&quot; 48;
                 "
-                ;
             >
                 <span
                     v-for="icon in filteredIcons"
@@ -122,6 +128,7 @@ onMounted(() => {
             />
             <va-slider
                 class="slider"
+                :label-color="fontColor"
                 :model-value="component.settings.strokeWeight"
                 track-label-visible
                 :min="100"
@@ -134,6 +141,7 @@ onMounted(() => {
             />
             <va-slider
                 class="slider"
+                :label-color="fontColor"
                 :model-value="component.settings.opticSize"
                 track-label-visible
                 :min="20"
@@ -143,6 +151,7 @@ onMounted(() => {
             />
             <va-slider
                 class="slider"
+                :label-color="fontColor"
                 :model-value="component.settings.grade"
                 track-label-visible
                 :min="-25"

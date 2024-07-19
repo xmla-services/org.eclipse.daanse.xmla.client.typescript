@@ -50,9 +50,9 @@
     "newStore": "Neues Geschäft",
     "caption": "Beschriftung",
     "dataEndpoint": "Datenendpunkt",
-    "dataSourcesTitle": "Datenquellen",
+    "dataSourcesTitle": "Datenbankverbindungen:",
     "noAvailableStores": "Keine verfügbaren Geschäfte",
-    "addDatasourceButton": "Datenquelle hinzufügen",
+    "addDatasourceButton": "Verbindung hinzufügen",
     "storeListItem": {
       "params": "Parameter",
       "events": "Ereignisse",
@@ -62,10 +62,10 @@
       "catalog": "Katalog",
       "cube": "Würfel",
       "rowsHierarchy": "Zeilenhierarchie",
-      "colsHierarchy:": "Spaltenhierarchie",
+      "colsHierarchy": "Spaltenhierarchie",
       "measure": "Maßnahme"
     },
-    "dataTable": {
+    "StoreLabels": {
       "caption": "Beschriftung",
       "type": "Typ",
       "url": "URL",
