@@ -14,7 +14,6 @@ import { useStoreManager } from "@/composables/storeManager";
 import type { Store } from "@/stores/Widgets/Store";
 
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
-import DataSetPropertyList from "@/plugins/charts/widgets/parts/DataSetPropertyList.vue";
 import type {IDataSetSelector} from "@/plugins/charts/widgets/api/DataSetSelector";
 import type {Composer, CSVSelector, Selector} from "@/plugins/charts/widgets/api/ChartdataComposer";
 import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";

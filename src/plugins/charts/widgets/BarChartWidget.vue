@@ -78,7 +78,7 @@ const {getDataFilterer} = useDataSetSelector();
 const stores = ref([]);
 const setStore =(store:Store)=>{
     console.log('setStore')
-    const storeData = useStore<Store>(eventbus);
+    const storeData = useStore<Store>(undefined,undefined,eventbus);
     storeData.setStore(store)
     stores.value.push(storeData)
     return storeData;
