@@ -19,7 +19,7 @@ import {parse} from "csv-parse/browser/esm/sync";
 export default class CSVStore extends BaseStore implements IStore  {
     public static readonly TYPE = 'CSV';
     private datasourceManager: any;
-    private eventBus: EventBus;
+    public eventBus: EventBus;
 
     public datasourceId: string | null = null;
 
@@ -79,7 +79,6 @@ export default class CSVStore extends BaseStore implements IStore  {
             const paramsList = Object.keys(this.params);
 
             paramsList.forEach((e) => {
-                console.log(e);
                 requestTemplate = requestTemplate.replace(
                     `{${e}}`,
                     this.runtimeParams[e],
@@ -88,13 +87,34 @@ export default class CSVStore extends BaseStore implements IStore  {
 
             const datasource = this.datasourceManager.getDatasource(this.datasourceId);
             const astring = (await datasource?.getData(requestTemplate,true)) as string;
+
             let json = parse(astring, {
+                cast: (value, context) => {
+                    if(context.header){
+                        return value
+                    }
+                    if(context.column == 'zeit'){
+                        return  new Date(parseInt(value)*1000)
+                    }
+                    if(!context.quoting){
+                        return ~~value
+                    }
+
+                    return value;
+                },
                 columns: (header)=>{
                    this.header = header;
                     return header
                 },
                 skip_empty_lines: true
             });
+            let mapa = {}
+            json.forEach(elm=>{
+                mapa[elm['zeit']]=elm;
+            })
+
+            json= Array.from(Object.values(mapa));
+            //let keys = json[0].map(e=>e['zeit']);
 
             return json;
         } catch(e) {
@@ -181,6 +201,7 @@ export default class CSVStore extends BaseStore implements IStore  {
             events: this.events,
             datasourceId: this.datasourceId,
             params: this.params,
+            type: "CSV",
         };
     }
 

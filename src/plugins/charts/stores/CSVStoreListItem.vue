@@ -261,6 +261,19 @@ const headers = ref(false);
                 v-model="headers"
                 />
         </div>
-        <<<<>>>>
+        <VaInput
+            label="von Zeile"
+            v-model="from"
+            type="number"
+        >
+
+        </VaInput>
+        <VaInput
+            label="bis Zeile"
+            v-model="to"
+            type="number"
+        >
+
+        </VaInput>
     </div>
 </template>
