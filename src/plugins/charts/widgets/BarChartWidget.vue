@@ -10,7 +10,7 @@ Contributors: Smart City Jena
 -->
 <script lang="ts" setup>
 
-
+import 'chartjs-adapter-moment';
 import BarChartWidgetSettings, {type ITChartSettings} from "@/plugins/charts/widgets/BarChartWidgetSettings.vue";
 import {computed, inject, onMounted, ref, watch} from "vue";
 import {useSettings} from "@/composables/widgets/settings";
@@ -19,14 +19,33 @@ import {useStore} from "@/composables/widgets/store";
 import type {Store} from "@/stores/Widgets/Store";
 import {useSerialization} from "@/composables/widgets/serialization";
 import { Bar } from 'vue-chartjs'
-import {Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,LogarithmicScale,TimeScale, Chart} from 'chart.js'
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    LogarithmicScale,
+    TimeScale,
+    TimeSeriesScale,
+    Chart,
+    _adapters
+} from 'chart.js'
 import type {IDataSetSelector} from "@/plugins/charts/widgets/api/DataSetSelector";
 import {useDataSetSelector} from "@/plugins/charts/composables/dataSetSelector";
 import type {Composer, Selector} from "@/plugins/charts/widgets/api/ChartdataComposer";
 import type {TinyEmitter} from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
-import 'chartjs-adapter-date-fns';
-import {de} from 'date-fns/locale';
+import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
+
+//import * as dateFns from 'date-fns';
+//import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
+
+//_adapters._date.override(dateFnsAdapter)
+
+//import {de} from 'date-fns/locale';
 
 
 const settingsComponent = BarChartWidgetSettings;
@@ -36,7 +55,12 @@ const props = withDefaults(defineProps<ITChartSettings>(), {
     composer: [],
     axes: {
         x:{
-            type:'category',
+            type:'timeseries',
+            offsetAfterAutoskip:true,
+            ticks:{
+                source:'data'
+            },
+
             backgroundColor:'#fff',
             stacked:false,
             weight:2,
@@ -93,16 +117,49 @@ defineExpose({
 
 
 
-onMounted(()=>{});
+onMounted(()=>{
+    console.log(props)
+});
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,LogarithmicScale,TimeScale)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,LogarithmicScale,TimeScale,TimeSeriesScale)
 Chart.defaults.backgroundColor = '#36A2EB00';
 const chartDataComposer = useChartDataComposer();
 
 chartDataComposer.setComposers(settings.value.composer);
-watch(()=>settings.value.composer,()=>{
+watch(()=>settings.value.composer,(composers)=>{
+    if(composers && composers.length>0){
+        let InitializedComposerds =[];
+        composers.forEach((composer)=>{
+           if(composer instanceof CSVComposer){
+               return
+           }else{
+               let composerObj = composer as any;
+               let csvCo =new CSVComposer();
+               csvCo.setSelectorX(composerObj.selectorX)
+               for(let sely of composerObj.selectorY){
+                   csvCo.addSelectorY(sely)
+               }
+
+               let store = useStoreManager().getStore(composerObj.store.id);
+               let store2 = setStore(store as Store);
+               csvCo.setStore(store2.store as IStore);
+               csvCo.setData(store2.data);
+               InitializedComposerds.push(csvCo);
+           }
+        });
+
+        if(InitializedComposerds.length>0){
+            setSetting('composer',InitializedComposerds);
+        }
+        //@ts-ignore
+       /* props.composer = InitializedComposerds;
+
+       settings.value.composer = InitializedComposerds;
+        settings.value = settings.value;*/
+    }
     chartDataComposer.setComposers(settings.value.composer);
 })
+
 
 //chartDataComposer.setComposers(settings.value.composer);
 
@@ -119,7 +176,7 @@ const chartData= computed(()=>{
        }
        return 'y';
     }
-    if(settings.value.composer.length>0){
+    if(settings.value.composer && settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
             datasets: chartDataComposer.getDataForAxesY().value.map(e=>{

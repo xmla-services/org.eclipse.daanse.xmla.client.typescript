@@ -154,7 +154,7 @@ watch(axes,(axis)=>{
                        v-if="axes.x"
                        v-model="axes.x.type"
 
-                       :options="['time','linear','logarithmic','category']"
+                       :options="['timeseries','linear','logarithmic','category']"
                        placeholder="Select an header for X"
                    />
                    <VaColorInput
@@ -194,7 +194,7 @@ watch(axes,(axis)=>{
                    <VaSelect
 
                        v-model="axes.y.type"
-                       :options="['time','linear','logarithmic','category']"
+                       :options="['timeseries','linear','logarithmic','category']"
                        placeholder="Select an header for X"
                    />
                    <VaColorInput
@@ -232,7 +232,6 @@ watch(axes,(axis)=>{
           <VaSelect
 
               v-model="axes[additionanl_name].type"
-
               :options="['time','linear','logarithmic','category']"
               placeholder="Select an header for X"
           />
