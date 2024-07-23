@@ -12,7 +12,7 @@ Contributors: Smart City Jena
 
 import 'chartjs-adapter-moment';
 import BarChartWidgetSettings, {type ITChartSettings} from "@/plugins/charts/widgets/BarChartWidgetSettings.vue";
-import {computed, inject, onMounted, ref, watch} from "vue";
+import {computed, inject, onMounted, ref, unref, watch} from "vue";
 import {useSettings} from "@/composables/widgets/settings";
 import {useStoreManager} from "@/composables/storeManager";
 import {useStore} from "@/composables/widgets/store";
@@ -39,6 +39,7 @@ import type {Composer, Selector} from "@/plugins/charts/widgets/api/ChartdataCom
 import type {TinyEmitter} from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
 import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
+import {deepUnref} from "vue-deepunref";
 
 //import * as dateFns from 'date-fns';
 //import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
@@ -51,7 +52,7 @@ import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 const settingsComponent = BarChartWidgetSettings;
 
 const props = withDefaults(defineProps<ITChartSettings>(), {
-    dataSets: [] as IDataSetSelector[],
+    //dataSets: [] as IDataSetSelector[],
     composer: [],
     axes: {
         x:{
@@ -97,7 +98,7 @@ setSetting('axes.y',{
     display: true
 })*/
 const eventbus = inject("customEventBus") as TinyEmitter;
-const { getState } = useSerialization(settings);
+const getStateComposeable = useSerialization(settings).getState;
 const {getDataFilterer} = useDataSetSelector();
 const stores = ref([]);
 const setStore =(store:Store)=>{
@@ -106,6 +107,13 @@ const setStore =(store:Store)=>{
     storeData.setStore(store)
     stores.value.push(storeData)
     return storeData;
+}
+const getState=()=>{
+    const state= deepUnref(getStateComposeable() as any);
+    for (let index of state.composer){
+        delete index['data']
+    }
+    return state;
 }
 defineExpose({
   setSetting,
@@ -205,7 +213,6 @@ const chartData= computed(()=>{
        }
 
 });
-
 
 
 
