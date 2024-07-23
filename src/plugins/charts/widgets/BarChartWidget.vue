@@ -53,6 +53,7 @@ import { XMLAComposer } from "@/plugins/charts/impl/XMLAComposer";
 
 //import {de} from 'date-fns/locale';
 
+
 const settingsComponent = BarChartWidgetSettings;
 
 const props = withDefaults(defineProps<ITChartSettings>(), {
