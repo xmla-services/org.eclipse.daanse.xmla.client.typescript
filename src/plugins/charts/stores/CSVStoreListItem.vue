@@ -12,7 +12,8 @@ Contributors: Smart City Jena
 import { useI18n } from 'vue-i18n';
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
-import { type Ref, onMounted, ref, watch } from "vue";
+import {type Ref, onMounted, ref, watch, computed} from "vue";
+import type CSVStore from "@/plugins/charts/stores/CSVStore";
 
 
 // TODO: fix duplicate interface
@@ -141,10 +142,19 @@ const getSelectedDatasource = (item) => {
 
 const selection = ref('|');
 const headers = ref(false);
+
+const parserParams = computed(
+    return store.getParserParams();
+},set:(params)=>{
+
+        }});
+watch(parserParams,(params)=>{
+    const store = storeManager.getStore(props.item.id) as CSVStore;
+    store.setParseParams(params);
+},{deep:true})
 </script>
 
 <template>
-
     <div class="store-item-header" @click="clickHeader">
         <va-list-item-label class="store-item-header-text">
             {{ item.caption }}
@@ -249,9 +259,10 @@ const headers = ref(false);
         </div>
         <div class="separator-list">
             <h2>Delimiter</h2>
+            {{parserParams}}
 
             <VaOptionList
-                v-model="selection"
+                v-model="parserParams.delimiter"
                 type="radio"
                 :options="['|', ';', ',','-',' ', 'tab']"
             />
@@ -260,7 +271,30 @@ const headers = ref(false);
                 label="Header in first row"
                 v-model="headers"
                 />
+            <VaCheckbox
+                label="Skip empty Lines"
+                v-model="parserParams.skip_empty_lines"
+            />
         </div>
-        <<<<>>>>
+        <VaInput
+            label="von Zeile"
+            v-model="parserParams.from"
+            type="number"
+        >
+
+        </VaInput>
+        <VaInput
+            label="bis Zeile"
+            v-model="parserParams.to"
+            type="number"
+        >
+
+        </VaInput>
+        <h2>datetime</h2>
+        <VaOptionList
+            label="unixtime?"
+            v-model="parserParams.unixtimers"
+            :options="item.getHeader()"
+        />
     </div>
 </template>
