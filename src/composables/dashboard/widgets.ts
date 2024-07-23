@@ -73,6 +73,9 @@ export function useWidgets() {
                 const ref = instance?.refs[
                     `${key}_component`
                 ]?.[0] as ISerializable & IReactiveWidget;
+                const refWrapper = instance?.refs[
+                    `${key}_wrapper`
+                    ]?.[0] as ISerializable & IReactiveWidget;
                 if (ref) {
                     if (parsed[key].store) {
                         const store = storeManager.getStore(parsed[key].store);
@@ -82,6 +85,12 @@ export function useWidgets() {
                     Object.keys(parsed[key]).forEach((setting) => {
                         console.log(parsed[key][setting], setting);
                         ref.setSetting(setting, parsed[key][setting]);
+                    });
+                }
+                if(refWrapper && parsed[key+'_wrapper']){
+                    Object.keys(parsed[key+'_wrapper']).forEach((setting) => {
+                        console.log(parsed[key+'_wrapper'][setting], setting);
+                        refWrapper.setSetting(setting, parsed[key+'_wrapper'][setting]);
                     });
                 }
             });
