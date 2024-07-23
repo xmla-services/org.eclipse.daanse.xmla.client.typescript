@@ -19,13 +19,25 @@ export class XMLAComposer implements Composer<XMLASelector> {
     getSelectorsY() {
         return this.selectorY;
     }
-    setSelectorY(index: number, selector: XMLASelector) {
-        if (this.selectorY[index]) {
-            this.selectorY[index] = selector;
+    setSelectorY(selector: XMLASelector, value: boolean) {
+        console.log(selector, value);
+        const existing = this.selectorY.find((e) => e.id === selector.id);
+        if (existing && value === false) {
+            this.selectorY = this.selectorY.filter((e) => e.id !== selector.id);
+        } else {
+            this.selectorY.push({
+                ...selector,
+            });
         }
+
+        console.log(this.selectorY);
+        // if (this.selectorY[index]) {
+        //     this.selectorY[index] = selector;
+        // }
     }
 
     setSelectorX(selector: XMLASelector) {
+        console.log(selector);
         this.selectorX = selector;
     }
     getSelectorX() {
@@ -47,7 +59,7 @@ export class XMLAComposer implements Composer<XMLASelector> {
             try {
                 return {
                     //@ts-ignore
-                    data: this.data.map((e) => e[this.selectorX!.header]),
+                    data: this.data[this.selectorX!.header],
                     title: this.selectorX?.header,
                     from: this.selectorX,
                 } as AxisData;
@@ -68,10 +80,12 @@ export class XMLAComposer implements Composer<XMLASelector> {
                 try {
                     ret.push({
                         //@ts-ignore
-                        data: this.data.map((e) => {
+                        data: this.data[sel.header].map((e, i) => {
+                            console.log(this.selectorX);
+                            if (!this.selectorX?.header) return;
                             return {
-                                x: e[this.selectorX!.header],
-                                y: e[sel.header],
+                                y: parseInt(e),
+                                x: this.data[this.selectorX.header][i],
                             };
                         }),
                         title: sel.header,
@@ -79,6 +93,8 @@ export class XMLAComposer implements Composer<XMLASelector> {
                     } as AxisData);
                 } catch (e) {}
             });
+            console.log(ret);
+            console.log(this.data);
             return ret;
         });
     }

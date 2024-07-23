@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, type Ref, watch } from "vue";
+import { ref, type Ref, watch, computed } from "vue";
 import MeasureSelectionModal from "@/components/Modals/MeasureSelectionModal.vue";
 import AxisSelectionModal from "@/components/Modals/AxisSelectionModal.vue";
 import FilterSelectionModal from "@/components/Modals/FilterSelectionModal.vue";
 import { parseRequestToTable } from "@/utils/MdxRequests/MdxRequestHelper";
+import type { AxisSettings } from "@/plugins/charts/widgets/BarChartWidgetSettings.vue";
+import type { IChartComponent } from "chart.js/dist/core/core.typedRegistry";
+import type { XMLAComposer } from "../../impl/XMLAComposer";
 
 const measureSelectionModal = ref() as Ref<any>;
 const axisSelectionModal = ref() as Ref<any>;
@@ -13,6 +16,12 @@ const model = defineModel() as any;
 
 console.log(model.value);
 const store = ref(model.value.getStore());
+const headers = ref([] as any[]);
+
+const props = defineProps<{
+    axes: { [key: string]: AxisSettings };
+    component: IChartComponent;
+}>();
 
 const selectedMeasures = ref([] as MDSchemaMeasure[]);
 const selectedRows = ref([] as ConfiguredHierarchy[]);
@@ -152,8 +161,35 @@ const getData = async () => {
     };
 
     const mdxResponce = await store.value.getData(requestParams);
+    const parsedTable = parseRequestToTable(mdxResponce, 0) as any;
+    model.value.setData(parsedTable);
+    console.log(parsedTable);
+    headers.value = Object.keys(parsedTable).map((key) => ({
+        header: key,
+    }));
 
     console.log(parseRequestToTable(mdxResponce, 0));
+};
+
+const axis_names = computed((e) => {
+    return Object.keys(props.axes).filter((name) => name != "x");
+});
+
+const xSel = computed({
+    get: () => {
+        return model.value?.getSelectorX();
+    },
+    set: (val) => {
+        model.value?.setSelectorX(val);
+    },
+});
+
+const ySel = computed(() => {
+    return (model.value?.getSelectorsY() as CSVSelector[]).map((e) => e.header);
+});
+
+const updateSelectorY = (selector, value) => {
+    model.value?.setSelectorY(selector, value);
 };
 </script>
 
@@ -184,7 +220,7 @@ const getData = async () => {
                             preset="secondary"
                             round
                             :color="item.filters.enabled ? '#4CAF50' : ''"
-                            @click="openFiltersModal(store, 'filters', item.id)"
+                            @click="openFiltersModal(store, 'filters')"
                         />
                         <VaButton
                             icon="remove"
@@ -219,7 +255,7 @@ const getData = async () => {
                             preset="secondary"
                             round
                             :color="item.filters.enabled ? '#4CAF50' : ''"
-                            @click="openFiltersModal(store, 'rows', item.id)"
+                            @click="openFiltersModal(store, 'rows')"
                         />
                         <VaButton
                             icon="remove"
@@ -254,7 +290,7 @@ const getData = async () => {
                             preset="secondary"
                             round
                             :color="item.filters.enabled ? '#4CAF50' : ''"
-                            @click="openFiltersModal(store, 'cols', item.id)"
+                            @click="openFiltersModal(store, 'cols')"
                         />
                         <VaButton
                             icon="remove"
@@ -272,7 +308,7 @@ const getData = async () => {
                         icon="add"
                         preset="secondary"
                         round
-                        @click="openMeasureSelectionModal(store)"
+                        @click="openMeasureSelectionModal()"
                     />
                 </div>
                 <div class="query_designer-area">
@@ -291,6 +327,51 @@ const getData = async () => {
                             @click="removeMeasure(measure.MEASURE_UNIQUE_NAME)"
                         />
                     </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <div>xAxis:</div>
+                <div>
+                    <VaSelect
+                        v-model="xSel"
+                        :options="headers"
+                        text-by="header"
+                        placeholder="Select an header for X"
+                    />
+                </div>
+            </div>
+            <div>
+                <div>yAxis:</div>
+                <div v-for="name in axis_names" :key="name">
+                    {{ name }}
+                    <template v-for="head in headers" :key="head.header">
+                        <div>
+                            <VaCheckbox
+                                :label="head.header"
+                                :model-value="ySel.includes(head.header)"
+                                @update:model-value="
+                                    (event) => updateSelectorY(head, event)
+                                "
+                            />
+                        </div>
+                        <!-- :model-value="
+                                axisAssignment[name]
+                                    ? !!axisAssignment[name].find(
+                                          (e) => e.id == head.id,
+                                      )
+                                    : false
+                            "
+                            @update:model-value="
+                                updateAxisAssignment(
+                                    name,
+                                    head,
+                                    $event,
+                                    axisAssignment,
+                                )
+                            " -->
+                    </template>
                 </div>
             </div>
         </div>

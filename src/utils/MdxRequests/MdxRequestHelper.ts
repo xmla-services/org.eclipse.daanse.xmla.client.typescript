@@ -292,6 +292,8 @@ const parseRequestToTable = (mdxResponce, mainAxis) => {
             });
         });
     }
+
+    return table;
     console.log(table);
 };
 

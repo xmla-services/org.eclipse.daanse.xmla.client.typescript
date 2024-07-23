@@ -143,6 +143,7 @@ const chartData = computed(() => {
         }
         return "y";
     };
+    console.log(chartDataComposer.getDataForMergedAxisX());
     if (settings.value.composer.length > 0) {
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,

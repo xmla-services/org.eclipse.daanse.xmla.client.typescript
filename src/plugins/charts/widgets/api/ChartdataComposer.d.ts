@@ -37,6 +37,7 @@ export interface CSVSelector extends Selector{
 export interface XMLASelector extends Selector{
     type:HeaderType;
     header?:string;
+    selected?:boolean;
 }
 export interface STASelector extends Selector{
     things?:Thing[];
