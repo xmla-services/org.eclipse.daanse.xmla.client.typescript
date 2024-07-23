@@ -12,16 +12,14 @@ Contributors: Smart City Jena
 import { ref, type Ref, inject } from "vue";
 import type { TinyEmitter } from "tiny-emitter";
 
-export function useStore<Type extends IStore>(eventBus, updateFn?, watcher?) {
+export function useStore<Type extends IStore>(
+    eventBus: TinyEmitter,
+    updateFn?,
+    watcher?,
+) {
     const data = ref({});
     const store = ref(null) as unknown as Ref<Type>;
-    let EventBus: TinyEmitter;
-
-    if (!eventBus) {
-        EventBus = inject("customEventBus") as TinyEmitter;
-    } else {
-        EventBus = eventBus;
-    }
+    const EventBus = eventBus;
 
     if (!updateFn) {
         updateFn = async () => {
