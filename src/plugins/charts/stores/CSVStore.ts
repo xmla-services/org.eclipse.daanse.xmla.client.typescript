@@ -15,6 +15,7 @@ import type RESTDatasource from "@/dataSources/RestDatasource";
 import BaseStore from "@/stores/Widgets/BaseStore";
 import { useErrorHandler } from "@/composables/dashboard/errorToast";
 import {parse} from "csv-parse/browser/esm/sync";
+import moment from "moment";
 
 export default class CSVStore extends BaseStore implements IStore  {
     public static readonly TYPE = 'CSV';
@@ -30,6 +31,37 @@ export default class CSVStore extends BaseStore implements IStore  {
     private runtimeParams: IStoreParams = {};
     private errorToast: any;
 
+    private unixtimers:any = [];
+    private cast =  (value, context) => {
+            if(context.header){
+        this.unixtimers = [];
+        return value
+            }
+
+        if(this.parserParams.unixtimers.includes(context.column) ){
+            return  new Date(parseInt(value)*1000)
+        }
+        if(!context.quoting){
+            return ~~value
+        }
+
+        return value;
+    };
+    private columns = (header)=>{
+        this.header = header;
+        return header
+    };
+    private parserParams: any = {
+
+        cast: this.cast,
+        cast_date: true,
+        unixtimers: [],
+    columns:this.columns,
+    skip_empty_lines: true,
+    from:1,
+    to:undefined,
+    delimiter:','
+    }
     private header:string[] = [];
     public type = CSVStore.TYPE;
 
@@ -72,7 +104,7 @@ export default class CSVStore extends BaseStore implements IStore  {
         this.registerForDataSourceEvents();
     }
 
-    async getData(): Promise<string> {
+    async getData(parseOnly=false): Promise<string> {
         try {
             let requestTemplate = this.requestTemplate;
 
@@ -88,32 +120,13 @@ export default class CSVStore extends BaseStore implements IStore  {
             const datasource = this.datasourceManager.getDatasource(this.datasourceId);
             const astring = (await datasource?.getData(requestTemplate,true)) as string;
 
-            let json = parse(astring, {
-                cast: (value, context) => {
-                    if(context.header){
-                        return value
-                    }
-                    if(context.column == 'zeit'){
-                        return  new Date(parseInt(value)*1000)
-                    }
-                    if(!context.quoting){
-                        return ~~value
-                    }
-
-                    return value;
-                },
-                columns: (header)=>{
-                   this.header = header;
-                    return header
-                },
-                skip_empty_lines: true
-            });
-            let mapa = {}
+            let json = parse(astring, this.parserParams);
+            /*let mapa = {}
             json.forEach(elm=>{
                 mapa[elm['zeit']]=elm;
             })
 
-            json= Array.from(Object.values(mapa));
+            json= Array.from(Object.values(mapa));*/
             //let keys = json[0].map(e=>e['zeit']);
 
             return json;
@@ -130,15 +143,21 @@ export default class CSVStore extends BaseStore implements IStore  {
         return this.datasourceManager.getDatasource(this.datasourceId);
     }
 
-    setOptions({ caption = "", requestTemplate = "" }): void {
+    setOptions({ caption = "", requestTemplate = "" ,parserParams={}}): void {
         this.caption = caption;
         this.requestTemplate = requestTemplate;
-
+        this.parserParams = parserParams;
         this.calculateParams();
         console.log("EMITED UPDATE", this.id);
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
-
+    setParseParams(parserParams){
+        this.parserParams = parserParams;
+        this.calculateParams();
+        console.log("EMITED UPDATE", this.id);
+        //this.getData();
+        this.eventBus.emit(`UPDATE:${this.id}`);
+    }
     updateEvents(events) {
         console.log(events);
         this.initedEvents.forEach((e) => {
@@ -192,6 +211,9 @@ export default class CSVStore extends BaseStore implements IStore  {
     getHeader(){
         return this.header;
     }
+    getParserParams(){
+        return this.parserParams;
+    }
 
     getState() {
         return {
@@ -201,6 +223,7 @@ export default class CSVStore extends BaseStore implements IStore  {
             events: this.events,
             datasourceId: this.datasourceId,
             params: this.params,
+            parserParams:this.parserParams,
             type: "CSV",
         };
     }
@@ -212,6 +235,11 @@ export default class CSVStore extends BaseStore implements IStore  {
         this.events = state.events;
         this.datasourceId = state.datasourceId;
         this.params = state.params;
+        if(state.parserParams){
+            this.parserParams = state.parserParams;
+            this.parserParams['columns']=this.columns;
+            this.parserParams['cast']=this.cast;
+        }
         this.calculateParams();
         this.updateEvents(this.events);
     }
