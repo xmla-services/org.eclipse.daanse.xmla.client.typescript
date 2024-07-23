@@ -160,7 +160,8 @@ watch(
 );
 </script>
 
-<template>
+<template class="csvstoreitem">
+
     <div class="store-item-header" @click="clickHeader">
         <va-list-item-label class="store-item-header-text">
             {{ item.caption }}
@@ -279,6 +280,18 @@ watch(
             <h2>{{ t("SidebarStoreList.CSVAStoreListItem.delimiter") }}</h2>
 
             <div class="pad">
+            <VaOptionList
+                v-model="parserParams.delimiter" class="flex"
+                type="radio"
+                :options="['|', ';', ',','-',' ', 'tab']"
+            />
+            </div>
+            <h2>{{ t('SidebarStoreList.CSVAStoreListItem.header') }}</h2>
+            <div class="pad">
+            <VaCheckbox
+                :label="t('SidebarStoreList.CSVAStoreListItem.header_in_fist_row')"
+                v-model="headers"
+            <div class="pad">
                 <VaOptionList
                     v-model="parserParams.delimiter"
                     class="flex"
@@ -336,6 +349,10 @@ watch(
             </div>
         </div>
     </div>
+    </div>
+
+
+
 </template>
 <style lang="scss">
 .store-item {
