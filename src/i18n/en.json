@@ -50,9 +50,9 @@
     "caption": "Caption",
     "dataEndpoint": "Data endpoint",
     "newStore": "New Store",
-    "dataSourcesTitle": "Datasources",
+    "dataSourcesTitle": "Connections:",
     "noAvailableStores": "No stores available",
-    "addDatasourceButton": "Add datasource",
+    "addDatasourceButton": "Add connection",
     "storeListItem": {
       "params": "Params",
       "events": "Events",
@@ -62,16 +62,27 @@
       "catalog": "Catalog",
       "cube": "Cube",
       "rowsHierarchy": "Rows hierarchy",
-      "colsHierarchy:": "Cols hierarchy",
+      "colsHierarchy": "Cols hierarchy",
       "measure": "Measure"
     },
-    "dataTable": {
+    "StoreLabels": {
       "caption": "Caption",
       "type": "Type",
       "url": "Url",
       "name": "Name",
       "value": "Value"
-    }
+    },
+      "CSVAStoreListItem": {
+          "header": "Header",
+          "delimiter": "Delimiter",
+          "header_in_fist_row": "Header in fist Row",
+          "range": "Range",
+          "from": "from Line",
+          "to": "to Line",
+          "skip": "Skip empty Lines",
+          "datetime": "DateTime Fields",
+          "preview": "Preview"
+      }
   },
 
   "StoreConfigurationModal": {
@@ -107,7 +118,7 @@
     "fill": "Fill",
     "none": "None"
   },
-  
+
   "Widgets": {
     "selectStore": "Select store",
     "storeSettingsTitle": "Store settings",
@@ -212,7 +223,7 @@
     "horizontalRule": "horizontal rule",
     "hardBreak": "hard break",
     "undo": "undo",
-    "redo": "redo" 
+    "redo": "redo"
   },
 
   "TableWidget": {

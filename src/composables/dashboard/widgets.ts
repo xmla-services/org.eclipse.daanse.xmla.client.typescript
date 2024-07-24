@@ -8,8 +8,9 @@
   Contributors: Smart City Jena
 
 */
-import { ref, getCurrentInstance } from "vue";
+import { ref, getCurrentInstance, nextTick } from "vue";
 import { enabledWidgets, widgetNames } from "@/components/Widgets";
+import { useStoreManager } from "../storeManager";
 
 declare interface Widget {
     id: string;
@@ -27,6 +28,7 @@ declare interface Widget {
 
 export function useWidgets() {
     const instance = getCurrentInstance();
+    const storeManager = useStoreManager();
     const widgets = ref<Widget[]>([]);
 
     const widgetsStorage: ISerializable = {
@@ -39,8 +41,13 @@ export function useWidgets() {
 
                 const componentRef = refs[
                     `${widget.id}_component`
-                ] as ISerializable[];
+                ] as (ISerializable & IReactiveWidget)[];
                 state[widget.id] = componentRef[0].getState();
+                state[widget.id].type = widget.component;
+
+                if (componentRef[0].store) {
+                    state[widget.id].store = componentRef[0].store.id;
+                }
 
                 const wrapperRef = refs[
                     `${widget.id}_wrapper`
@@ -51,7 +58,43 @@ export function useWidgets() {
             return JSON.stringify(state);
         },
         loadState: (state) => {
-            console.warn("Not implemented", state);
+            const parsed = JSON.parse(state);
+
+            Object.keys(parsed).forEach(async (key) => {
+                if (key.includes("_wrapper")) return;
+                widgets.value.push({
+                    id: key,
+                    component: parsed[key].type,
+                    caption: "Test",
+                });
+                delete parsed[key].type;
+
+                await nextTick();
+                const ref = instance?.refs[
+                    `${key}_component`
+                ]?.[0] as ISerializable & IReactiveWidget;
+                const refWrapper = instance?.refs[
+                    `${key}_wrapper`
+                    ]?.[0] as ISerializable & IReactiveWidget;
+                if (ref) {
+                    if (parsed[key].store) {
+                        const store = storeManager.getStore(parsed[key].store);
+                        ref.setStore(store);
+                    }
+
+                    Object.keys(parsed[key]).forEach((setting) => {
+                        console.log(parsed[key][setting], setting);
+                        ref.setSetting(setting, parsed[key][setting]);
+                    });
+                }
+                if(refWrapper && parsed[key+'_wrapper']){
+                    Object.keys(parsed[key+'_wrapper']).forEach((setting) => {
+                        console.log(parsed[key+'_wrapper'][setting], setting);
+                        refWrapper.setSetting(setting, parsed[key+'_wrapper'][setting]);
+                    });
+                }
+            });
+            console.log(parsed);
         },
     };
 

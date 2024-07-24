@@ -27,48 +27,48 @@ import ButtonControl from "@/components/Controls/Button/ButtonControl.vue";
 import InputControl from "@/components/Controls/Input/InputControl.vue";
 
 export const enabledWidgets = {
-  // Widgets
-  ImageWidget,
-  TextWidget,
-  SvgWidget,
-  RepeatableSvgWidget,
-  ProgressWidget,
-  VideoWidget,
-  IconWidget,
-  RichTextWidget,
-  TableWidget,
-  PivotTableWidget,
-  // Controls
-  SwitchControl,
-  SelectControl,
-  DateControl,
-  TimeControl,
-  ColorControl,
-  ButtonControl,
-  InputControl,
+    // Widgets
+    ImageWidget,
+    TextWidget,
+    SvgWidget,
+    RepeatableSvgWidget,
+    ProgressWidget,
+    VideoWidget,
+    IconWidget,
+    RichTextWidget,
+    TableWidget,
+    PivotTableWidget,
+    // Controls
+    SwitchControl,
+    SelectControl,
+    DateControl,
+    TimeControl,
+    ColorControl,
+    ButtonControl,
+    InputControl,
 };
 
 export const widgetNames = [
-  // Widgets
-  { name: "ImageWidget", label: "Image Widget" },
-  { name: "TextWidget", label: "Text Widget" },
-  { name: "SvgWidget", label: "SVG Widget" },
-  { name: "RepeatableSvgWidget", label: "Repeatable SVG Widget" },
-  { name: "ProgressWidget", label: "Progress Widget" },
-  { name: "VideoWidget", label: "Video Widget" },
-  { name: "IconWidget", label: "Icon Widget" },
-  { name: "RichTextWidget", label: "Rich Text Widget" },
-  { name: "TableWidget", label: "Table Widget" },
-  { name: "PivotTableWidget", label: "Pivot Table Widget" },
+    // Widgets
+    { name: "ImageWidget", label: "Image Widget" },
+    { name: "TextWidget", label: "Text Widget" },
+    { name: "SvgWidget", label: "SVG Widget" },
+    { name: "RepeatableSvgWidget", label: "Repeatable SVG Widget" },
+    { name: "ProgressWidget", label: "Progress Widget" },
+    { name: "VideoWidget", label: "Video Widget" },
+    { name: "IconWidget", label: "Icon Widget" },
+    { name: "RichTextWidget", label: "Rich Text Widget" },
+    { name: "TableWidget", label: "Table Widget" },
+    { name: "PivotTableWidget", label: "Pivot Table Widget" },
 
-  // Controls
-  { name: "SwitchControl", label: "Switch Control" },
-  { name: "SelectControl", label: "Select Control" },
-  { name: "DateControl", label: "Date Control" },
-  { name: "TimeControl", label: "Time Control" },
-  { name: "ColorControl", label: "Color Control" },
-  { name: "ButtonControl", label: "Button Control" },
-  { name: "InputControl", label: "Input Control" },
+    // Controls
+    { name: "SwitchControl", label: "Switch Control" },
+    { name: "SelectControl", label: "Select Control" },
+    { name: "DateControl", label: "Date Control" },
+    { name: "TimeControl", label: "Time Control" },
+    { name: "ColorControl", label: "Color Control" },
+    { name: "ButtonControl", label: "Button Control" },
+    { name: "InputControl", label: "Input Control" },
 ];
 
 // TODO: move settings components def here

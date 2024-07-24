@@ -12,74 +12,97 @@ Contributors: Smart City Jena
 import { usePromisifiedModal } from "@/composables/promisifiedModal";
 import type XMLADatasource from "@/dataSources/XmlaDatasource";
 import type { XMLAStore } from "@/stores/Widgets/XMLAStore";
-import { ref, type Ref } from "vue";
+import { ref } from "vue";
 
-// const url = "https://ssemenkoff.dev/emondrian/xmla";
+interface AxisSelectionModalParams {
+    store: XMLAStore;
+    selectedHierarchies: ConfiguredHierarchy[];
+}
+
 export default {
-  name: "AxisSelectionModal",
-  setup() {
-    const hierarchyList = ref([] as MDSchemaHierarchy[]);
-    const selectedHierarchies = ref([] as MDSchemaHierarchy[]);
+    name: "AxisSelectionModal",
+    setup() {
+        const hierarchyList = ref([] as ConfiguredHierarchy[]);
+        const selectedHierarchies = ref([] as ConfiguredHierarchy[]);
 
-    const opened = async (data) => {
-      const store = data.store as XMLAStore;
-      const preselectedHierarchies = data.selectedHierarchies as MDSchemaHierarchy[];
-      const dataSource = store.getDatasource() as XMLADatasource;
+        const opened = async (data: AxisSelectionModalParams) => {
+            const store = data.store;
+            const preselectedHierarchies = data.selectedHierarchies;
+            const dataSource = store.getDatasource() as XMLADatasource;
 
-      const measures = await dataSource.getHierarchies();
-      selectedHierarchies.value = preselectedHierarchies;
+            const hierarchies = await dataSource.getHierarchies();
+            selectedHierarchies.value = preselectedHierarchies;
 
-      console.log(measures);
-      hierarchyList.value = measures;
-    };
+            hierarchyList.value = hierarchies.map((hierarchy) => {
+                const selected = preselectedHierarchies.find(
+                    (selectedHierarchy) =>
+                        selectedHierarchy.id ===
+                        hierarchy.HIERARCHY_UNIQUE_NAME,
+                );
 
-    const { isOpened, run, close } = usePromisifiedModal(() => {
-      selectedHierarchies.value = [];
-      hierarchyList.value = [];
-    }, opened);
+                if (selected) {
+                    return selected;
+                }
 
-    return {
-      isOpened,
-      run,
-      close,
-      hierarchyList,
-      selectedHierarchies,
-    };
-  },
-  methods: {
-    ok() {
-      this.close(this.selectedHierarchies);
+                return {
+                    id: hierarchy.HIERARCHY_UNIQUE_NAME,
+                    caption: hierarchy.HIERARCHY_NAME,
+                    originalItem: hierarchy,
+                    filters: {
+                        enabled: false,
+                        multipleChoise: false,
+                    },
+                } as ConfiguredHierarchy;
+            });
+        };
+
+        const { isOpened, run, close } = usePromisifiedModal(() => {
+            selectedHierarchies.value = [];
+            hierarchyList.value = [];
+        }, opened);
+
+        return {
+            isOpened,
+            run,
+            close,
+            hierarchyList,
+            selectedHierarchies,
+        };
     },
-  },
+    methods: {
+        ok() {
+            this.close(this.selectedHierarchies);
+        },
+    },
 };
 </script>
 <template>
-  <va-modal
-    :modelValue="isOpened"
-    no-padding
-    class="modal"
-    @ok="ok"
-    zIndex="10000000"
-  >
-    <template #content="{ ok }">
-      <va-card-title class="va-h6">Select measures</va-card-title>
-      <va-card-content>
-        <VaOptionList
-          v-model="selectedHierarchies"
-          :options="hierarchyList"
-          track-by="HIERARCHY_UNIQUE_NAME"
-          text-by="HIERARCHY_NAME"
-          class="measure_list"
-        />
-      </va-card-content>
-      <va-card-actions>
-        <va-button @click="ok">Ok!</va-button>
-      </va-card-actions>
-    </template>
-  </va-modal>
+    <va-modal
+        :modelValue="isOpened"
+        no-padding
+        class="modal"
+        @ok="ok"
+        zIndex="10000000"
+    >
+        <template #content="{ ok }">
+            <va-card-title class="va-h6">Select measures</va-card-title>
+            <va-card-content>
+                <VaOptionList
+                    v-model="selectedHierarchies"
+                    :options="hierarchyList"
+                    track-by="id"
+                    text-by="caption"
+                    class="measure_list"
+                />
+            </va-card-content>
+            <va-card-actions>
+                <va-button @click="ok">Ok!</va-button>
+            </va-card-actions>
+        </template>
+    </va-modal>
 </template>
 <style lang="scss" scoped>
 .measure_list {
-  padding: 20px 0;
+    padding: 20px 0;
 }
 </style>

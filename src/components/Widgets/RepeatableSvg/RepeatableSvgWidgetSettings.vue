@@ -105,13 +105,13 @@ onMounted(() => {
                     class="color-input"
                     :model-value="component.settings.activeItemStyles.fill"
                     :label="t('RepeatableSvgWidget.activeItemFill')"
-                    @update:model-value="component.setSetting('fill', $event)"
+                    @update:model-value="component.setSetting('activeItemStyles.fill', $event)"
                 />
                 <va-color-input
                     class="color-input"
                     :model-value="component.settings.activeItemStyles.stroke"
                     :label="t('RepeatableSvgWidget.activeItemStroke')"
-                    @update:model-value="component.setSetting('stroke', $event)"
+                    @update:model-value="component.setSetting('activeItemStyles.stroke', $event)"
                 />
             </div>
             <div class="colors">
@@ -119,13 +119,13 @@ onMounted(() => {
                     class="color-input"
                     :model-value="component.settings.defaultItemStyles.fill"
                     :label="t('RepeatableSvgWidget.defaultItemFill')"
-                    @update:model-value="component.setSetting('fill', $event)"
+                    @update:model-value="component.setSetting('defaultItemStyles.fill', $event)"
                 />
                 <va-color-input
                     class="color-input"
                     :model-value="component.settings.defaultItemStyles.stroke"
                     :label="t('RepeatableSvgWidget.defaultItemStroke')"
-                    @update:model-value="component.setSetting('stroke', $event)"
+                    @update:model-value="component.setSetting('defaultItemStyles.stroke', $event)"
                 />
             </div>
         </div>
