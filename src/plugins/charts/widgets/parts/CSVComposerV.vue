@@ -39,43 +39,30 @@ import type CSVStore from "@/plugins/charts/stores/CSVStore";
     const headers = computed(()=>{
         return (model.value?.getStore() as CSVStore).getHeader().map(head=>{return {header:head,id:uuidv4()}})
     })
-//[{header:'id',id:uuidv4()},{header:'item',id:uuidv4()},{header:"model",id:uuidv4()},{header:"bj",id:uuidv4()},{header:"gender",id:uuidv4()},{header:"markets",id:uuidv4()}];
+
     const updateSelectorY = (val,head,name)=>{
         if(!Object.keys(axisAssignment.value).includes(name)){
             axisAssignment.value[name]=[];
         }
         let items = model.value?.getSelectorsY();
         if(items){
-            const index = items!.findIndex((v:CSVSelector)=>v.id == head.id);
-            if(index!=-1){
-                if(!val){
-                    items.splice(index,1);
-                }
+            let index = -1;
+            let axis = undefined;
+            for(axis in items){
+                index = items![axis].findIndex((v:CSVSelector)=>v.header == head.header);
+                if(index!=-1)break;
+            }
 
-            }else {
-                //let selector = {header:head,id:uuidv4()}as CSVSelector;
-                items.push(head)
+            if(index!=-1) {
+
+                    items[axis].splice(index, 1);
 
             }
+        if (val) {
+            //let selector = {header:head,id:uuidv4()}as CSVSelector;
+            model.value?.addSelectorY(head, name);
         }
-        if(val){ //false => true
-            const searchkeys = Object.keys(axisAssignment.value).filter(k=>k!==name);
-            for(const akey of searchkeys){
-                const index = axisAssignment.value[akey].findIndex((v:CSVSelector)=>v.id == head.id);
-                if(index!=-1) {
-                    axisAssignment.value[akey].splice(index, 1);
-                }
-            }
-            axisAssignment.value[name].push(head);
-        } else{
-            const index = axisAssignment.value[name].findIndex((v:CSVSelector)=>v.id == head.id);
-            if(index!=-1){
-                axisAssignment.value[name].splice(index,1);
-            }
         }
-
-
-
 
     }
     const source = computed(()=>{
@@ -84,12 +71,21 @@ import type CSVStore from "@/plugins/charts/stores/CSVStore";
 const axis_names =computed((e)=>{
     return Object.keys(props.axes).filter((name)=>(name!='x'))
 })
-
+const checkvalue = computed(()=>{
+    return (name,head)=> {
+        let item = model.value?.getSelectorsY()[name];
+        if (item) {
+            let index = item!.findIndex((v: CSVSelector) => v.header == head.header);
+            if (index != -1) return true;
+        }
+        return false;
+    }
+})
 </script>
 
 <template>
 <div class="composer">
-
+    <h2>{{source}}</h2>
 
     <br>
 
@@ -110,7 +106,7 @@ const axis_names =computed((e)=>{
     <template v-for="head in headers">
 
 
-        <VaCheckbox :model-value="(axisAssignment[name])?!!(axisAssignment[name].find(e=>e.id==head.id)):false" @update:modelValue="(ev)=>updateSelectorY(ev,head,name)" :label="head.header">
+        <VaCheckbox :model-value="checkvalue(name,head)" @update:modelValue="(ev)=>updateSelectorY(ev,head,name)" :label="head.header">
 
 
         </VaCheckbox>

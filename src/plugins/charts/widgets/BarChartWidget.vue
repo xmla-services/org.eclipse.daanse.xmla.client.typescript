@@ -78,8 +78,6 @@ const props = withDefaults(defineProps<ITChartSettings>(), {
             display: true
         }
     },
-    axisAssignment:{},
-    test:{}
 } as any);
 const {settings,setSetting}=useSettings<ITChartSettings>(props);
 /*setSetting('axes.x',{
@@ -140,8 +138,8 @@ watch(()=>settings.value.composer,(composers)=>{
         let InitializedComposerds =[];
         composers.forEach((composer)=>{
             let composerClass = null;
-            if((composer as any).type){ //not instanciated
-                composerClass = useComposerManager().getComposerForStoreType((composer as any).type)
+            if((composer as any).store.type){ //not instanciated
+                composerClass = useComposerManager().getComposerForStoreType((composer as any).store.type)
             }
             if (composer instanceof composerClass) {
                 return;
@@ -201,7 +199,7 @@ const chartData= computed(()=>{
                 return {
                     label:e.title,
                     data:e.data,
-                    yAxisID:getAssignment(e.from!)
+                    yAxisID:e.from || "y",
                 }
             })
         }
