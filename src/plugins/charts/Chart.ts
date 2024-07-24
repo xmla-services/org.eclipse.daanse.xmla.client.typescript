@@ -4,6 +4,8 @@ import {enabledWidgets, widgetNames} from "@/components/Widgets";
 import {useStoreManager} from "@/composables/storeManager";
 import CSVStore from "@/plugins/charts/stores/CSVStore";
 import CSVStoreListItem from "@/plugins/charts/stores/CSVStoreListItem.vue";
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
+import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 
 export default {
 
@@ -16,7 +18,7 @@ export default {
         //const storemanger = container.get<StoreManagerI>(cid.UseStoreManager); // injection via inverserify
         //console.log(storemanger.register(...)) //register Store
         useStoreManager().registerStoreType(CSVStore);
-
+        useComposerManager().registerComposer(CSVComposer,CSVStore.TYPE);
 
 
 
