@@ -43,8 +43,7 @@ import type {
 } from "@/plugins/charts/widgets/api/ChartdataComposer";
 import type { TinyEmitter } from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
-import { CSVComposer } from "@/plugins/charts/impl/CSVComposer";
-import { XMLAComposer } from "@/plugins/charts/impl/XMLAComposer";
+import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 
 //import * as dateFns from 'date-fns';
@@ -58,35 +57,33 @@ import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 const settingsComponent = BarChartWidgetSettings;
 
 const props = withDefaults(defineProps<ITChartSettings>(), {
-    dataSets: [] as IDataSetSelector[],
+    //dataSets: [] as IDataSetSelector[],
     composer: [],
     axes: {
-        x: {
-            type: "timeseries",
-            offsetAfterAutoskip: true,
-            ticks: {
-                source: "data",
+        x:{
+            type:'timeseries',
+            offsetAfterAutoskip:true,
+            ticks:{
+                source:'data'
             },
 
-            backgroundColor: "#fff",
+            backgroundColor:'#fff',
+            stacked:false,
+            weight:2,
+            reverse:false,
+            display:true
+        },
+        y:{
+            type: 'category',
+            backgroundColor: '#fff',
             stacked: false,
             weight: 2,
             reverse: false,
-            display: true,
-        },
-        y: {
-            type: "category",
-            backgroundColor: "#fff",
-            stacked: false,
-            weight: 2,
-            reverse: false,
-            display: true,
-        },
+            display: true
+        }
     },
-    axisAssignment: {},
-    test: {},
 } as any);
-const { settings, setSetting } = useSettings<ITChartSettings>(props);
+const {settings,setSetting}=useSettings<ITChartSettings>(props);
 /*setSetting('axes.x',{
     type:'category',
     backgroundColor:'#fff',
@@ -105,46 +102,38 @@ setSetting('axes.y',{
 })*/
 const eventbus = inject("customEventBus") as TinyEmitter;
 const getStateComposeable = useSerialization(settings).getState;
-const { getDataFilterer } = useDataSetSelector();
+const {getDataFilterer} = useDataSetSelector();
 const stores = ref([]);
-const setStore = (store: Store) => {
-    console.log("setStore");
-    const storeData = useStore<Store>(eventbus);
-    storeData.setStore(store);
-    stores.value.push(storeData);
+const setStore =(store:Store)=>{
+    console.log('setStore')
+    const storeData = useStore<Store>(undefined,undefined,eventbus);
+    storeData.setStore(store)
+    stores.value.push(storeData)
     return storeData;
-};
-const getState = () => {
-    const state = deepUnref(getStateComposeable() as any);
-    for (let index of state.composer) {
-        delete index["data"];
+}
+const getState=()=>{
+    const state= deepUnref(getStateComposeable() as any);
+    for (let index of state.composer){
+        delete index['data']
     }
     return state;
-};
+}
 defineExpose({
-    setSetting,
-    settings,
-    settingsComponent,
-    setStore,
-    getState,
+  setSetting,
+  settings,
+  settingsComponent,
+  setStore,
+  getState,
 });
 
-onMounted(() => {
-    console.log(props);
+
+
+onMounted(()=>{
+    console.log(props)
 });
 
-ChartJS.register(
-    Title,
-    Tooltip,
-    Legend,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    LogarithmicScale,
-    TimeScale,
-    TimeSeriesScale,
-);
-Chart.defaults.backgroundColor = "#36A2EB00";
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,LogarithmicScale,TimeScale,TimeSeriesScale)
+Chart.defaults.backgroundColor = '#36A2EB00';
 const chartDataComposer = useChartDataComposer();
 
 chartDataComposer.setComposers(settings.value.composer);
@@ -153,8 +142,8 @@ watch(()=>settings.value.composer,(composers)=>{
         let InitializedComposerds =[];
         composers.forEach((composer)=>{
             let composerClass = null;
-            if((composer as any).type){ //not instanciated
-                composerClass = useComposerManager().getComposerForStoreType((composer as any).type)
+            if((composer as any).store.type){ //not instanciated
+                composerClass = useComposerManager().getComposerForStoreType((composer as any).store.type)
             }
             if (composer instanceof composerClass) {
                 return;
@@ -187,52 +176,54 @@ watch(()=>settings.value.composer,(composers)=>{
 
        settings.value.composer = InitializedComposerds;
         settings.value = settings.value;*/
-        }
-        chartDataComposer.setComposers(settings.value.composer);
-    },
-);
+    }
+    chartDataComposer.setComposers(settings.value.composer);
+})
+
 
 //chartDataComposer.setComposers(settings.value.composer);
 
-const chartData = computed(() => {
-    const getAssignment = (from: Selector) => {
-        const keys = Object.keys(settings.value.axisAssignment);
-        for (let akey of keys) {
-            let item = settings.value.axisAssignment[akey].find(
-                (e) => e.id == from.id,
-            );
-            if (item) {
-                return akey;
-                break;
-            }
-        }
-        return "y";
-    };
-    if (settings.value.composer && settings.value.composer.length > 0) {
+const chartData= computed(()=>{
+
+    const getAssignment=(from:Selector)=>{
+            const keys = Object.keys(settings.value.axisAssignment);
+       for (let akey of keys) {
+           let item = settings.value.axisAssignment[akey].find(e=>(e.id==from.id));
+           if(item) {
+               return akey;
+               break
+           }
+       }
+       return 'y';
+    }
+    if(settings.value.composer && settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
-            datasets: chartDataComposer.getDataForAxesY().value.map((e) => {
+            datasets: chartDataComposer.getDataForAxesY().value.map(e=>{
                 return {
-                    label: e.title,
-                    data: e.data,
-                    yAxisID: e.from || "y", // getAssignment(e.from!),
-                };
-            }),
-        };
-    } else {
+                    label:e.title,
+                    data:e.data,
+                    yAxisID:e.from || "y",
+                }
+            })
+        }
+    }else{
         return {
             labels: [],
-            datasets: [{ data: [] }],
-        };
+            datasets: [{data: []}]
+        }
     }
 
 });
-const chartOptions = computed(() => {
-    return {
-        responsive: true,
-        backgroundColor: "#00000000",
-        scales: settings.value.axes,
-    };
+   const chartOptions= computed(()=>{
+
+       return{
+           responsive: true,
+           backgroundColor:'#00000000',
+           scales:settings.value.axes
+
+       }
+
 });
 
 
@@ -244,36 +235,40 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-    <!--<div class="chart_container" v-if="settings">-->
+ <!--<div class="chart_container" v-if="settings">-->
 
-    <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
+      <Bar
+          id="my-chart-id"
+          :options="chartOptions"
+          :data="chartData"
+      />
 
-    <!--</div>-->
+<!--</div>-->
 </template>
 
 <style scoped>
 .text-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    gap: 1rem;
-    align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 1rem;
+  align-items: stretch;
 }
 
 .component {
-    overflow: hidden;
+  overflow: hidden;
 }
-.cmap_container {
-    width: 100%;
-    height: 100%;
-    position: relative;
+.cmap_container{
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 </style>
 <style>
-.holder {
-    width: 20px;
-    height: 20px;
-    background-color: #000;
+.holder{
+  width:20px;
+  height:20px;
+  background-color: #000;
 }
 </style>

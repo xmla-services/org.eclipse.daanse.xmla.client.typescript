@@ -38,15 +38,14 @@ export interface AxisSettings {
 }
 export interface ITChartSettings {
     baseMapUrl: string;
-    dataSets: IDataSetSelector[];
-    composer: Composer<Selector>[];
-    axes: {
-        x: AxisSettings;
-        y: AxisSettings;
-        y2: AxisSettings;
-        [key: string]: AxisSettings;
-    };
-    axisAssignment: { [key: string]: Composer<any> };
+
+    composer:Composer<Selector>[];
+    axes:{
+        x:AxisSettings,
+        y:AxisSettings,
+        y2:AxisSettings,
+        [key: string]:AxisSettings
+    }
 }
 
 
