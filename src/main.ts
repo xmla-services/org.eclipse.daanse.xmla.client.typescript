@@ -84,7 +84,10 @@ import MQTTDatasource from "@/dataSources/MqttDatasource";
 import {useStoreManager} from "@/composables/storeManager";
 import {XMLAStore} from "@/stores/Widgets/XMLAStore";
 import {Store} from "@/stores/Widgets/Store";
+import Chart from "@/plugins/charts/Chart";
+import CSVStore from "@/plugins/charts/stores/CSVStore";
 
+//@ts-ignore
 const app = createApp(App);
 
 const pinia = createPinia();
@@ -194,5 +197,7 @@ useStoreManager().registerStoreType(XMLAStore);
 useStoreManager().registerStoreType(Store);
 
 
+
+app.use(Chart);
 app.mount("#app");
 export default app;

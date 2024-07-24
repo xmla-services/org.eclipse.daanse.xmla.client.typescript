@@ -75,10 +75,14 @@ onMounted(() => {
         getData();
     }
 });
+const add =()=>{
+    component.setSetting('test',['hi'])
+}
 </script>
 
 <template>
     <va-collapse v-model="opened.widgetSection" :header="t('TextWidget.title')">
+        {{component}}
         <div class="settings-container">
             <div class="settings-block">
                 <va-input
@@ -95,6 +99,7 @@ onMounted(() => {
                         component.setSetting('fontSize', $event)
                     "
                 />
+                <button @click="add">add</button>
             </div>
             <div class="settings-block">
                 <va-color-input

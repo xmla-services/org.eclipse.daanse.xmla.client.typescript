@@ -8,7 +8,7 @@ SPDX-License-Identifier: EPL-2.0
 Contributors: Smart City Jena
 
 */
-import { ref, type Ref, watch } from "vue";
+import  {isRef, ref, type Ref, watch} from "vue";
 
 export function useSettings<Type>(props: any) {
     const settings = ref({}) as Ref<Type>;
@@ -19,15 +19,24 @@ export function useSettings<Type>(props: any) {
 
     const setSetting = (key, value) => {
         const keyArr = key.split(".");
-        let iter = settings.value;
+        let iter:any = settings.value;
 
-        keyArr.forEach((key) => {
-            if (typeof iter[key] === "object") {
-                iter = iter[key];
+
+        keyArr.forEach((akey,index,array) => {
+
+            if (!(akey in iter)){
+                iter[akey]={}
+            }
+            if (typeof iter[akey] === "object" && index!=(array.length-1)) {
+
+                iter = iter[akey];
+
             } else {
-                iter[key] = value;
+                iter[akey] = value;
             }
         });
+
+        settings.value = {...settings.value};
     };
 
     watch(props, () => {
