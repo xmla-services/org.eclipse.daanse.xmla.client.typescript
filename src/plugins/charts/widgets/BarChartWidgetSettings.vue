@@ -49,6 +49,7 @@ export interface ITChartSettings {
     axisAssignment: { [key: string]: Composer<any> };
 }
 
+
 interface IChartComponent {
     store: Store | XMLAStore;
     settings: ITChartSettings;
