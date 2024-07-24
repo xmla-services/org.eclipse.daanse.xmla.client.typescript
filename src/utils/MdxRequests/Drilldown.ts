@@ -501,7 +501,6 @@ export async function getColsDrilldownRequestString(
             });
 
             if (levels.length) {
-                console.log(levels);
                 for (let i = 0; i < levels.length; i++) {
                     const joinedMembers = levels[i]
                         .map((e) => e.UName)

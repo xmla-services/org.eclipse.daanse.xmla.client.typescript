@@ -39,7 +39,6 @@ export function findMaxinArrayByField(fieldname:string|string[], arraylike:objec
     }, init);
   }
   catch (e){
-    console.log(e);
     throw new Error(`${fieldname} not a key`)
   }
 

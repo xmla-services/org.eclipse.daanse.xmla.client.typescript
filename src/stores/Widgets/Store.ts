@@ -75,7 +75,6 @@ export class Store extends BaseStore implements IStore {
             const paramsList = Object.keys(this.params);
 
             paramsList.forEach((e) => {
-                console.log(e);
                 requestTemplate = requestTemplate.replace(
                     `{${e}}`,
                     this.runtimeParams[e],
@@ -106,12 +105,10 @@ export class Store extends BaseStore implements IStore {
         this.requestTemplate = requestTemplate;
 
         this.calculateParams();
-        console.log("EMITED UPDATE", this.id);
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
 
     updateEvents(events) {
-        console.log(events);
         this.initedEvents.forEach((e) => {
             this.eventBus.off(e.name, e.cb);
         });

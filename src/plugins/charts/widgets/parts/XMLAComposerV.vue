@@ -166,6 +166,7 @@ const getData = async () => {
     console.log(parsedTable);
     headers.value = Object.keys(parsedTable).map((key) => ({
         header: key,
+        id: key,
     }));
 
     console.log(parseRequestToTable(mdxResponce, 0));
@@ -184,12 +185,14 @@ const xSel = computed({
     },
 });
 
-const ySel = computed(() => {
-    return (model.value?.getSelectorsY() as CSVSelector[]).map((e) => e.header);
-});
+const updateSelectorY = (value, axisName) => {
+    const selection = value.map((e) => headers.value.find((h) => h.id === e));
+    model.value?.setSelectorY(selection, axisName);
+    // model.value?.setSelectorY(selector, value, axisName);
+};
 
-const updateSelectorY = (selector, value) => {
-    model.value?.setSelectorY(selector, value);
+const getAxisSelection = (axisName) => {
+    return model.value?.getSelectorY(axisName).map((e) => e.id);
 };
 </script>
 
@@ -255,7 +258,7 @@ const updateSelectorY = (selector, value) => {
                             preset="secondary"
                             round
                             :color="item.filters.enabled ? '#4CAF50' : ''"
-                            @click="openFiltersModal(store, 'rows')"
+                            @click="openFiltersModal('rows', item.id)"
                         />
                         <VaButton
                             icon="remove"
@@ -290,7 +293,7 @@ const updateSelectorY = (selector, value) => {
                             preset="secondary"
                             round
                             :color="item.filters.enabled ? '#4CAF50' : ''"
-                            @click="openFiltersModal(store, 'cols')"
+                            @click="openFiltersModal('cols', item.id)"
                         />
                         <VaButton
                             icon="remove"
@@ -345,33 +348,18 @@ const updateSelectorY = (selector, value) => {
             <div>
                 <div>yAxis:</div>
                 <div v-for="name in axis_names" :key="name">
-                    {{ name }}
-                    <template v-for="head in headers" :key="head.header">
-                        <div>
-                            <VaCheckbox
-                                :label="head.header"
-                                :model-value="ySel.includes(head.header)"
-                                @update:model-value="
-                                    (event) => updateSelectorY(head, event)
-                                "
-                            />
-                        </div>
-                        <!-- :model-value="
-                                axisAssignment[name]
-                                    ? !!axisAssignment[name].find(
-                                          (e) => e.id == head.id,
-                                      )
-                                    : false
-                            "
-                            @update:model-value="
-                                updateAxisAssignment(
-                                    name,
-                                    head,
-                                    $event,
-                                    axisAssignment,
-                                )
-                            " -->
-                    </template>
+                    <div>{{ name }}</div>
+                    <VaSelect
+                        :model-value="getAxisSelection(name)"
+                        @update:model-value="
+                            (event) => updateSelectorY(event, name)
+                        "
+                        :options="headers"
+                        text-by="header"
+                        value-by="id"
+                        multiple
+                        placeholder="Select an header for Y"
+                    />
                 </div>
             </div>
         </div>

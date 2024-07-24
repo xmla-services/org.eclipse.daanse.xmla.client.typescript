@@ -557,7 +557,6 @@ class XMLAApi {
             FROM ${cubename}
         `;
             }
-            console.log(mdxRequest);
         } else {
             mdxRequest = `
           SELECT
@@ -622,7 +621,6 @@ class XMLAApi {
     }
 
     public async getLevelChildMembers(level: MDSchemaLevel) {
-        console.log(level);
         const mdx = `
             SELECT {AddCalculatedMembers({${level.DIMENSION_UNIQUE_NAME}.${level.HIERARCHY_UNIQUE_NAME}.Levels(0).Members})} DIMENSION PROPERTIES MEMBER_TYPE ON 0, {} ON 1 FROM ${level.CUBE_NAME} CELL PROPERTIES CELL_ORDINAL
         `;
