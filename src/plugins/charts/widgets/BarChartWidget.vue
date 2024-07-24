@@ -101,15 +101,22 @@ setSetting('axes.y',{
     display: true
 })*/
 const eventbus = inject("customEventBus") as TinyEmitter;
-const { getState } = useSerialization(settings);
+const getStateComposeable = useSerialization(settings).getState;
 const { getDataFilterer } = useDataSetSelector();
 const stores = ref([]);
 const setStore = (store: Store) => {
     console.log("setStore");
-    const storeData = useStore<Store>(eventbus);
+    const storeData = useStore<Store>(undefined, undefined, eventbus);
     storeData.setStore(store);
     stores.value.push(storeData);
     return storeData;
+};
+const getState = () => {
+    const state = deepUnref(getStateComposeable() as any);
+    for (let index of state.composer) {
+        delete index["data"];
+    }
+    return state;
 };
 defineExpose({
     setSetting,
@@ -145,8 +152,6 @@ watch(
             let InitializedComposerds = [];
             composers.forEach((composer) => {
                 if (composer instanceof CSVComposer) {
-                    return;
-                } else if (composer instanceof XMLAComposer) {
                     return;
                 } else {
                     let composerObj = composer as any;
@@ -184,7 +189,6 @@ watch(
 const chartData = computed(() => {
     const getAssignment = (from: Selector) => {
         const keys = Object.keys(settings.value.axisAssignment);
-        console.log('assignment', settings.value.axisAssignment);
         for (let akey of keys) {
             let item = settings.value.axisAssignment[akey].find(
                 (e) => e.id == from.id,
@@ -197,23 +201,13 @@ const chartData = computed(() => {
         return "y";
     };
     if (settings.value.composer && settings.value.composer.length > 0) {
-        console.log('labels', chartDataComposer.getDataForMergedAxisX().value.data);
-        console.log('datasets', chartDataComposer.getDataForAxesY().value.map((e) => {
-                return {
-                    label: e.title,
-                    data: e.data,
-                    yAxisID: getAssignment(e.from!),
-                };
-            }));
-
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
             datasets: chartDataComposer.getDataForAxesY().value.map((e) => {
                 return {
                     label: e.title,
                     data: e.data,
-                    // yAxisID: getAssignment(e.from!),
-                    yAxisID: e.from || "y",
+                    yAxisID: e.from || "y", // getAssignment(e.from!),
                 };
             }),
         };
@@ -225,7 +219,6 @@ const chartData = computed(() => {
     }
 });
 const chartOptions = computed(() => {
-    console.log(settings.value.axes);
     return {
         responsive: true,
         backgroundColor: "#00000000",
