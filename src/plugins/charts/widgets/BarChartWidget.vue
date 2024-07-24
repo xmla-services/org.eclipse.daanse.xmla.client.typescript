@@ -45,6 +45,7 @@ import type { TinyEmitter } from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
 import { CSVComposer } from "@/plugins/charts/impl/CSVComposer";
 import { XMLAComposer } from "@/plugins/charts/impl/XMLAComposer";
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 
 //import * as dateFns from 'date-fns';
 //import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
@@ -147,52 +148,42 @@ Chart.defaults.backgroundColor = "#36A2EB00";
 const chartDataComposer = useChartDataComposer();
 
 chartDataComposer.setComposers(settings.value.composer);
-watch(
-    () => settings.value.composer,
-    (composers) => {
-        if (composers && composers.length > 0) {
-            let InitializedComposerds = [];
-            composers.forEach((composer) => {
-                if (composer instanceof CSVComposer) {
-                    return;
-                } else if (composer instanceof XMLAComposer) {
-                    return;
-                } else {
-                    let composerObj = composer as any;
-                    if (composer.type === "XMLA") {
-                        let xmlaCo = new XMLAComposer();
-
-                        let store = useStoreManager().getStore(
-                            composerObj.store.id,
-                        );
-                        let configuredStore = setStore(store as Store);
-                        xmlaCo.setStore(configuredStore.store.value as IStore);
-
-                        xmlaCo.restoreState(composerObj);
-                        InitializedComposerds.push(xmlaCo);
-                    } else {
-                        let csvCo = new CSVComposer();
-                        csvCo.setSelectorX(composerObj.selectorX);
-                        for (let sely of composerObj.selectorY) {
-                            // csvCo.addSelectorY(sely);
-                        }
-
-                        let store = useStoreManager().getStore(
-                            composerObj.store.id,
-                        );
-                        let store2 = setStore(store as Store);
-                        csvCo.setStore(store2.store as IStore);
-                        csvCo.setData(store2.data);
-                        InitializedComposerds.push(csvCo);
-                    }
-                }
-            });
-
-            if (InitializedComposerds.length > 0) {
-                setSetting("composer", InitializedComposerds);
+watch(()=>settings.value.composer,(composers)=>{
+    if(composers && composers.length>0){
+        let InitializedComposerds =[];
+        composers.forEach((composer)=>{
+            let composerClass = null;
+            if((composer as any).type){ //not instanciated
+                composerClass = useComposerManager().getComposerForStoreType((composer as any).type)
             }
-            //@ts-ignore
-            /* props.composer = InitializedComposerds;
+            if (composer instanceof composerClass) {
+                return;
+            } else {
+                let composerObj = composer as any;
+                let aCo = new composerClass();
+                aCo.setSelectorX(composerObj.selectorX);
+                for (let sely in composerObj.selectorY) {
+                    composerObj.selectorY[sely].forEach(sel=>{
+                        aCo.addSelectorY(sel,sely);
+                    })
+
+                }
+
+                let store = useStoreManager().getStore(
+                    composerObj.store.id,
+                );
+                let store2 = setStore(store as Store);
+                aCo.setStore(store2.store as IStore);
+                aCo.setData(store2.data);
+                InitializedComposerds.push(aCo);
+            }
+        });
+
+        if (InitializedComposerds.length > 0) {
+            setSetting("composer", InitializedComposerds);
+        }
+        //@ts-ignore
+       /* props.composer = InitializedComposerds;
 
        settings.value.composer = InitializedComposerds;
         settings.value = settings.value;*/
@@ -234,6 +225,7 @@ const chartData = computed(() => {
             datasets: [{ data: [] }],
         };
     }
+
 });
 const chartOptions = computed(() => {
     return {
@@ -242,6 +234,13 @@ const chartOptions = computed(() => {
         scales: settings.value.axes,
     };
 });
+
+
+
+
+
+
+
 </script>
 
 <template>

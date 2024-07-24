@@ -15,18 +15,19 @@ export interface Composer<Selector>{
     setStore(store:IStore):void;
     getStore():IStore|undefined;
     setSelectorX(selector:Selector);
-    addSelectorY(selector:Selector);
+    addSelectorY(selector:Selector,axisName:string);
     getSelectorX():Selector|undefined;
-    getSelectorsY():Selector[];
-    setSelectorY(index:number,selector:CSVSelector):void;
-    setSelectorsY(selectors:Selector[], axisName?: string):void;
+    getSelectorsY():{
+        [key:string]:Array<Selector>
+    };
+    setSelectorY(selector:CSVSelector,axisName:string):void;
     getDataX():ComputedRef<AxisData>|Ref<AxisData>;
     getDataY():ComputedRef<Array<AxisData>>|Ref<Array<AxisData>>;
 }
 export interface AxisData{
     title:string,
     data:Array<string|number>,
-    from?:Selector
+    from?:string
 }
 export abstract interface Selector{
     id:string
