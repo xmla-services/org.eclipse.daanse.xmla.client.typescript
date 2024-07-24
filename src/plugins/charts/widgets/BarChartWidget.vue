@@ -40,6 +40,7 @@ import type {TinyEmitter} from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
 import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 import {deepUnref} from "vue-deepunref";
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 
 //import * as dateFns from 'date-fns';
 //import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
@@ -138,26 +139,35 @@ watch(()=>settings.value.composer,(composers)=>{
     if(composers && composers.length>0){
         let InitializedComposerds =[];
         composers.forEach((composer)=>{
-           if(composer instanceof CSVComposer){
-               return
-           }else{
-               let composerObj = composer as any;
-               let csvCo =new CSVComposer();
-               csvCo.setSelectorX(composerObj.selectorX)
-               for(let sely of composerObj.selectorY){
-                   csvCo.addSelectorY(sely)
-               }
+            let composerClass = null;
+            if((composer as any).type){ //not instanciated
+                composerClass = useComposerManager().getComposerForStoreType((composer as any).type)
+            }
+            if (composer instanceof composerClass) {
+                return;
+            } else {
+                let composerObj = composer as any;
+                let aCo = new composerClass();
+                aCo.setSelectorX(composerObj.selectorX);
+                for (let sely in composerObj.selectorY) {
+                    composerObj.selectorY[sely].forEach(sel=>{
+                        aCo.addSelectorY(sel,sely);
+                    })
 
-               let store = useStoreManager().getStore(composerObj.store.id);
-               let store2 = setStore(store as Store);
-               csvCo.setStore(store2.store as IStore);
-               csvCo.setData(store2.data);
-               InitializedComposerds.push(csvCo);
-           }
+                }
+
+                let store = useStoreManager().getStore(
+                    composerObj.store.id,
+                );
+                let store2 = setStore(store as Store);
+                aCo.setStore(store2.store as IStore);
+                aCo.setData(store2.data);
+                InitializedComposerds.push(aCo);
+            }
         });
 
-        if(InitializedComposerds.length>0){
-            setSetting('composer',InitializedComposerds);
+        if (InitializedComposerds.length > 0) {
+            setSetting("composer", InitializedComposerds);
         }
         //@ts-ignore
        /* props.composer = InitializedComposerds;
