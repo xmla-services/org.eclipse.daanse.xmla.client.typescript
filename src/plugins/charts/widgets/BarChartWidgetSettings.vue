@@ -20,6 +20,7 @@ import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 import CSVComposerV from "@/plugins/charts/widgets/parts/CSVComposerV.vue";
 import {clone} from "lodash"
 import { deepUnref } from 'vue-deepunref';
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 
 export interface AxisSettings{
 
@@ -79,32 +80,16 @@ const getStores = computed(() => {
 
 const addComposer=(store:IStore)=>{
     console.log('add ')
+    const ComposerClass = useComposerManager().getComposerForStoreType(store.type);
     const storeData = component.setStore(store as Store);
-    const csvComposer = new CSVComposer();
-
-    csvComposer.setStore(storeData.store);
-    csvComposer.setData(storeData.data);
-
-    /*csvComposer.setSelectorX({
-        header:'item'
-    }as CSVSelector)
-    csvComposer.addSelectorY({
-        header:'markets'
-    }as CSVSelector)*/
-    /*csvComposer.addSelectorY({
-        header:'bj'
-    }as CSVSelector)*/
-
-    /*const val = [ ...deepUnref(component.settings.composer as any)];
-    val.push(csvComposer)
-    component.setSetting('composer',val);*/
-    const val = [...toRaw(unref(component.settings.composer))];
-    val.push(csvComposer)
-    //console.log(component.settings.composer.push(2));
-    component.setSetting('composer',val);
-    //component.settings.composer.push(csvComposer);
-    /*let list = component.settings.composer;
-    list.push(csvComposer)*/
+    if(ComposerClass){
+    const aComposer = new ComposerClass();
+        aComposer.setStore(storeData.store);
+        aComposer.setData(storeData.data);
+        const val = [...toRaw(unref(component.settings.composer))];
+        val.push(aComposer)
+        component.setSetting('composer',val);
+    }
 
 }
 const axis_names =computed(()=>{
@@ -281,10 +266,13 @@ watch(axes,(axis)=>{
 
               <VaDropdownContent>
               <VaList>
-                  <VaListItem v-for="store in getStores" @click="addComposer(store)">
+                  <template v-for="store in getStores">
+
+
+                  <VaListItem v-if="useComposerManager().isRegistered(store.type)" @click="addComposer(store)">
                       {{store.caption}}
                   </VaListItem>
-
+                  </template>
               </VaList>
               </VaDropdownContent>
           </VaDropdown>
