@@ -20,7 +20,8 @@ export interface Composer<Selector>{
     getSelectorsY():{
         [key:string]:Array<Selector>
     };
-    setSelectorY(selector:CSVSelector,axisName:string):void;
+    setSelectorsY(selectors:Selector[], axisName?: string):void;
+    setSelectorY(selector:Selector,axisName:string):void;
     getDataX():ComputedRef<AxisData>|Ref<AxisData>;
     getDataY():ComputedRef<Array<AxisData>>|Ref<Array<AxisData>>;
 }
