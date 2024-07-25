@@ -277,7 +277,8 @@ watch(axes,(axis)=>{
 
       </div>
      <div class="composers" v-for="(composer, i) in component.settings.composer">
-            <CSVComposerV :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></CSVComposerV>
+
+            <Component :is="useComposerManager().getSettingsComponentForType(composer.getStore()!.type)" :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></Component>
       </div>
 
     </div>
