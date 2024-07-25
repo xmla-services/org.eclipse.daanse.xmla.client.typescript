@@ -239,45 +239,27 @@ watch(
                         <VaButton> Add+ </VaButton>
                     </template>
 
-                    <VaDropdownContent>
-                        <VaList>
-                            <template v-for="store in getStores">
-                                <VaListItem
-                                    v-if="
-                                        useComposerManager().isRegistered(
-                                            store.type,
-                                        )
-                                    "
-                                    @click="addComposer(store)"
-                                >
-                                    {{ store.caption }}
-                                </VaListItem>
-                            </template>
-                        </VaList>
-                    </VaDropdownContent>
-                </VaDropdown>
-            </div>
-            <div
-                class="composers"
-                v-for="(composer, i) in component.settings.composer"
-            >
-                <template v-if="composer instanceof XMLAComposer">
-                    <XMLAComposerV
-                        :modelValue="component.settings.composer[i]"
-                        :axes="component.settings.axes"
-                        :component="component"
-                    ></XMLAComposerV>
-                </template>
-                <template v-else>
-                    <CSVComposerV
-                        :modelValue="component.settings.composer[i]"
-                        :axes="component.settings.axes"
-                        :component="component"
-                    ></CSVComposerV>
-                </template>
-            </div>
-        </div>
-    </va-collapse>
+              <VaDropdownContent>
+              <VaList>
+                  <template v-for="store in getStores">
+
+
+                  <VaListItem v-if="useComposerManager().isRegistered(store.type)" @click="addComposer(store)">
+                      {{store.caption}}
+                  </VaListItem>
+                  </template>
+              </VaList>
+              </VaDropdownContent>
+          </VaDropdown>
+
+      </div>
+     <div class="composers" v-for="(composer, i) in component.settings.composer">
+
+            <Component :is="useComposerManager().getSettingsComponentForType(composer.getStore()!.type)" :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></Component>
+      </div>
+
+    </div>
+  </va-collapse>
 </template>
 <style lang="scss" scoped>
 .settings-container {
