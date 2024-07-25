@@ -3,7 +3,6 @@ import { ref, type Ref, watch, computed } from "vue";
 import MeasureSelectionModal from "@/components/Modals/MeasureSelectionModal.vue";
 import AxisSelectionModal from "@/components/Modals/AxisSelectionModal.vue";
 import FilterSelectionModal from "@/components/Modals/FilterSelectionModal.vue";
-import { parseRequestToTable } from "@/utils/MdxRequests/MdxRequestHelper";
 import type { AxisSettings } from "@/plugins/charts/widgets/BarChartWidgetSettings.vue";
 import type { IChartComponent } from "chart.js/dist/core/core.typedRegistry";
 import type { XMLAComposer } from "../../impl/XMLAComposer";
@@ -16,37 +15,49 @@ const model = defineModel() as any;
 
 console.log(model.value);
 const store = ref(model.value.getStore());
-const headers = ref([] as any[]);
 
 const props = defineProps<{
     axes: { [key: string]: AxisSettings };
     component: IChartComponent;
 }>();
 
-const selectedMeasures = ref([] as MDSchemaMeasure[]);
-const selectedRows = ref([] as ConfiguredHierarchy[]);
-const selectedCols = ref([] as ConfiguredHierarchy[]);
-const selectedFilters = ref([] as ConfiguredHierarchy[]);
+// const selectedMeasures = ref([] as MDSchemaMeasure[]);
+// const selectedRows = ref([] as ConfiguredHierarchy[]);
+// const selectedCols = ref([] as ConfiguredHierarchy[]);
+// const selectedFilters = ref([] as ConfiguredHierarchy[]);
 
 const openAxisSelectionModal = async (axis) => {
+    let currentSelection = null;
+
+    switch (axis) {
+        case "rows":
+            currentSelection = model.value.selectedRows;
+            break;
+        case "cols":
+            currentSelection = model.value.selectedCols;
+            break;
+        case "filters":
+            currentSelection = model.value.selectedFilters;
+            break;
+    }
+
     const selectedHierarchies = await axisSelectionModal.value.run({
         store: store.value,
-        selectedHierarchies:
-            axis === "rows" ? selectedRows.value : selectedCols.value,
+        selectedHierarchies: currentSelection,
     });
 
     if (axis === "rows") {
-        selectedRows.value = selectedHierarchies;
+        model.value.selectedRows = selectedHierarchies;
     } else if (axis === "cols") {
-        selectedCols.value = selectedHierarchies;
+        model.value.selectedCols = selectedHierarchies;
     } else if (axis === "filters") {
-        selectedFilters.value = selectedHierarchies;
+        model.value.selectedFilters = selectedHierarchies;
     }
 };
 
 const openFiltersModal = async (axis, id) => {
     if (axis === "rows") {
-        const selectedHierarchy = selectedRows.value.find(
+        const selectedHierarchy = model.value.selectedRows.find(
             (hierarchy) => hierarchy.id === id,
         );
 
@@ -65,7 +76,7 @@ const openFiltersModal = async (axis, id) => {
                 filtersCongig.filters.originalItem;
         }
     } else if (axis === "cols") {
-        const selectedHierarchy = selectedCols.value.find(
+        const selectedHierarchy = model.value.selectedCols.find(
             (hierarchy) => hierarchy.id === id,
         );
 
@@ -84,7 +95,7 @@ const openFiltersModal = async (axis, id) => {
                 filtersCongig.filters.originalItem;
         }
     } else if (axis === "filters") {
-        const selectedHierarchy = selectedFilters.value.find(
+        const selectedHierarchy = model.value.selectedFilters.find(
             (hierarchy) => hierarchy.id === id,
         );
 
@@ -103,25 +114,23 @@ const openFiltersModal = async (axis, id) => {
                 filtersCongig.filters.originalItem;
         }
     }
-
-    console.log(selectedRows.value);
 };
 
 const removeFromAxis = (axis, hierarchyUniqueName) => {
     if (axis === "rows") {
-        selectedRows.value = selectedRows.value.filter(
+        model.value.selectedRows = model.value.selectedRows.filter(
             (hierarchy) =>
                 hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
                 hierarchyUniqueName,
         );
     } else if (axis === "cols") {
-        selectedCols.value = selectedCols.value.filter(
+        model.value.selectedCols = model.value.selectedCols.filter(
             (hierarchy) =>
                 hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
                 hierarchyUniqueName,
         );
     } else if (axis === "filters") {
-        selectedFilters.value = selectedFilters.value.filter(
+        model.value.selectedFilters = model.value.selectedFilters.filter(
             (hierarchy) =>
                 hierarchy.originalItem.HIERARCHY_UNIQUE_NAME !==
                 hierarchyUniqueName,
@@ -130,47 +139,35 @@ const removeFromAxis = (axis, hierarchyUniqueName) => {
 };
 
 const openMeasureSelectionModal = async () => {
-    selectedMeasures.value = await measureSelectionModal.value.run({
+    model.value.selectedMeasures = await measureSelectionModal.value.run({
         store: store.value,
-        selectedMeasures: selectedMeasures.value,
+        selectedMeasures: model.value.selectedMeasures,
     });
 };
 const removeMeasure = (measureUniqueName) => {
-    selectedMeasures.value = selectedMeasures.value.filter(
+    model.value.selectedMeasures = model.value.selectedMeasures.filter(
         (measure) => measure.MEASURE_UNIQUE_NAME !== measureUniqueName,
     );
 };
 
-watch(
-    () => [selectedRows.value, selectedCols.value, selectedMeasures.value],
-    () => {
-        getData();
-    },
-    { deep: true },
-);
-
-const getData = async () => {
-    const requestParams = {
-        rows: selectedRows.value,
-        columns: selectedCols.value,
-        measures: selectedMeasures.value,
-        rowsExpandedMembers: [],
-        rowsDrilldownMembers: [],
-        columnsExpandedMembers: [],
-        columnsDrilldownMembers: [],
-    };
-
-    const mdxResponce = await store.value.getData(requestParams);
-    const parsedTable = parseRequestToTable(mdxResponce, 0) as any;
-    model.value.setData(parsedTable);
-    console.log(parsedTable);
-    headers.value = Object.keys(parsedTable).map((key) => ({
+const headers = computed(() => {
+    return Object.keys(model.value.data).map((key) => ({
         header: key,
         id: key,
     }));
+});
 
-    console.log(parseRequestToTable(mdxResponce, 0));
-};
+watch(
+    () => [
+        model.value.selectedRows,
+        model.value.selectedCols,
+        model.value.selectedMeasures,
+    ],
+    async () => {
+        await model.value.getData();
+    },
+    { deep: true },
+);
 
 const axis_names = computed((e) => {
     return Object.keys(props.axes).filter((name) => name != "x");
@@ -187,7 +184,7 @@ const xSel = computed({
 
 const updateSelectorY = (value, axisName) => {
     const selection = value.map((e) => headers.value.find((h) => h.id === e));
-    model.value?.setSelectorY(selection, axisName);
+    model.value?.setSelectorsY(selection, axisName);
     // model.value?.setSelectorY(selector, value, axisName);
 };
 
@@ -211,7 +208,7 @@ const getAxisSelection = (axisName) => {
                 </div>
                 <div class="query_designer-area">
                     <div
-                        v-for="item in selectedFilters"
+                        v-for="item in model.selectedFilters"
                         :key="item.id"
                         class="query_designer-area-item"
                     >
@@ -246,7 +243,7 @@ const getAxisSelection = (axisName) => {
                 </div>
                 <div class="query_designer-area">
                     <div
-                        v-for="item in selectedRows"
+                        v-for="item in model.selectedRows"
                         :key="item.id"
                         class="query_designer-area-item"
                     >
@@ -281,7 +278,7 @@ const getAxisSelection = (axisName) => {
                 </div>
                 <div class="query_designer-area">
                     <div
-                        v-for="item in selectedCols"
+                        v-for="item in model.selectedCols"
                         :key="item.id"
                         class="query_designer-area-item"
                     >
@@ -316,7 +313,7 @@ const getAxisSelection = (axisName) => {
                 </div>
                 <div class="query_designer-area">
                     <div
-                        v-for="measure in selectedMeasures"
+                        v-for="measure in model.selectedMeasures"
                         :key="measure.MEASURE_UNIQUE_NAME"
                         class="query_designer-area-item"
                     >

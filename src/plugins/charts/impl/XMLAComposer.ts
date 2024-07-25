@@ -4,7 +4,7 @@ import type {
     XMLASelector,
 } from "@/plugins/charts/widgets/api/ChartdataComposer";
 import { computed, type ComputedRef, type Ref, ref, watch } from "vue";
-
+import { parseRequestToTable } from "@/utils/MdxRequests/MdxRequestHelper";
 import { useStore } from "@/composables/widgets/store";
 
 export class XMLAComposer implements Composer<XMLASelector> {
@@ -12,6 +12,11 @@ export class XMLAComposer implements Composer<XMLASelector> {
     private selectorY: any = {};
     private data: Ref<any> = ref({});
     private store: IStore | undefined;
+    public selectedMeasures: MDSchemaMeasure[] = [];
+    public selectedRows: ConfiguredHierarchy[] = [];
+    public selectedCols: ConfiguredHierarchy[] = [];
+    public selectedFilters: ConfiguredHierarchy[] = [];
+
     type: string = "XMLA";
 
     addSelectorY(selector: XMLASelector, axisName: string) {
@@ -33,7 +38,7 @@ export class XMLAComposer implements Composer<XMLASelector> {
         return this.selectorY[axisName];
     }
 
-    setSelectorY(selector: XMLASelector, axisName) {
+    setSelectorsY(selector: XMLASelector[], axisName) {
         if (!this.selectorY[axisName]) {
             this.selectorY[axisName] = [];
         }
@@ -60,10 +65,11 @@ export class XMLAComposer implements Composer<XMLASelector> {
 
     getDataX(): ComputedRef<AxisData> | Ref<AxisData> {
         return computed(() => {
+            console.log(this.data);
             try {
                 return {
                     //@ts-ignore
-                    data: this.data[this.selectorX!.header],
+                    data: this.data[this.selectorX!.header] || [],
                     title: this.selectorX?.header,
                     from: this.selectorX,
                 } as AxisData;
@@ -83,6 +89,23 @@ export class XMLAComposer implements Composer<XMLASelector> {
             const axises = Object.keys(this.selectorY);
 
             axises.forEach((axisName) => {
+                const availableSelectors = this.selectorY[axisName].map(
+                    (sel) => {
+                        return {
+                            header: sel.header,
+                            available: !!this.data[sel.header],
+                        };
+                    },
+                );
+
+                this.selectorY[axisName] = this.selectorY[axisName].filter(
+                    (sel) => {
+                        return availableSelectors.find(
+                            (e) => e.header === sel.header,
+                        )?.available;
+                    },
+                );
+
                 this.selectorY[axisName].forEach((sel) => {
                     try {
                         ret.push({
@@ -105,5 +128,34 @@ export class XMLAComposer implements Composer<XMLASelector> {
             });
             return ret;
         });
+    }
+
+    async getData() {
+        if (!this.store) return;
+        const requestParams = {
+            rows: this.selectedRows,
+            columns: this.selectedCols,
+            measures: this.selectedMeasures,
+            rowsExpandedMembers: [],
+            rowsDrilldownMembers: [],
+            columnsExpandedMembers: [],
+            columnsDrilldownMembers: [],
+        };
+
+        const mdxResponce = await this.store.getData(requestParams);
+        const parsedTable = parseRequestToTable(mdxResponce, 0) as any;
+        return parsedTable;
+    }
+
+    async restoreState(state) {
+        console.log(state.selectorY["y"]);
+        this.selectedCols = state.selectedCols;
+        this.selectedRows = state.selectedRows;
+        this.selectedFilters = state.selectedFilters;
+        this.selectedMeasures = state.selectedMeasures;
+
+        this.data.value = await this.getData();
+        this.selectorY = state.selectorY;
+        this.selectorX = state.selectorX;
     }
 }

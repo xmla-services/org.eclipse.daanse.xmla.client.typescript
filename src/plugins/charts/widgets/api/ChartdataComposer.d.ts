@@ -19,6 +19,7 @@ export interface Composer<Selector>{
     getSelectorX():Selector|undefined;
     getSelectorsY():Selector[];
     setSelectorY(index:number,selector:CSVSelector):void;
+    setSelectorsY(selectors:Selector[], axisName?: string):void;
     getDataX():ComputedRef<AxisData>|Ref<AxisData>;
     getDataY():ComputedRef<Array<AxisData>>|Ref<Array<AxisData>>;
 }

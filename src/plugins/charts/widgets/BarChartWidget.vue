@@ -20,6 +20,7 @@ import { useStore } from "@/composables/widgets/store";
 import type { Store } from "@/stores/Widgets/Store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import { Bar } from "vue-chartjs";
+import { deepUnref } from "vue-deepunref";
 import {
     Chart as ChartJS,
     Title,
@@ -157,19 +158,32 @@ watch(
                     return;
                 } else {
                     let composerObj = composer as any;
-                    let csvCo = new CSVComposer();
-                    csvCo.setSelectorX(composerObj.selectorX);
-                    for (let sely of composerObj.selectorY) {
-                        // csvCo.addSelectorY(sely);
-                    }
+                    if (composer.type === "XMLA") {
+                        let xmlaCo = new XMLAComposer();
 
-                    let store = useStoreManager().getStore(
-                        composerObj.store.id,
-                    );
-                    let store2 = setStore(store as Store);
-                    csvCo.setStore(store2.store as IStore);
-                    csvCo.setData(store2.data);
-                    InitializedComposerds.push(csvCo);
+                        let store = useStoreManager().getStore(
+                            composerObj.store.id,
+                        );
+                        let configuredStore = setStore(store as Store);
+                        xmlaCo.setStore(configuredStore.store.value as IStore);
+
+                        xmlaCo.restoreState(composerObj);
+                        InitializedComposerds.push(xmlaCo);
+                    } else {
+                        let csvCo = new CSVComposer();
+                        csvCo.setSelectorX(composerObj.selectorX);
+                        for (let sely of composerObj.selectorY) {
+                            // csvCo.addSelectorY(sely);
+                        }
+
+                        let store = useStoreManager().getStore(
+                            composerObj.store.id,
+                        );
+                        let store2 = setStore(store as Store);
+                        csvCo.setStore(store2.store as IStore);
+                        csvCo.setData(store2.data);
+                        InitializedComposerds.push(csvCo);
+                    }
                 }
             });
 
