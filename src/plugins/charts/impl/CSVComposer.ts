@@ -1,7 +1,6 @@
 import type {AxisData, Composer, CSVSelector, XMLASelector} from "@/plugins/charts/widgets/api/ChartdataComposer";
 import {computed, type ComputedRef, type Ref, ref, watch} from "vue";
 
-import {useStore} from "@/composables/widgets/store";
 
 
 
@@ -104,6 +103,14 @@ export class CSVComposer implements Composer<CSVSelector>{
             return ret;
 
         });
+    }
+
+    setSelectorsY(selectors: CSVSelector[], axisName: string = 'y'): void {
+        if(!this.selectorY[axisName]){
+            this.selectorY[axisName]=[];
+        }
+
+        this.selectorY[axisName]=selectors;
     }
 
 
