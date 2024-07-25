@@ -38,7 +38,7 @@ export default class CSVStore extends BaseStore implements IStore  {
         return value
             }
 
-        if(this.parserParams.unixtimers.includes(context.column) ){
+        if(this.parserParams.unixtimers && this.parserParams.unixtimers.includes(context.column) ){
             return  new Date(parseInt(value)*1000)
         }
         if(!context.quoting){
@@ -153,9 +153,14 @@ export default class CSVStore extends BaseStore implements IStore  {
     }
     setParseParams(parserParams){
         this.parserParams = parserParams;
+        this.parserParams['cast'] = this.cast;
+        this.parserParams['cast_date'] = true;
+
+        this.parserParams['columns'] = this.columns;
+
         this.calculateParams();
         console.log("EMITED UPDATE", this.id);
-        //this.getData();
+        this.getData();
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
     updateEvents(events) {
