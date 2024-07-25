@@ -13,12 +13,13 @@ export interface IRichTextEditorSettingsProps {
     editor?: string;
 }
 
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
 import RichTextWidgetSettings from "./RichTextWidgetSettings.vue";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = RichTextWidgetSettings;
 
@@ -26,8 +27,9 @@ const props = withDefaults(defineProps<IRichTextEditorSettingsProps>(), {
     editor: "",
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, data, setStore } = useStore<Store>();
+const { store, data, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 
 defineExpose({

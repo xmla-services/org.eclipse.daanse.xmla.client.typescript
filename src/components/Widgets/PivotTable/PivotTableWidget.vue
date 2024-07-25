@@ -105,7 +105,7 @@ const watcher = (oldVal, newVal) => {
     }
 };
 
-const { store, setStore } = useStore<XMLAStore>(updateFn, watcher);
+const { store, setStore } = useStore<XMLAStore>(EventBus, updateFn, watcher);
 
 const {
     rowsExpandedMembers,

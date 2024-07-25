@@ -26,6 +26,7 @@ import CSVComposerV from "@/plugins/charts/widgets/parts/CSVComposerV.vue";
 import XMLAComposerV from "@/plugins/charts/widgets/parts/XMLAComposerV.vue";
 import { clone } from "lodash";
 import { deepUnref } from "vue-deepunref";
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
 
 export interface AxisSettings {
     type: string;

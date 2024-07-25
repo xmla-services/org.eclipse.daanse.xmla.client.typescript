@@ -106,7 +106,7 @@ const { getDataFilterer } = useDataSetSelector();
 const stores = ref([]);
 const setStore = (store: Store) => {
     console.log("setStore");
-    const storeData = useStore<Store>(undefined, undefined, eventbus);
+    const storeData = useStore<Store>(eventbus);
     storeData.setStore(store);
     stores.value.push(storeData);
     return storeData;
@@ -153,12 +153,14 @@ watch(
             composers.forEach((composer) => {
                 if (composer instanceof CSVComposer) {
                     return;
+                } else if (composer instanceof XMLAComposer) {
+                    return;
                 } else {
                     let composerObj = composer as any;
                     let csvCo = new CSVComposer();
                     csvCo.setSelectorX(composerObj.selectorX);
                     for (let sely of composerObj.selectorY) {
-                        csvCo.addSelectorY(sely);
+                        // csvCo.addSelectorY(sely);
                     }
 
                     let store = useStoreManager().getStore(

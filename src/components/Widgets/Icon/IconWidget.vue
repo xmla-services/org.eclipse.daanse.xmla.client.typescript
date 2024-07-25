@@ -20,12 +20,13 @@ export interface IIconSettingsProps {
     grade?: number;
 }
 
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
 import IconWidgetSettings from "./IconWidgetSettings.vue";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = IconWidgetSettings;
 
@@ -39,8 +40,10 @@ const props = withDefaults(defineProps<IIconSettingsProps>(), {
     grade: 48,
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
+
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, setStore } = useStore<Store>();
+const { store, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 
 const iconStyle = computed(() => {

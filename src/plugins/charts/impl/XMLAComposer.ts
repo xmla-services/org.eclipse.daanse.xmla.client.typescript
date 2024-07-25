@@ -15,6 +15,9 @@ export class XMLAComposer implements Composer<XMLASelector> {
     type: string = "XMLA";
 
     addSelectorY(selector: XMLASelector, axisName: string) {
+        if (!selector) return;
+        if (!this.selectorY[axisName]) this.selectorY[axisName] = [];
+
         this.selectorY[axisName].push(selector);
     }
 
