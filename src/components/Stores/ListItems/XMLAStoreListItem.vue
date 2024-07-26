@@ -94,8 +94,6 @@ onMounted(async () => {
         })
         .filter((e) => e.type === "XMLA") as XMLADatasource[];
 
-    console.log(item.value);
-    console.log(storeManager);
     const store = storeManager.getStore(item.value.id);
     const ds = store.getDatasource();
 

@@ -14,13 +14,14 @@ export interface IImageSettingsProps {
     images?: ImageGalleryItem[];
 }
 
-import { onMounted, ref, watch, type Ref, computed } from "vue";
+import { onMounted, ref, watch, type Ref, computed, inject } from "vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
 import type { ImageGalleryItem, GallerySettings } from "@/@types/widgets";
 import ImageWidgetSettings from "./ImageWidgetSettings.vue";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = ImageWidgetSettings;
 
@@ -32,8 +33,9 @@ const props = withDefaults(defineProps<IImageSettingsProps>(), {
     images: (): ImageGalleryItem[] => [],
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, data, setStore } = useStore<Store>();
+const { store, data, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 
 let interval = null as any;

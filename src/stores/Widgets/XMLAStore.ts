@@ -67,7 +67,17 @@ export class XMLAStore extends BaseStore implements IStore {
                 this.datasourceId,
             );
 
-            console.log(datasource);
+            if (!params) {
+                params = {
+                    rows: [],
+                    columns: [],
+                    measures: [],
+                    rowsExpandedMembers: [],
+                    rowsDrilldownMembers: [],
+                    columnsExpandedMembers: [],
+                    columnsDrilldownMembers: [],
+                };
+            }
 
             const measuresMapped = params.measures.map((e) => {
                 return { originalItem: e };

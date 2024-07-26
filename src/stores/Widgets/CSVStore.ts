@@ -1,22 +1,24 @@
 /*
-  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
-  This program and the accompanying materials are made
-  available under the terms of the Eclipse Public License 2.0
-  which is available at https://www.eclipse.org/legal/epl-2.0/
-  SPDX-License-Identifier: EPL-2.0
+   Copyright (c) 2023 Contributors to the  Eclipse Foundation.
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+   SPDX-License-Identifier: EPL-2.0
 
-  Contributors: Smart City Jena
+   Contributors: Smart City Jena
 
-*/
+ */
 
 import { useDatasourceManager } from "@/composables/datasourceManager";
 import type RESTDatasource from "@/dataSources/RestDatasource";
 import BaseStore from "@/stores/Widgets/BaseStore";
 import { useErrorHandler } from "@/composables/dashboard/errorToast";
+import { parse } from "csv-parse/browser/esm/sync";
 
-export class Store extends BaseStore implements IStore {
-    public static readonly TYPE = "REST";
+export default class CSVStore extends BaseStore implements IStore {
+    public static readonly TYPE = "CSV";
     private datasourceManager: any;
+    private eventBus: EventBus;
 
     public datasourceId: string | null = null;
 
@@ -27,12 +29,13 @@ export class Store extends BaseStore implements IStore {
     private runtimeParams: IStoreParams = {};
     private errorToast: any;
 
-    public type = Store.TYPE;
-    public listAvailableDatasourceTypes = ["REST"];
+    private header: string[] = [];
+    public type = CSVStore.TYPE;
 
     constructor(id: string, caption: string, eventBus: EventBus) {
         super(id, caption, eventBus);
         this.datasourceManager = useDatasourceManager();
+        this.eventBus = eventBus;
         this.requestTemplate = "/products/{pageNum}";
 
         this.calculateParams();
@@ -75,6 +78,7 @@ export class Store extends BaseStore implements IStore {
             const paramsList = Object.keys(this.params);
 
             paramsList.forEach((e) => {
+                console.log(e);
                 requestTemplate = requestTemplate.replace(
                     `{${e}}`,
                     this.runtimeParams[e],
@@ -84,7 +88,17 @@ export class Store extends BaseStore implements IStore {
             const datasource = this.datasourceManager.getDatasource(
                 this.datasourceId,
             );
-            const json = (await datasource?.getData(requestTemplate)) as string;
+            const astring = (await datasource?.getData(
+                requestTemplate,
+                true,
+            )) as string;
+            const json = parse(astring, {
+                columns: (header) => {
+                    this.header = header;
+                    return header;
+                },
+                skip_empty_lines: true,
+            });
 
             return json;
         } catch (e) {
@@ -105,10 +119,12 @@ export class Store extends BaseStore implements IStore {
         this.requestTemplate = requestTemplate;
 
         this.calculateParams();
+        console.log("EMITED UPDATE", this.id);
         this.eventBus.emit(`UPDATE:${this.id}`);
     }
 
     updateEvents(events) {
+        console.log(events);
         this.initedEvents.forEach((e) => {
             this.eventBus.off(e.name, e.cb);
         });
@@ -157,6 +173,10 @@ export class Store extends BaseStore implements IStore {
         // }
     }
 
+    getHeader() {
+        return this.header;
+    }
+
     getState() {
         return {
             caption: this.caption,
@@ -165,7 +185,6 @@ export class Store extends BaseStore implements IStore {
             events: this.events,
             datasourceId: this.datasourceId,
             params: this.params,
-            type: "REST",
         };
     }
 

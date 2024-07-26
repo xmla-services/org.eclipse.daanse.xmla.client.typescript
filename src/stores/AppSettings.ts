@@ -40,7 +40,6 @@ export const useAppSettingsStore = defineStore("appSettingsStore", {
     async initXmlaApi(url: string) {
       const client = await this.$state.$soapClient;
       client.setEndpoint(url);
-      console.log(url);
       this.api = new XMLAApi(client, url);
       this.xmlaApiInited = true;
 

@@ -9,12 +9,11 @@ Contributors: Smart City Jena
 
 -->
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
+import { useI18n } from "vue-i18n";
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
-import {type Ref, onMounted, ref, watch, computed} from "vue";
+import { type Ref, onMounted, ref, watch, computed } from "vue";
 import type CSVStore from "@/plugins/charts/stores/CSVStore";
-
 
 // TODO: fix duplicate interface
 declare interface IDatasource {
@@ -140,20 +139,25 @@ const getSelectedDatasource = (item) => {
     });
 };
 
-const selection = ref('|');
+const selection = ref("|");
 const headers = ref(false);
 
-const parserParams = computed(
-    {get:()=>{
-    const store = storeManager.getStore(props.item.id) as CSVStore;
-    return store.getParserParams();
-},set:(params)=>{
+const parserParams = computed({
+    get: () => {
+        const store = storeManager.getStore(props.item.id) as CSVStore;
+        return store.getParserParams();
+    },
+    set: (params) => {},
+});
 
-        }});
-watch(parserParams,(params)=>{
-    const store = storeManager.getStore(props.item.id) as CSVStore;
-    store.setParseParams(params);
-},{deep:true})
+watch(
+    parserParams,
+    (params) => {
+        const store = storeManager.getStore(props.item.id) as CSVStore;
+        store.setParseParams(params);
+    },
+    { deep: true },
+);
 </script>
 
 <template class="csvstoreitem">
@@ -163,7 +167,9 @@ watch(parserParams,(params)=>{
             {{ item.caption }}
             <!-- {{ item.id }} -->
         </va-list-item-label>
-        <va-icon v-if="!isExpanded" class="material-icons"> expand_more </va-icon>
+        <va-icon v-if="!isExpanded" class="material-icons">
+            expand_more
+        </va-icon>
         <va-icon v-else class="material-icons"> expand_less </va-icon>
     </div>
     <div v-if="isExpanded" class="store-item-content">
@@ -179,9 +185,12 @@ watch(parserParams,(params)=>{
         ></va-input>
 
         <div class="datasource-list">
-            <h2>{{ t('SidebarStoreList.dataSourcesTitle') }}</h2>
-            <va-button class="datasource-list-add-button" @click="createDatasource">
-                {{ t('SidebarStoreList.addDatasourceButton') }}
+            <h2>{{ t("SidebarStoreList.dataSourcesTitle") }}</h2>
+            <va-button
+                class="datasource-list-add-button"
+                @click="createDatasource"
+            >
+                {{ t("SidebarStoreList.addDatasourceButton") }}
             </va-button>
             <va-data-table
                 class="table-crud"
@@ -204,7 +213,9 @@ watch(parserParams,(params)=>{
                         class="type-input"
                         v-model="dslist[rowIndex].type"
                         @update:modelValue="updateDatasource(rowIndex)"
-                        :options="Object.keys(dsManager.getDataSourceRegistry())"
+                        :options="
+                            Object.keys(dsManager.getDataSourceRegistry())
+                        "
                     />
                 </template>
                 <template #cell(url)="{ rowIndex }">
@@ -218,7 +229,7 @@ watch(parserParams,(params)=>{
         </div>
 
         <div class="datasource-list">
-            <h2>{{ t('SidebarStoreList.storeListItem.params') }}</h2>
+            <h2>{{ t("SidebarStoreList.storeListItem.params") }}</h2>
             <va-data-table
                 class="table-crud"
                 :items="getParams(item)"
@@ -228,16 +239,21 @@ watch(parserParams,(params)=>{
                     <va-input
                         class="url-input"
                         :model-value="getParams(item)[rowIndex].value"
-                        @update:model-value="setParamValue(item, rowIndex, $event)"
+                        @update:model-value="
+                            setParamValue(item, rowIndex, $event)
+                        "
                     ></va-input>
                 </template>
             </va-data-table>
         </div>
 
         <div class="datasource-list">
-            <h2>{{ t('SidebarStoreList.storeListItem.events') }}</h2>
-            <va-button class="datasource-list-add-button" @click="addEvent(item.id)">
-                {{ t('SidebarStoreList.storeListItem.addEventButton') }}
+            <h2>{{ t("SidebarStoreList.storeListItem.events") }}</h2>
+            <va-button
+                class="datasource-list-add-button"
+                @click="addEvent(item.id)"
+            >
+                {{ t("SidebarStoreList.storeListItem.addEventButton") }}
             </va-button>
             <va-data-table
                 class="table-crud"
@@ -261,7 +277,7 @@ watch(parserParams,(params)=>{
             </va-data-table>
         </div>
         <div class="separator-list">
-            <h2>{{ t('SidebarStoreList.CSVAStoreListItem.delimiter') }}</h2>
+            <h2>{{ t("SidebarStoreList.CSVAStoreListItem.delimiter") }}</h2>
 
             <div class="pad">
             <VaOptionList
@@ -324,17 +340,17 @@ watch(parserParams,(params)=>{
 
 </template>
 <style lang="scss">
-.store-item{
-    .flex{
-        ul{
+.store-item {
+    .flex {
+        ul {
             display: flex;
             flex-direction: row;
             justify-content: flex-start;
         }
-       }
+    }
 }
 .pad {
-    padding:15px 0 25px;
+    padding: 15px 0 25px;
 }
 
 </style>
