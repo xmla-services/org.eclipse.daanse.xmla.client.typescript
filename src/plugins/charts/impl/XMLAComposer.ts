@@ -5,7 +5,8 @@ import type {
 } from "@/plugins/charts/widgets/api/ChartdataComposer";
 import { computed, type ComputedRef, type Ref, ref, watch } from "vue";
 import { parseRequestToTable } from "@/utils/MdxRequests/MdxRequestHelper";
-import { useStore } from "@/composables/widgets/store";
+import {parseInt} from "lodash";
+
 
 export class XMLAComposer implements Composer<XMLASelector> {
     private selectorX: XMLASelector | undefined;
@@ -163,5 +164,8 @@ export class XMLAComposer implements Composer<XMLASelector> {
         this.data.value = await this.getData();
         this.selectorY = state.selectorY;
         this.selectorX = state.selectorX;
+    }
+
+    setSelectorY(selector: XMLASelector, axisName: string): void {
     }
 }

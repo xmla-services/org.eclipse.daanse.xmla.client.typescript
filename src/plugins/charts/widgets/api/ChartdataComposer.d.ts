@@ -13,7 +13,7 @@ export interface Composer<Selector>{
 
     setData(data:Ref<any>):void;
     setStore(store:IStore):void;
-    getStore():IStore|undefined;
+    getStore(): IStore|undefined;
     setSelectorX(selector:Selector);
     addSelectorY(selector:Selector,axisName:string);
     getSelectorX():Selector|undefined;
@@ -24,6 +24,7 @@ export interface Composer<Selector>{
     setSelectorY(selector:Selector,axisName:string):void;
     getDataX():ComputedRef<AxisData>|Ref<AxisData>;
     getDataY():ComputedRef<Array<AxisData>>|Ref<Array<AxisData>>;
+    restoreState(state):void|Promise;
 }
 export interface AxisData{
     title:string,

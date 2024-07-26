@@ -112,6 +112,15 @@ export class CSVComposer implements Composer<CSVSelector>{
 
         this.selectorY[axisName]=selectors;
     }
+    async restoreState(state) {
+        this.setSelectorX(state.selectorX);
+        for (let sely in state.selectorY) {
+            state.selectorY[sely].forEach(sel => {
+                this.addSelectorY(sel, sely);
+            })
+
+        }
+    }
 
 
 }

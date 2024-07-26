@@ -255,7 +255,7 @@ watch(
       </div>
      <div class="composers" v-for="(composer, i) in component.settings.composer">
 
-            <Component :is="useComposerManager().getSettingsComponentForType(composer.getStore()!.type)" :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></Component>
+            <Component :is="useComposerManager().getSettingsComponentForType(composer.getStore().type)" :modelValue="component.settings.composer[i]" :axes="component.settings.axes" :component="component"></Component>
       </div>
 
     </div>

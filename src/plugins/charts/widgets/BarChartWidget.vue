@@ -45,6 +45,7 @@ import type { TinyEmitter } from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
 import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
 import useComposerManager from "@/plugins/charts/composables/ComposerManager";
+import {XMLAComposer} from "@/plugins/charts/impl/XMLAComposer";
 
 //import * as dateFns from 'date-fns';
 //import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
@@ -106,7 +107,7 @@ const {getDataFilterer} = useDataSetSelector();
 const stores = ref([]);
 const setStore =(store:Store)=>{
     console.log('setStore')
-    const storeData = useStore<Store>(undefined,undefined,eventbus);
+    const storeData = useStore<Store>(eventbus,undefined,undefined);
     storeData.setStore(store)
     stores.value.push(storeData)
     return storeData;
@@ -150,22 +151,18 @@ watch(()=>settings.value.composer,(composers)=>{
             } else {
                 let composerObj = composer as any;
                 let aCo = new composerClass();
-                aCo.setSelectorX(composerObj.selectorX);
-                for (let sely in composerObj.selectorY) {
-                    composerObj.selectorY[sely].forEach(sel=>{
-                        aCo.addSelectorY(sel,sely);
-                    })
 
+                    let store = useStoreManager().getStore(
+                        composerObj.store.id,
+                    );
+                    let configuredStore = setStore(store as Store);
+                    aCo.setStore(configuredStore.store.value);
+                    aCo.setData(configuredStore.data);
+                    aCo.restoreState(composerObj);
+
+                    InitializedComposerds.push(aCo);
                 }
 
-                let store = useStoreManager().getStore(
-                    composerObj.store.id,
-                );
-                let store2 = setStore(store as Store);
-                aCo.setStore(store2.store as IStore);
-                aCo.setData(store2.data);
-                InitializedComposerds.push(aCo);
-            }
         });
 
         if (InitializedComposerds.length > 0) {
@@ -185,17 +182,7 @@ watch(()=>settings.value.composer,(composers)=>{
 
 const chartData= computed(()=>{
 
-    const getAssignment=(from:Selector)=>{
-            const keys = Object.keys(settings.value.axisAssignment);
-       for (let akey of keys) {
-           let item = settings.value.axisAssignment[akey].find(e=>(e.id==from.id));
-           if(item) {
-               return akey;
-               break
-           }
-       }
-       return 'y';
-    }
+
     if(settings.value.composer && settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
