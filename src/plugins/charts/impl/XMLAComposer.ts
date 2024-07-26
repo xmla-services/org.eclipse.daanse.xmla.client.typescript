@@ -147,6 +147,11 @@ export class XMLAComposer implements Composer<XMLASelector> {
         return parsedTable;
     }
 
+    // TODO: find out why this is not working
+    async fetch() {
+        this.data.value = await this.getData();
+    }
+
     async restoreState(state) {
         console.log(state.selectorY["y"]);
         this.selectedCols = state.selectedCols;
@@ -154,6 +159,7 @@ export class XMLAComposer implements Composer<XMLASelector> {
         this.selectedFilters = state.selectedFilters;
         this.selectedMeasures = state.selectedMeasures;
 
+        // await this.fetch();
         this.data.value = await this.getData();
         this.selectorY = state.selectorY;
         this.selectorX = state.selectorX;

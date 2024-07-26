@@ -83,7 +83,12 @@ const addComposer = (store: IStore) => {
     if (ComposerClass) {
         const aComposer = new ComposerClass();
         aComposer.setStore(storeData.store);
-        aComposer.setData(storeData.data);
+        if (aComposer instanceof CSVComposer) {
+            aComposer.setData(storeData.data);
+        } else if (aComposer instanceof XMLAComposer) {
+            aComposer.setData(ref({}));
+        }
+        console.log(storeData);
         const val = [...toRaw(unref(component.settings.composer))];
         val.push(aComposer);
         component.setSetting("composer", val);

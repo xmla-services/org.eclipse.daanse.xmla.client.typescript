@@ -164,7 +164,7 @@ watch(
         model.value.selectedMeasures,
     ],
     async () => {
-        await model.value.getData();
+        model.value.data = await model.value.getData();
     },
     { deep: true },
 );
