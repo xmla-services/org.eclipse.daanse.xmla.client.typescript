@@ -16,6 +16,7 @@ import StoreListItem from "./ListItems/StoreListItem.vue";
 import XMLAStoreListItem from "./ListItems/XMLAStoreListItem.vue";
 import CSVStoreListItem from "./ListItems/CSVStoreListItem.vue";
 
+
 const { t } = useI18n();
 const storeManager = useStoreManager();
 const map = storeManager.getStoreList();

@@ -64,15 +64,14 @@ export interface ITChartSettings {
     canvasBackgroundColor: string;
     dataSetBackgroundColors: string[];
     baseMapUrl: string;
-    dataSets: IDataSetSelector[];
-    composer: Composer<Selector>[];
-    axes: {
-        x: AxisSettings;
-        y: AxisSettings;
-        y2: AxisSettings;
-        [key: string]: AxisSettings;
-    };
-    axisAssignment: { [key: string]: Composer<any> };
+
+    composer:Composer<Selector>[];
+    axes:{
+        x:AxisSettings,
+        y:AxisSettings,
+        y2:AxisSettings,
+        [key: string]:AxisSettings
+    }
 }
 
 interface IChartComponent {
@@ -118,12 +117,8 @@ const addComposer = (store: IStore) => {
     if (ComposerClass) {
         const aComposer = new ComposerClass();
         aComposer.setStore(storeData.store);
-        if (aComposer instanceof CSVComposer) {
-            aComposer.setData(storeData.data);
-        } else if (aComposer instanceof XMLAComposer) {
-            aComposer.setData(ref({}));
-        }
-        console.log(storeData);
+        aComposer.setData(storeData.data);
+
         const val = [...toRaw(unref(component.settings.composer))];
         val.push(aComposer);
         component.setSetting("composer", val);
@@ -139,7 +134,7 @@ function addAxis() {
     let name = "y2";
 
     //component.setSetting('axes.'+name,{
-    //let axis =  clone(toRaw(unref(component.settings.axes)));     
+    //let axis =  clone(toRaw(unref(component.settings.axes)));
     axes.value[name] = {
         title: {
             display: true,
@@ -624,7 +619,7 @@ watch(
                     :model-value="component.settings.axes.y.ticks.color"
                     @update:model-value="component.setSetting('axes.y.ticks.color', $event)"
                 />
-            </div>    
+            </div>
             <!-- <div class="settings-block mb-3">
                 <va-input
                     label="Tick Template:"
@@ -698,7 +693,7 @@ watch(
 
 .background-colors-block {
     display: flex;
-    flex-direction: row; 
+    flex-direction: row;
 }
 
 .transparency-input {

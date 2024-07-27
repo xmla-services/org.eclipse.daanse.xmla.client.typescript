@@ -45,9 +45,9 @@ import type {
 } from "@/plugins/charts/widgets/api/ChartdataComposer";
 import type { TinyEmitter } from "tiny-emitter";
 import useChartDataComposer from "@/plugins/charts/composables/ChartDataComposer";
-import { CSVComposer } from "@/plugins/charts/impl/CSVComposer";
-import { XMLAComposer } from "@/plugins/charts/impl/XMLAComposer";
-import { reverse } from "lodash";
+import {CSVComposer} from "@/plugins/charts/impl/CSVComposer";
+import useComposerManager from "@/plugins/charts/composables/ComposerManager";
+import {XMLAComposer} from "@/plugins/charts/impl/XMLAComposer";
 
 //import * as dateFns from 'date-fns';
 //import * as  dateFnsAdapter  from 'chartjs-adapter-date-fns';
@@ -123,8 +123,6 @@ const props = withDefaults(defineProps<ITChartSettings>(), {
             }
         },
     },
-    axisAssignment: {},
-    test: {},
 } as any);
 const { settings, setSetting } = useSettings<ITChartSettings>(props);
 /*setSetting('axes.x',{
@@ -147,11 +145,11 @@ const eventbus = inject("customEventBus") as TinyEmitter;
 const getStateComposeable = useSerialization(settings).getState;
 const { getDataFilterer } = useDataSetSelector();
 const stores = ref([]);
-const setStore = (store: Store) => {
-    console.log("setStore");
-    const storeData = useStore<Store>(eventbus);
-    storeData.setStore(store);
-    stores.value.push(storeData);
+const setStore =(store:Store)=>{
+    console.log('setStore')
+    const storeData = useStore<Store>(eventbus,undefined,undefined);
+    storeData.setStore(store)
+    stores.value.push(storeData)
     return storeData;
 };
 const getState = () => {
@@ -188,35 +186,38 @@ Chart.defaults.backgroundColor = "#36A2EB00";
 const chartDataComposer = useChartDataComposer();
 
 chartDataComposer.setComposers(settings.value.composer);
-watch(
-    () => settings.value.composer,
-    (composers) => {
-        if (composers && composers.length > 0) {
-            let InitializedComposerds = [];
-            composers.forEach((composer) => {
-                if (composer instanceof CSVComposer) {
-                    return;
-                } else if (composer instanceof XMLAComposer) {
-                    return;
-                } else {
-                    let composerObj = composer as any;
-                    if (composer.type === "XMLA") {
-                        let xmlaCo = new XMLAComposer();
+watch(()=>settings.value.composer,(composers)=>{
+    if(composers && composers.length>0){
+        let InitializedComposerds =[];
+        composers.forEach((composer)=>{
+            let composerClass = null;
+            if((composer as any).store.type){ //not instanciated
+                composerClass = useComposerManager().getComposerForStoreType((composer as any).store.type)
+            }
+            if (composer instanceof composerClass) {
+                return;
+            } else {
+                let composerObj = composer as any;
+                let aCo = new composerClass();
 
-                        let store = useStoreManager().getStore(
-                            composerObj.store.id,
-                        );
-                        let configuredStore = setStore(store as Store);
-                        xmlaCo.setStore(configuredStore.store.value as IStore);
+                    let store = useStoreManager().getStore(
+                        composerObj.store.id,
+                    );
+                    let configuredStore = setStore(store as Store);
+                    aCo.setStore(configuredStore.store.value);
+                    aCo.setData(configuredStore.data);
+                    aCo.restoreState(composerObj);
 
-                        xmlaCo.restoreState(composerObj);
-                        InitializedComposerds.push(xmlaCo);
-                    } else {
-                        let csvCo = new CSVComposer();
-                        csvCo.setSelectorX(composerObj.selectorX);
-                        for (let sely of composerObj.selectorY) {
-                            // csvCo.addSelectorY(sely);
-                        }
+                    InitializedComposerds.push(aCo);
+                }
+
+        });
+
+        if (InitializedComposerds.length > 0) {
+            setSetting("composer", InitializedComposerds);
+        }
+        //@ts-ignore
+       /* props.composer = InitializedComposerds;
 
                         let store = useStoreManager().getStore(
                             composerObj.store.id,
@@ -244,21 +245,10 @@ watch(
 
 //chartDataComposer.setComposers(settings.value.composer);
 
-const chartData = computed(() => {
-    const getAssignment = (from: Selector) => {
-        const keys = Object.keys(settings.value.axisAssignment);
-        for (let akey of keys) {
-            let item = settings.value.axisAssignment[akey].find(
-                (e) => e.id == from.id,
-            );
-            if (item) {
-                return akey;
-                break;
-            }
-        }
-        return "y";
-    };
-    if (settings.value.composer && settings.value.composer.length > 0) {
+const chartData= computed(()=>{
+
+
+    if(settings.value.composer && settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
             datasets: chartDataComposer.getDataForAxesY().value.map((e) => {

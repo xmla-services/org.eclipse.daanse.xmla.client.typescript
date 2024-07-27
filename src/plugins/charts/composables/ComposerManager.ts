@@ -10,22 +10,29 @@
 */
 
 
-import type {ComposerRegistryMap, useChartDataComposerI} from "@/plugins/charts/widgets/api/ComposerManager";
+import type {
+    ComposerRegistryMap,
+    ComposerRegistrySettingsMap,
+    useChartDataComposerI
+} from "@/plugins/charts/widgets/api/ComposerManager";
 
 import type {Composer,Selector} from "@/plugins/charts/widgets/api/ChartdataComposer";
+import type {Component} from "vue";
 
 
 
 const composerRegistryMap: ComposerRegistryMap = {};
-
+const composerRegistrySettingsMap:ComposerRegistrySettingsMap ={}
 
 const  useComposerManager=()=> {
 
-    const registerComposer = (class_ref:Composer<Selector>,storetype:string) => {
+    const registerComposer = (class_ref:Composer<Selector>,settingComponent:Component,storetype:string) => {
         composerRegistryMap[storetype] = class_ref;
+        composerRegistrySettingsMap[storetype] = settingComponent;
     };
     const unRegisterDataSource = (storetype) => {
         delete composerRegistryMap[storetype];
+        delete composerRegistrySettingsMap[storetype];
         //dataSourceRegistry.push(class_ref);
     };
     const getComposerRegistry = () => {
@@ -37,13 +44,17 @@ const  useComposerManager=()=> {
     const isRegistered=(storetype:string)=>{
         return Object.keys(composerRegistryMap).includes(storetype)
     }
+    const  getSettingsComponentForType=(storetype:string)=>{
+        return composerRegistrySettingsMap[storetype]??undefined;
+    }
 
     return {
         registerComposer,
         getComposerRegistry,
         unRegisterDataSource,
         getComposerForStoreType,
-        isRegistered
+        isRegistered,
+        getSettingsComponentForType
     } as useChartDataComposerI;
 }
 export default useComposerManager;
