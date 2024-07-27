@@ -70,8 +70,10 @@ const openFiltersModal = async (axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -89,8 +91,10 @@ const openFiltersModal = async (axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -108,8 +112,10 @@ const openFiltersModal = async (axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -162,6 +168,7 @@ watch(
         model.value.selectedRows,
         model.value.selectedCols,
         model.value.selectedMeasures,
+        model.value.mainAxisRotate,
     ],
     async () => {
         model.value.data = await model.value.getData();
@@ -195,6 +202,13 @@ const getAxisSelection = (axisName) => {
 
 <template>
     <div class="composer">
+        <div>
+            <VaCheckbox
+                v-model="model.mainAxisRotate"
+                class="mb-4"
+                label="Rotate axises"
+            />
+        </div>
         <div class="store_list-item-query_designer">
             <div>
                 <div class="query_designer-area-header">
