@@ -41,96 +41,98 @@ watch(
         ) {
             axisAssignment.value = { ...deepUnref(vaxisAssignment as any) };
         }
-    })
-    const axisAssignment = ref({});
-    watch(()=>props.component.settings.axisAssignment,(vaxisAssignment)=>{
-        if(!isEqual(deepUnref( axisAssignment.value),deepUnref(vaxisAssignment))) {
-            axisAssignment.value = {...deepUnref(vaxisAssignment as any)};
+    },
+    { immediate: true, deep: true },
+);
+watch(
+    axisAssignment,
+    (newaxisAssignment, oldValue) => {
+        props.component.setSetting("axisAssignment", axisAssignment);
+    },
+    { deep: true },
+);
+const ySel = computed(() => {
+    return (model.value?.getSelectorsY() as CSVSelector[]).map((e) => e.header);
+});
+const headers = computed(() => {
+    return (model.value?.getStore() as CSVStore).getHeader().map((head) => {
+        return { header: head, id: uuidv4() };
+    });
+});
+
+const updateSelectorY = (val, head, name) => {
+    if (!Object.keys(axisAssignment.value).includes(name)) {
+        axisAssignment.value[name] = [];
+    }
+    let items = model.value?.getSelectorsY();
+    if (items) {
+        let index = -1;
+        let axis = undefined;
+        for (axis in items) {
+            index = items![axis].findIndex(
+                (v: CSVSelector) => v.header == head.header,
+            );
+            if (index != -1) break;
         }
-    },{immediate:true,deep:true})
-    watch(axisAssignment,(newaxisAssignment,oldValue)=>{
 
-        props.component.setSetting('axisAssignment',axisAssignment);
-
-    },{deep:true})
-    const ySel = computed(()=>{
-       return (model.value?.getSelectorsY() as CSVSelector[]).map(e=>e.header);
-    })
-    const headers = computed(()=>{
-        return (model.value?.getStore() as CSVStore).getHeader().map(head=>{return {header:head,id:uuidv4()}})
-    })
-
-    const updateSelectorY = (val,head,name)=>{
-        if(!Object.keys(axisAssignment.value).includes(name)){
-            axisAssignment.value[name]=[];
+        if (index != -1) {
+            items[axis].splice(index, 1);
         }
-        let items = model.value?.getSelectorsY();
-        if(items){
-            let index = -1;
-            let axis = undefined;
-            for(axis in items){
-                index = items![axis].findIndex((v:CSVSelector)=>v.header == head.header);
-                if(index!=-1)break;
-            }
-
-            if(index!=-1) {
-
-                    items[axis].splice(index, 1);
-
-            }
         if (val) {
             //let selector = {header:head,id:uuidv4()}as CSVSelector;
             model.value?.addSelectorY(head, name);
         }
-        }
-
     }
-    const source = computed(()=>{
-        return model.value?.getStore()?.caption||'';
-    })
-const axis_names =computed((e)=>{
-    return Object.keys(props.axes).filter((name)=>(name!='x'))
-})
-const checkvalue = computed(()=>{
-    return (name,head)=> {
+};
+const source = computed(() => {
+    return model.value?.getStore()?.caption || "";
+});
+const axis_names = computed((e) => {
+    return Object.keys(props.axes).filter((name) => name != "x");
+});
+const checkvalue = computed(() => {
+    return (name, head) => {
         let item = model.value?.getSelectorsY()[name];
         if (item) {
-            let index = item!.findIndex((v: CSVSelector) => v.header == head.header);
+            let index = item!.findIndex(
+                (v: CSVSelector) => v.header == head.header,
+            );
             if (index != -1) return true;
         }
         return false;
-    }
-})
+    };
+});
 </script>
 
 <template>
-<div class="composer">
-    <h2>{{source}}</h2>
+    <div class="composer">
+        <h2>{{ source }}</h2>
 
-    <br>
+        <br />
 
-    xAxis:
-    <br>
-    <VaSelect
-        v-model="xSel"
-        :options="headers"
-        text-by="header"
-        placeholder="Select an header for X"
-    />
-    <br>
-    <br>
-    yAxis:
-    <br>
-    <div v-for="name in axis_names">
-        {{name}}
-    <template v-for="head in headers">
+        xAxis:
+        <br />
+        <VaSelect
+            v-model="xSel"
+            :options="headers"
+            text-by="header"
+            placeholder="Select an header for X"
+        />
+        <br />
+        <br />
+        yAxis:
+        <br />
+        <div v-for="name in axis_names">
+            {{ name }}
+            <template v-for="head in headers">
+                <VaCheckbox
+                    :model-value="checkvalue(name, head)"
+                    @update:modelValue="(ev) => updateSelectorY(ev, head, name)"
+                    :label="head.header"
+                >
+                </VaCheckbox>
 
-
-        <VaCheckbox :model-value="checkvalue(name,head)" @update:modelValue="(ev)=>updateSelectorY(ev,head,name)" :label="head.header">
-
-
-        </VaCheckbox>
-
+                >>>>>>> 3a7b178d66c427d64868fd011f3b81c1ab8f34ae
                 <!--<VaSelect
 
             @update:modelValue="(ev)=>updateSelectorY(ev,i)"
