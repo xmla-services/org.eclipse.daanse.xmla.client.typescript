@@ -14,7 +14,6 @@ import { useStoreManager } from "../../composables/storeManager";
 import { onMounted, ref, watch } from "vue";
 import StoreListItem from "./ListItems/StoreListItem.vue";
 import XMLAStoreListItem from "./ListItems/XMLAStoreListItem.vue";
-import CSVStoreListItem from "./ListItems/CSVStoreListItem.vue";
 
 
 const { t } = useI18n();

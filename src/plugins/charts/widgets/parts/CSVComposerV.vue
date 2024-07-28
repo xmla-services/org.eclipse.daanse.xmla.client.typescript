@@ -132,7 +132,6 @@ const checkvalue = computed(() => {
                 >
                 </VaCheckbox>
 
-                >>>>>>> 3a7b178d66c427d64868fd011f3b81c1ab8f34ae
                 <!--<VaSelect
 
             @update:modelValue="(ev)=>updateSelectorY(ev,i)"

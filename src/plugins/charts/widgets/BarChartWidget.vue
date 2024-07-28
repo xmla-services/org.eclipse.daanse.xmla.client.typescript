@@ -77,17 +77,20 @@ const props = withDefaults(defineProps<ITChartSettings>(), {
     legendPosition: "top",
     borderColor: '#000000',
     canvasBackgroundColor: "#ffffff",
-    dataSetBackgroundColors: () => ["#ff0000", "#00ff00", "#0000ff"],
+    //dataSetBackgroundColors: () => ["#272FEB", "#EBCF5E", "#66606B","#A65EEB","#6B6760","#EBB35E"],
+    dataSetBackgroundColors: () => [
+        "#483285",
+        "#009BA6",
+        "#90388C",
+        "#5B3881",
+        "#EA560D",
+        "#006590"],
     axes: {
         x: {
             text: "X",
             position: "bottom",
             type: "timeseries",
             offsetAfterAutoskip: true,
-            ticks: {
-                source: "data",
-            },
-
             backgroundColor: "#fff",
             stacked: false,
             weight: 2,
@@ -101,6 +104,7 @@ const props = withDefaults(defineProps<ITChartSettings>(), {
             },
             ticks: {
                 color: "#000",
+                source: "data",
             }
         },
         y: {
@@ -251,14 +255,19 @@ const chartData= computed(()=>{
     if(settings.value.composer && settings.value.composer.length>0){
         return {
             labels: chartDataComposer.getDataForMergedAxisX().value.data,
-            datasets: chartDataComposer.getDataForAxesY().value.map((e) => {
+            datasets: chartDataComposer.getDataForAxesY().value.map((e,index) => {
                 return {
                     label: e.title,
                     data: e.data,
                     yAxisID: e.from || "y", // getAssignment(e.from!),
-                    borderWidth: 2,
-                    backgroundColor: settings.value.dataSetBackgroundColors,
+                    borderWidth: (settings.value.chartType==='Line')?1:1,
+                    backgroundColor: (index<settings.value.dataSetBackgroundColors.length)
+                        ?settings.value.dataSetBackgroundColors[index]
+                        :settings.value.dataSetBackgroundColors[index-(settings.value.dataSetBackgroundColors.length % index*settings.value.dataSetBackgroundColors.length)-1],
                     borderColor: settings.value.borderColor,
+                    pointBorderWidth:1,
+                    pointRadius:5
+
                 };
             }),
         };
