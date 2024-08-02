@@ -68,6 +68,9 @@ const parsedProgress = computed(() => {
         const dataField = trimmedString.split(".");
 
         const res = dataField.reduce((acc: any, field) => {
+            if(!acc[field]){
+                return ""
+            }
             return acc[field];
         }, data.value);
 

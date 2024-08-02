@@ -1,7 +1,7 @@
-import BarChartWidget  from './widgets/BarChartWidget.vue';
+import BarChartWidget from "./widgets/BarChartWidget.vue";
 
-import {enabledWidgets, widgetNames} from "@/components/Widgets";
-import {useStoreManager} from "@/composables/storeManager";
+import { enabledWidgets, widgetNames } from "@/components/Widgets";
+import { useStoreManager } from "@/composables/storeManager";
 import CSVStore from "@/plugins/charts/stores/CSVStore";
 import CSVStoreListItem from "@/plugins/charts/stores/CSVStoreListItem.vue";
 import useComposerManager from "@/plugins/charts/composables/ComposerManager";

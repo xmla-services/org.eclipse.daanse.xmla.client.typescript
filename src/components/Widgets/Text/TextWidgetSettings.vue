@@ -82,7 +82,6 @@ const add =()=>{
 
 <template>
     <va-collapse v-model="opened.widgetSection" :header="t('TextWidget.title')">
-        {{component}}
         <div class="settings-container">
             <div class="settings-block">
                 <va-input

@@ -17,6 +17,7 @@ export class XMLAComposer implements Composer<XMLASelector> {
     public selectedRows: ConfiguredHierarchy[] = [];
     public selectedCols: ConfiguredHierarchy[] = [];
     public selectedFilters: ConfiguredHierarchy[] = [];
+    public mainAxisRotate: boolean = false;
 
     type: string = "XMLA";
 
@@ -144,8 +145,12 @@ export class XMLAComposer implements Composer<XMLASelector> {
         };
 
         const mdxResponce = await this.store.getData(requestParams);
-        const parsedTable = parseRequestToTable(mdxResponce, 0) as any;
-        return parsedTable;
+
+        if (this.mainAxisRotate) {
+            return parseRequestToTable(mdxResponce, 1) as any;
+        } else {
+            return parseRequestToTable(mdxResponce, 0) as any;
+        }
     }
 
     // TODO: find out why this is not working
@@ -159,6 +164,7 @@ export class XMLAComposer implements Composer<XMLASelector> {
         this.selectedRows = state.selectedRows;
         this.selectedFilters = state.selectedFilters;
         this.selectedMeasures = state.selectedMeasures;
+        this.mainAxisRotate = state.mainAxisRotate;
 
         // await this.fetch();
         this.data.value = await this.getData();

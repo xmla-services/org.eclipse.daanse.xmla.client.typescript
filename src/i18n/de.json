@@ -121,6 +121,7 @@
     "RichTextWidget": "Rich Text Widget",
     "TableWidget": "Tabellen Widget",
     "PivotTableWidget": "Pivot Tabelle Widget",
+    "BarChartWidget": "Bar Chart Widget",
     "SwitchControl": "Schalter Steuerung",
     "SelectControl": "Auswahl Steuerung",
     "DateControl": "Datums Steuerung",
@@ -349,5 +350,13 @@
     "addWidgetButton": "Add widget",
     "loading": "Loading...",
     "addRestDatasourceButton": "Add REST datasource"
+  },
+
+  "vuestic": {
+    "toggleDropdown": "toggle",
+    "select": "select",
+    "openColorPicker": "color",
+    "noOptions": "No options",
+    "selectRowByIndex": "select"
   }
 }

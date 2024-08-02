@@ -118,8 +118,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -137,8 +139,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -156,8 +160,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }

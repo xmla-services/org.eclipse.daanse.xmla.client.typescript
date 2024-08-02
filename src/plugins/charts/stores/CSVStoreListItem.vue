@@ -160,8 +160,7 @@ watch(
 );
 </script>
 
-<template class="csvstoreitem">
-
+<template>
     <div class="store-item-header" @click="clickHeader">
         <va-list-item-label class="store-item-header-text">
             {{ item.caption }}
@@ -280,64 +279,63 @@ watch(
             <h2>{{ t("SidebarStoreList.CSVAStoreListItem.delimiter") }}</h2>
 
             <div class="pad">
-            <VaOptionList
-                v-model="parserParams.delimiter" class="flex"
-                type="radio"
-                :options="['|', ';', ',','-',' ', 'tab']"
-            />
-            </div>
-            <h2>{{ t('SidebarStoreList.CSVAStoreListItem.header') }}</h2>
-            <div class="pad">
-            <VaCheckbox
-                :label="t('SidebarStoreList.CSVAStoreListItem.header_in_fist_row')"
-                v-model="headers"
+                <VaOptionList
+                    v-model="parserParams.delimiter"
+                    class="flex"
+                    type="radio"
+                    :options="['|', ';', ',', '-', ' ', 'tab']"
                 />
-            <VaCheckbox
-                :label="t('SidebarStoreList.CSVAStoreListItem.skip')"
-                v-model="parserParams.skip_empty_lines"
-            />
-        </div>
-            <h2>{{ t('SidebarStoreList.CSVAStoreListItem.range') }}</h2>
+            </div>
+            <h2>{{ t("SidebarStoreList.CSVAStoreListItem.header") }}</h2>
+            <div class="pad">
+                <VaCheckbox
+                    :label="
+                        t(
+                            'SidebarStoreList.CSVAStoreListItem.header_in_fist_row',
+                        )
+                    "
+                    v-model="headers"
+                />
+                <VaCheckbox
+                    :label="t('SidebarStoreList.CSVAStoreListItem.skip')"
+                    v-model="parserParams.skip_empty_lines"
+                />
+            </div>
+            <h2>{{ t("SidebarStoreList.CSVAStoreListItem.range") }}</h2>
             <div class="pad row">
-
                 <VaInput
                     class="flex flex-col md6"
-            :label="t('SidebarStoreList.CSVAStoreListItem.from')"
-            v-model="parserParams.from"
-            type="number"
-        >
-
-        </VaInput>
-        <VaInput
-            class="flex flex-col md6"
-            :label="t('SidebarStoreList.CSVAStoreListItem.to')"
-            :modelValue="parserParams.to"
-            @update:modelValue="(val)=>parserParams.to=(val<=1)?null:val"
-            type="number"
-        >
-
-        </VaInput>
+                    :label="t('SidebarStoreList.CSVAStoreListItem.from')"
+                    v-model="parserParams.from"
+                    type="number"
+                >
+                </VaInput>
+                <VaInput
+                    class="flex flex-col md6"
+                    :label="t('SidebarStoreList.CSVAStoreListItem.to')"
+                    :modelValue="parserParams.to"
+                    @update:modelValue="
+                        (val) => (parserParams.to = val <= 1 ? null : val)
+                    "
+                    type="number"
+                >
+                </VaInput>
             </div>
-        <h2>{{ t('SidebarStoreList.CSVAStoreListItem.datetime') }}</h2>
-       <div class="pad">
-        <VaOptionList
-
-            v-model="parserParams.unixtimers"
-            :options="item.getHeader()"
-        />
-       </div>
-
-            <h2>{{ t('SidebarStoreList.CSVAStoreListItem.preview') }}</h2>
+            <h2>{{ t("SidebarStoreList.CSVAStoreListItem.datetime") }}</h2>
             <div class="pad">
-                {{item.datasourceId}}
+                <VaOptionList
+                    v-model="parserParams.unixtimers"
+                    :options="item.getHeader()"
+                />
+            </div>
+
+            <h2>{{ t("SidebarStoreList.CSVAStoreListItem.preview") }}</h2>
+            <div class="pad">
+                {{ item.datasourceId }}
                 <!--<VaDataTable :items="item" />-->
             </div>
-
+        </div>
     </div>
-    </div>
-
-
-
 </template>
 <style lang="scss">
 .store-item {
@@ -352,5 +350,4 @@ watch(
 .pad {
     padding: 15px 0 25px;
 }
-
 </style>
