@@ -19,12 +19,13 @@ export interface IProgressSettingsProps {
     rotation?: number;
 }
 
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import ProgressWidgetSettings from "./ProgressWidgetSettings.vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = ProgressWidgetSettings;
 
@@ -38,8 +39,9 @@ const props = withDefaults(defineProps<IProgressSettingsProps>(), {
     rotation: 90,
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, data, setStore } = useStore<Store>();
+const { store, data, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 
 defineExpose({
@@ -66,6 +68,9 @@ const parsedProgress = computed(() => {
         const dataField = trimmedString.split(".");
 
         const res = dataField.reduce((acc: any, field) => {
+            if(!acc[field]){
+                return ""
+            }
             return acc[field];
         }, data.value);
 

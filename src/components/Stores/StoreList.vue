@@ -15,11 +15,12 @@ import { onMounted, ref, watch } from "vue";
 import StoreListItem from "./ListItems/StoreListItem.vue";
 import XMLAStoreListItem from "./ListItems/XMLAStoreListItem.vue";
 
+
 const { t } = useI18n();
 const storeManager = useStoreManager();
 const map = storeManager.getStoreList();
 const list = ref([] as IStore[]);
-const tabs = ["REST", "XMLA","CSV"];
+const tabs = ["REST", "XMLA", "CSV"];
 const currentTab = ref(0);
 let filteredList = ref([] as IStore[]);
 

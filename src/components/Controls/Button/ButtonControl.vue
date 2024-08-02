@@ -41,7 +41,6 @@ const { getState } = useSerialization(settings);
 const click = () => {
     settings.value.events.forEach((e: EventItem) => {
         if (e.trigger === "Click") {
-            console.log(`${e.name} emited`, settings);
             EventBus.emit(e.name);
         }
     });

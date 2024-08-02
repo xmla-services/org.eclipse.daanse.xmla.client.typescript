@@ -15,13 +15,21 @@ export interface ISVGSettingsProps {
     classesConfig?: Config;
 }
 
-import { computed, getCurrentInstance, onMounted, ref, type Ref } from "vue";
+import {
+    computed,
+    getCurrentInstance,
+    onMounted,
+    ref,
+    type Ref,
+    inject,
+} from "vue";
 import SvgWidgetSettings from "./SvgWidgetSettings.vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
 import type { Config } from "@/@types/widgets";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = SvgWidgetSettings;
 
@@ -40,8 +48,9 @@ const props = withDefaults(defineProps<ISVGSettingsProps>(), {
     }),
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, data, setStore } = useStore<Store>();
+const { store, data, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 
 const styles: Ref<string> = computed(() => {

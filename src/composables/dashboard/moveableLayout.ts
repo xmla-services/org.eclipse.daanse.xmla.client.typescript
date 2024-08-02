@@ -42,7 +42,6 @@ export function useMoveableLayout() {
     };
 
     const getInitialStyle = (id: string) => {
-        console.log(id, layout.value[id]);
         return {
             width: `${layout.value[id].width}px`,
             height: `${layout.value[id].height}px`,

@@ -19,7 +19,7 @@ import FilterSelectionModal from "@/components/Modals/FilterSelectionModal.vue";
 const { t } = useI18n();
 const storeSelectionOpened = ref(false);
 const props = defineProps(["component"]) as any;
-const storeId = ref(props.component.store.id);
+const storeId = ref(props.component.store?.id);
 const storeManager = useStoreManager();
 
 const selectedMeasures = ref([] as MDSchemaMeasure[]);
@@ -118,8 +118,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -137,8 +139,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }
@@ -156,8 +160,10 @@ const openFiltersModal = async (store, axis, id) => {
             selectedHierarchy.filters.enabled = filtersCongig.filters.enabled;
             selectedHierarchy.filters.multipleChoise =
                 filtersCongig.filters.multipleChoise;
-            selectedHierarchy.filters.selectedItem =
-                filtersCongig.filters.selectedItem;
+            selectedHierarchy.filters.selectedItems =
+                filtersCongig.filters.selectedItems;
+            selectedHierarchy.filters.deselectedItems =
+                filtersCongig.filters.deselectedItems;
             selectedHierarchy.filters.originalItem =
                 filtersCongig.filters.originalItem;
         }

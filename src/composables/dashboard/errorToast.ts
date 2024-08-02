@@ -14,39 +14,37 @@ import { useToast } from "vuestic-ui";
 let onClickFunc = null as unknown as Function;
 
 export function useErrorHandler() {
-  const { init } = useToast();
-  
-  const setOnClick = (cb) => {
-    onClickFunc = cb;
-  }
+    const { init } = useToast();
 
-  const handleErrorToast = (error) => {
-    const errorMessage = 
-      error.message.length
-       > 40 
-        ? error.message.slice(0, 40) + '...'
-        : `${error.message}${error.fileName}`;
-
-    const handleClick = () => {
-      if (onClickFunc && error.message.length > 40 ) {
-        onClickFunc(error);
-      }
+    const setOnClick = (cb) => {
+        onClickFunc = cb;
     };
 
-    init(
-      {
-        title: "Error",
-        message: errorMessage,
-        duration: 5000,
-        closeable: true,
-        offsetX: 32,
-        offsetY: 32,
-        color: "danger",
-        position: "bottom-right",
-        onClick: handleClick,
-      }
-    );
-  };
+    const handleErrorToast = (error) => {
+        console.error(error);
+        const errorMessage =
+            error.message.length > 40
+                ? error.message.slice(0, 40) + "..."
+                : `${error.message}${error.fileName}`;
 
-  return { handleErrorToast, setOnClick };
+        const handleClick = () => {
+            if (onClickFunc && error.message.length > 40) {
+                onClickFunc(error);
+            }
+        };
+
+        init({
+            title: "Error",
+            message: errorMessage,
+            duration: 5000,
+            closeable: true,
+            offsetX: 32,
+            offsetY: 32,
+            color: "danger",
+            position: "bottom-right",
+            onClick: handleClick,
+        });
+    };
+
+    return { handleErrorToast, setOnClick };
 }

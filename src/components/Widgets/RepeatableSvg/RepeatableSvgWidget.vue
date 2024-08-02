@@ -23,13 +23,14 @@ export interface IRepeatableSVGSettingsProps {
     progress?: string;
 }
 
-import { onMounted, computed, type Ref, ref } from "vue";
+import { onMounted, computed, type Ref, ref, inject } from "vue";
 import RepeatableSvgWidgetSettings from "./RepeatableSvgWidgetSettings.vue";
 import { useSettings } from "@/composables/widgets/settings";
 import { useStore } from "@/composables/widgets/store";
 import { useSerialization } from "@/composables/widgets/serialization";
 import type { Store } from "@/stores/Widgets/Store";
 import type { ItemStyles } from "@/@types/widgets";
+import type { TinyEmitter } from "tiny-emitter";
 
 const settingsComponent = RepeatableSvgWidgetSettings;
 
@@ -47,8 +48,9 @@ const props = withDefaults(defineProps<IRepeatableSVGSettingsProps>(), {
     progress: "0.5",
 });
 
+const eventbus = inject("customEventBus") as TinyEmitter;
 const { settings, setSetting } = useSettings<typeof props>(props);
-const { store, data, setStore } = useStore<Store>();
+const { store, data, setStore } = useStore<Store>(eventbus);
 const { getState } = useSerialization(settings);
 const svgSource: Ref<string> = ref("");
 

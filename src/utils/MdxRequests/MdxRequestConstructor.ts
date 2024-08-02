@@ -86,8 +86,6 @@ export async function getMdxRequest(
         }
         selectSection = `${selectSection}\n${colsRequest.select} DIMENSION PROPERTIES PARENT_UNIQUE_NAME,HIERARCHY_UNIQUE_NAME${colsProperties} ON 0\n`;
 
-        console.log('selectSection', selectSection);
-
         let resultString = "";
 
         if (filtersRequest.with) {
@@ -316,7 +314,6 @@ async function getSingleRowRequest(
 
     const rootExpanded = expandedMembers.some((member) => member.LNum === "0");
     if (drilledDownMember || (expandedMembers.length && rootExpanded)) {
-        console.log(expandedMembers);
         const request = await getRowsDrilldownRequestString(
             e,
             drilledDownMember,
@@ -563,9 +560,7 @@ async function getAxisFilterRequest(e, levels) {
     let withSection = "";
     let selectSection = "";
 
-    console.log('parsing filters', filter.enabled);
     if (!filter?.enabled) return null;
-    console.log(filter.selectedItem);
     const selectedFilters = [] as any[];
     if (filter.multipleChoise) {
         selectedFilters.push(...filter.selectedItems);
@@ -606,8 +601,6 @@ async function getAxisFilterRequest(e, levels) {
 
         levels = metadata.levels;
     }
-
-    console.log('selectedItem', selectedFilters);
 
     if (filter.selectAll && !deseclectedFiltersLevels.length) {
         const uid = "id" + v4();

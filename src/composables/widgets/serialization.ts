@@ -19,7 +19,6 @@ export function useSerialization<Type>(settings: Ref<Type>) {
         for (const key in componentState) {
             state[key] = componentState[key];
         }
-        console.log(state)
         return state;
     };
 
