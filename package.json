@@ -28,7 +28,7 @@
     "browser-soap": "^1.0.4",
     "chart.js": "^4.4.3",
     "chartjs-plugin-autocolors": "^0.2.2",
-    "chartjs-plugin-hierarchical": "^4.3.5",
+    "chartjs-plugin-hierarchical": "^4.4.1",
     "csv-parse": "^5.5.6",
     "inversify-props": "^2.2.6",
     "leaflet": "^1.9.4",
