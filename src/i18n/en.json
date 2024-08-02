@@ -368,6 +368,9 @@
     "select": "select",
     "openColorPicker": "color",
     "noOptions": "No options",
-    "selectRowByIndex": "select"
+    "selectRowByIndex": "select",
+      "uploadFile": "upload File",
+      "ok": "ok",
+      "cancel": "cancel"
   }
 }

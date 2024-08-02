@@ -195,6 +195,8 @@ Contributors: Smart City Jena
             class="sidebar"
         ></SidebarSettings>
         <ErrorHandlingModal ref="errorHandlingModal" />
+        <SaveModal ref="loadsaveModal" />
+        <LoadModal ref="loadModalref" />
     </div>
 </template>
 
@@ -220,6 +222,9 @@ import { useWidgets } from "@/composables/dashboard/widgets";
 import WidgetWrapper from "@/components/Widgets/WidgetWrapper/WidgetWrapper.vue";
 import { useI18n } from "vue-i18n";
 import ErrorHandlingModal from "@/components/Modals/ErrorHandlingModal.vue";
+import SaveModal from "@/components/Modals/SaveModal.vue";
+import loadModal from "@/components/Modals/LoadModal.vue";
+import LoadModal from "@/components/Modals/LoadModal.vue";
 
 const { t } = useI18n();
 
@@ -227,6 +232,8 @@ const dsManager = useDatasourceManager();
 const storeManager = useStoreManager();
 const { setOnClick } = useErrorHandler();
 const errorHandlingModal = ref(null) as Ref<any>;
+const loadsaveModal = ref(null) as Ref<any>;
+const loadModalref = ref(null) as Ref<any>;
 
 const editEnabled = ref(false);
 const showSidebar = ref(false);
@@ -247,6 +254,13 @@ const instance = getCurrentInstance();
 
 const openErrorModal = (data) => {
     errorHandlingModal.value?.run(data);
+};
+
+const openLaodSaveModal = (data) => {
+     loadsaveModal.value?.run(data);
+};
+const openLaodModal = async () => {
+    return await loadModalref.value?.run();
 };
 
 setOnClick(openErrorModal);
@@ -328,16 +342,19 @@ const toggleEdit = () => {
 
 const saveLayout = () => {
     const state = getSerializedState();
-    localStorage.setItem("testLayout", JSON.stringify(state));
+    openLaodSaveModal(state);
+    //
+    //localStorage.setItem("testLayout", JSON.stringify(state));
 
-    console.log(state);
+    //console.log(state);
 };
 
 const loadLayout = async () => {
-    const retrievedObject =
-        localStorage.getItem("testLayout") || JSON.stringify(layout);
+    const retrievedObject = await openLaodModal();
+    if(retrievedObject){
+        loadState(retrievedObject);
+    }
 
-    loadState(JSON.parse(retrievedObject));
 };
 
 const openStoreList = () => {
