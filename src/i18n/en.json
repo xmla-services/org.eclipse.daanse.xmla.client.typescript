@@ -362,7 +362,6 @@
     "loading": "Loading...",
     "addRestDatasourceButton": "Add REST datasource"
   },
-
   "vuestic": {
     "toggleDropdown": "toggle",
     "select": "select",

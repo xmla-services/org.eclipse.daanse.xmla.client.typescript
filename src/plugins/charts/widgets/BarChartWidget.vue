@@ -279,20 +279,22 @@ const chartData= computed(()=>{
     }
 });
 const chartOptions = computed(() => {
-    const config = {
+    return {
         plugins: {
             title: {
-            display: true,
-            text: settings.value.title,
-            position: settings.value.titlePosition,
-        },
+                display: true,
+                text: settings.value.title,
+                position: settings.value.titlePosition,
+            },
             legend: {
                 position: settings.value.legendPosition,
             },
         },
         responsive: true,
         // backgroundColor: "#00000000",
-        scales: {
+        scales: settings.value.axes
+    }
+        /*scales: {
             x: {
                 display: settings.value.axes.x.display,
                 type: settings.value.axes.x.type,
@@ -345,8 +347,9 @@ const chartOptions = computed(() => {
     };
     if (settings.value.axes.y2) {
         config.scales.y2 = settings.value.axes.y2;
-    }
-    return config;
+    }*/
+
+
 });
 </script>
 
