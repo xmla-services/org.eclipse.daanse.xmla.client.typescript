@@ -12,8 +12,10 @@ Contributors: Smart City Jena
 import { useI18n } from "vue-i18n";
 import { useStoreManager } from "../../../composables/storeManager";
 import { useDatasourceManager } from "../../../composables/datasourceManager";
-import { onMounted, ref, watch, nextTick, onActivated } from "vue";
+import { onMounted, ref, watch, nextTick, onActivated, computed } from "vue";
+import QueryDesigner from "../../Common/QueryDesigner.vue";
 import type XMLADatasource from "@/dataSources/XmlaDatasource";
+import { type XMLAStore } from "@/stores/Widgets/XMLAStore";
 
 const { t } = useI18n();
 const storeManager = useStoreManager();
@@ -222,6 +224,48 @@ const getMetadata = async () => {
         selectedCube.value.CUBE_NAME,
     );
 };
+
+const rows = computed(() => {
+    console.log("rows computed");
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    return store.XMLARequestParams.rows;
+});
+
+const setRows = (rows) => {
+    console.log("setRows", rows);
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    store.setRows(rows);
+};
+
+const columns = computed(() => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    return store.XMLARequestParams.columns;
+});
+
+const setCols = (cols) => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    store.setCols(cols);
+};
+
+const measures = computed(() => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    return store.XMLARequestParams.measures;
+});
+
+const setMeasures = (measures) => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    store.setMeasures(measures);
+};
+
+const filters = computed(() => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    return store.XMLARequestParams.filters;
+});
+
+const setFilters = (filters) => {
+    const store = storeManager.getStore(item.value.id) as XMLAStore;
+    store.setFilters(filters);
+};
 </script>
 
 <template>
@@ -299,6 +343,24 @@ const getMetadata = async () => {
                         />
                     </div>
                 </template>
+            </template>
+            <template
+                v-if="selectedCatalog.CATALOG_NAME && selectedCube.CUBE_NAME"
+            >
+                <QueryDesigner
+                    style="margin-top: 2rem"
+                    :store="storeManager.getStore(item.id)"
+                    :currentState="{
+                        rows,
+                        columns,
+                        measures,
+                        filters,
+                    }"
+                    @update:cols="setCols"
+                    @update:rows="setRows"
+                    @update:measures="setMeasures"
+                    @update:filters="setFilters"
+                />
             </template>
         </div>
     </div>
