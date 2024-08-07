@@ -3,7 +3,7 @@
     "loading": "Wird geladen",
     "connect": "Verbinde dich mit dem Würfel"
   },
-  
+
   "DashboardNavigation": {
     "designer": "Designerin",
     "dashboard": "Armaturenbrett",
@@ -213,7 +213,7 @@
     "horizontalRule": "horizontal rule",
     "hardBreak": "hard break",
     "undo": "undo",
-    "redo": "redo" 
+    "redo": "redo"
   },
 
   "TableWidget": {
@@ -357,6 +357,9 @@
     "select": "select",
     "openColorPicker": "color",
     "noOptions": "No options",
-    "selectRowByIndex": "select"
+    "selectRowByIndex": "select",
+      "uploadFile": "File Upload",
+      "ok": "ok",
+      "cancel": "abbrechen"
   }
 }

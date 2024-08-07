@@ -103,7 +103,6 @@ const parsedText = computed(() => {
         }"
     >
         <div class="component">
-            {{settings}}
             {{ parsedText }}
         </div>
     </div>

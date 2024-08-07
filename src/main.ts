@@ -69,6 +69,7 @@ import {
     VaTimeInput,
     VaTabs,
     VaTab,
+    VaFileUpload,
 } from "vuestic-ui";
 import "vuestic-ui/css";
 
@@ -177,6 +178,7 @@ app.use(
             VaTimeInput,
             VaTabs,
             VaTab,
+            VaFileUpload
         },
         config: {
             colors: {

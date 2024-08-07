@@ -69,7 +69,7 @@ export interface ITChartSettings {
     axes:{
         x:AxisSettings,
         y:AxisSettings,
-        y2:AxisSettings,
+        //y2:AxisSettings,
         [key: string]:AxisSettings
     }
 }
@@ -135,7 +135,7 @@ function addAxis() {
 
     //component.setSetting('axes.'+name,{
     //let axis =  clone(toRaw(unref(component.settings.axes)));
-    axes.value[name] = {
+    let axes = {
         title: {
             display: true,
             text: "Y2",
@@ -143,7 +143,7 @@ function addAxis() {
         ticks: {
             color: "#000"
         },
-        type: "category",
+        type: "linear",
         backgroundColor: "#fff",
         stacked: false,
         weight: 2,
@@ -151,7 +151,7 @@ function addAxis() {
         display: true,
         position: "right",
     };
-    component.setSetting(`axes.${name}`, axes.value[name]);
+    component.setSetting(`axes.${name}`, axes);
 }
 onMounted(() => {});
 
