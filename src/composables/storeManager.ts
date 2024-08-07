@@ -58,6 +58,8 @@ export function useStoreManager(): StoreManagerI {
     };
 
     const getStore = (key): IStore => {
+        console.log(key);
+        console.log(availableStores.value);
         const store = availableStores.value.get(key);
         if (store) {
             return store;

@@ -18,6 +18,8 @@ export function useStore<Type extends IStore>(
     watcher?,
 ) {
     const data = ref({});
+    const loading = ref(false);
+
     const store = ref(null) as unknown as Ref<Type>;
     const EventBus = eventBus || (inject("EventBus") as TinyEmitter);
 
@@ -40,7 +42,7 @@ export function useStore<Type extends IStore>(
         }
         store.value = newStore;
 
-        EventBus.on(`UPDATE:${newStore.id}`, updateFn);
+        EventBus.on(`UPDATE:${newStore.id}`, () => updateFn(store.value));
         updateFn(store.value);
     };
 
